@@ -1,0 +1,90 @@
+:root {
+  /* Monochromatic Premium Color System (Light Mode by Default) */
+  --primary: #000000;
+  --primary-rgb: 0, 0, 0;
+  --secondary: #555555;
+  --secondary-rgb: 85, 85, 85;
+
+  /* Primary Gradient for Navbar contents */
+  --gradient-primary: linear-gradient(140deg, #000428, #013c6e, #000428);
+
+  /* Backgrounds & Textures */
+  --bg-dark: #ffffff;
+  --bg-dark-rgb: 255, 255, 255;
+  --bg-card: rgba(250, 250, 250, 0.85);
+  --bg-card-rgb: 250, 250, 250;
+  
+  --text-light: #000000;
+  --text-muted: rgba(0, 0, 0, 0.6);
+  --text-dark: #ffffff;
+
+  /* Glassmorphism & Borders */
+  --glass: rgba(0, 0, 0, 0.02);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-hover: rgba(0, 0, 0, 0.04);
+  --glass-hover-border: rgba(0, 0, 0, 0.12);
+  --glass-glow: rgba(0, 0, 0, 0.02);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.08);
+  
+  /* Fonts */
+  --font-family: 'Stem', sans-serif;
+  
+  /* Transitions */
+  --transition-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-normal: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-slow: 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+  
+  /* Ambient Studio Lighting (Light Mode) */
+  --aurora-1: transparent;
+  --aurora-2: transparent;
+  --aurora-3: transparent;
+
+  /* Tech Grid Variables */
+  --grid-line: rgba(13, 35, 59, 0.02);
+  --grid-dot: rgba(13, 35, 59, 0.05);
+}
+
+.dark-theme {
+  /* Theme Colors (Dark Mode overrides) */
+  --primary: #ffffff;
+  --primary-rgb: 255, 255, 255;
+  --secondary: #a1a1aa;
+  --secondary-rgb: 161, 161, 170;
+
+  --bg-dark: #000000;
+  --bg-dark-rgb: 0, 0, 0;
+  --bg-card: rgba(10, 10, 10, 0.75);
+  --bg-card-rgb: 10, 10, 10;
+  
+  --text-light: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.55);
+  --text-dark: #000000;
+
+  /* Glassmorphism & Borders */
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-hover: rgba(255, 255, 255, 0.08);
+  --glass-hover-border: rgba(255, 255, 255, 0.15);
+  --glass-glow: rgba(255, 255, 255, 0.05);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.8);
+  
+  /* Ambient Studio Lighting (Dark Mode) */
+  --aurora-1: transparent;
+  --aurora-2: transparent;
+  --aurora-3: transparent;
+
+  /* Tech Grid Variables */
+  --grid-line: rgba(255, 255, 255, 0.015);
+  --grid-dot: rgba(255, 255, 255, 0.04);
+
+  /* Primary Gradient for Navbar contents */
+  --gradient-primary: linear-gradient(140deg, #705000, #8f702e, #705000);
+}
