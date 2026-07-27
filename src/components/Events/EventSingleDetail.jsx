@@ -19,7 +19,14 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
   const { events, loading } = useEvents();
   const school = events.find((e) => e.groupSlug === schoolId) || EVENTS_DATA.find(e => e.id === schoolId);
   const event = events.find((e) => e.groupSlug === schoolId && e.id === eventId);
-
+  
+  const coordinator = event?.coordinator || null;
+  const coordinatorName = coordinator?.employeeName || coordinator?.name || coordinator?.fullName || '';
+  const coordinatorCode = coordinator?.employeeCode || coordinator?.employeeId || coordinator?.id || coordinator?._id || '';
+  const empBase = import.meta.env.VITE_EMP_URL || import.meta.env.EMP_URL || '';
+  const initials = (coordinatorName || '').split(' ').filter(Boolean).slice(0,2).map(n => n[0]).join('').toUpperCase() || 'FC';
+  const placeholderSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='100%' height='100%' fill='%23222222'/><text x='50%' y='50%' dy='.35em' text-anchor='middle' font-family='Inter, Arial, Helvetica, sans-serif' font-size='46' fill='%23ffffff'>${initials}</text></svg>`;
+  const placeholderDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(placeholderSvg)}`;
   useEffect(() => {
     if (!event || !school) return;
     window.scrollTo(0, 0);
@@ -148,14 +155,34 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
         )}
 
         {/* ── COORDINATOR DETAILS ── */}
-        {event.coordinator && (
+        {coordinator && (
           <div className="esingle-section">
             <h2 className="esingle-section-title">
               <span>FACULTY COORDINATOR</span><span className="esingle-section-colon"> :</span>
             </h2>
-            <p className="esingle-section-text">
-              <strong>{event.coordinator.name}</strong> — {event.coordinator.designation} ({event.coordinator.department})
-            </p>
+            <div className="esingle-coordinator-row">
+              <img
+                src={coordinatorCode ? `${empBase}/${coordinatorCode}.jpg` : placeholderDataUrl}
+                alt={`Photo of ${coordinatorName || 'Coordinator'}`}
+                className="esingle-coordinator-photo"
+                onError={(e) => {
+                  if (e.currentTarget.src !== placeholderDataUrl) {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = placeholderDataUrl;
+                  }
+                }}
+              />
+
+              <div className="esingle-coordinator-info">
+                <p className="esingle-section-text">
+                  <strong>{coordinatorName || coordinator?.designation || 'Faculty Coordinator'}</strong>
+                  {coordinator?.designation && coordinatorName ? ` — ${coordinator.designation}` : null}
+                </p>
+                <p className="esingle-section-text">
+                  <small className="esingle-coordinator-code">Employee Code: {coordinatorCode || 'N/A'}</small>
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -168,14 +195,17 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
             <p className="esingle-section-text">{event.venue}</p>
           </div>
 
-          <a
-            href={event.registrationLink}
+          <button
+            type="button"
             className={`esingle-register-btn ${!event.isOpen ? 'esingle-register-btn--closed' : ''}`}
-            onClick={!event.isOpen ? (e) => e.preventDefault() : undefined}
+            onClick={(e) => {
+              if (!event.isOpen) return e.preventDefault();
+              window.location.hash = `register/${schoolId}/${eventId}`;
+            }}
           >
             {event.isOpen ? 'Register' : 'Closed'}
             {event.isOpen && <i className="bi bi-arrow-right" />}
-          </a>
+          </button>
         </div>
 
       </div>

@@ -75,20 +75,7 @@ function EventCard({ event, index, cardRef }) {
           </div>
         </div>
 
-        <div className="event-card__metrics">
-          <div className="event-card__metric">
-            <span className="event-card__metric-value">{event.registeredStudents || 0}</span>
-            <span className="event-card__metric-label">Users Registered</span>
-          </div>
-          <div className="event-card__metric">
-            <span className="event-card__metric-value">{String(event.feeAmount)}</span>
-            <span className="event-card__metric-label">Rupees</span>
-          </div>
-          <div className="event-card__metric">
-            <span className="event-card__metric-value">{event.participants || 0}</span>
-            <span className="event-card__metric-label">Participation</span>
-          </div>
-        </div>
+        
 
         {/* Footer */}
         <div className="event-card__footer event-card__footer--compact">

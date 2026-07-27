@@ -44,6 +44,53 @@ function getEventId(value) {
     .replace(/(^-|-$)/g, '');
 }
 
+function normalizeTeamSize(entry) {
+  const rawValues = [
+    entry.teamSize,
+    entry.registrationTeamSize,
+    entry.registrationTeamSizeLimit,
+    entry.teamSizeLimit,
+    entry.teamSizeRange,
+    entry.team_size,
+    entry.maxTeamSize,
+    entry.max_team_size,
+    entry.maximumTeamSize,
+    entry.maximum_team_size,
+    entry.maxTeams,
+    entry.max_team,
+    entry.team_capacity,
+    entry.maxParticipants,
+    entry.max_participants,
+    entry.participants,
+    entry.participantCount,
+    entry.participant_count,
+    entry.size,
+  ];
+
+  for (const value of rawValues) {
+    if (value === undefined || value === null || value === '') continue;
+    if (typeof value === 'number') return String(value);
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed) return trimmed;
+    }
+    if (typeof value === 'object') {
+      if ('min' in value && 'max' in value) {
+        return `${value.min}-${value.max}`;
+      }
+      if ('from' in value && 'to' in value) {
+        return `${value.from}-${value.to}`;
+      }
+    }
+  }
+
+  if (entry.teamMin && entry.teamMax) {
+    return `${entry.teamMin}-${entry.teamMax}`;
+  }
+
+  return '';
+}
+
 function extractEventItems(payload) {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.events)) return payload.events;
@@ -129,6 +176,7 @@ export function useEvents() {
         try {
           const response = await fetch(`${API_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`, {
             headers: getAuthHeaders(),
+            credentials: 'include',
           });
 
           if (!response.ok) {
@@ -167,9 +215,16 @@ export function useEvents() {
               const registrationLink = entry.registrationLink || entry.registrationUrl || entry.registration || '';
               const feeAmount = entry.registrationFee || entry.fee || entry.feeAmount || entry.fees || '₹100';
               const participants = entry.participants || entry.participation || entry.attendees || entry.attendeeCount || 0;
+              const teamSize = normalizeTeamSize(entry);
               const registeredStudents = entry.registeredStudents || entry.usersRegistered || entry.studentCount || entry.registrations || 0;
               const categoryColor = entry.categoryColor || entry.accentColor || meta.accentColor;
-              const eventCoordinator = entry.coordinator || entry.facultyCoordinator || entry.facultyCoordinators?.[0] || null;
+              const rawCoordinator = entry.coordinator || entry.facultyCoordinator || entry.facultyCoordinators?.[0] || null;
+              const eventCoordinator = rawCoordinator ? {
+                name: rawCoordinator.employeeName || rawCoordinator.name || rawCoordinator.fullName || null,
+                department: rawCoordinator.department || rawCoordinator.dept || null,
+                designation: rawCoordinator.designation || rawCoordinator.role || null,
+                employeeCode: rawCoordinator.employeeCode || rawCoordinator.employeeId || rawCoordinator.id || rawCoordinator._id || ''
+              } : null;
               const eventDate = entry.date || entry.eventDate || '';
               const eventTime = entry.time || entry.eventTime || '';
 
@@ -198,6 +253,7 @@ export function useEvents() {
                 registrationLink,
                 overview: eventOverview,
                 rules: eventRules,
+                teamSize,
                 coordinator: eventCoordinator,
                 groupId,
                 groupName,

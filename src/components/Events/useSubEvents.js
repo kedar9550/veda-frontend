@@ -64,6 +64,7 @@ export function useSubEvents(schoolId, groupId) {
         try {
           const response = await fetch(`${API_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`, {
             headers: getAuthHeaders(),
+            credentials: 'include',
           });
 
           if (!response.ok) {
@@ -85,7 +86,8 @@ export function useSubEvents(schoolId, groupId) {
                 name: event.coordinator.employeeName || event.coordinator.name,
                 department: event.coordinator.department,
                 designation: event.coordinator.designation,
-                role: event.coordinator.roleAssigned || event.coordinator.role
+                role: event.coordinator.roleAssigned || event.coordinator.role,
+                employeeCode: event.coordinator.employeeCode || event.coordinator.employeeId || event.coordinator.id || event.coordinator._id || ''
               } : null;
 
               if (staticEvent) {
