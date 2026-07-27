@@ -32,20 +32,15 @@ function EventCardSkeleton() {
 
 /* ─── Single Event Card ─── */
 function EventCard({ event, index, cardRef }) {
-  const [liked, setLiked] = React.useState(false);
-  const [likeCount, setLikeCount] = React.useState(event.likes);
-
-  const handleLike = (e) => {
-    e.stopPropagation();
-    setLiked((prev) => !prev);
-    setLikeCount((prev) => (liked ? prev - 1 : prev + 1));
-  };
-
   return (
     <div
       ref={cardRef}
       className="event-card"
       style={{ '--event-accent': event.accentColor }}
+      role="button"
+      tabIndex={0}
+      onClick={() => navigateToDetail(event.id)}
+      onKeyDown={(e) => e.key === 'Enter' && navigateToDetail(event.id)}
     >
       {/* Image */}
       <div className="event-card__image-wrap">
@@ -59,15 +54,15 @@ function EventCard({ event, index, cardRef }) {
 
         {/* Category badge */}
         <span className="event-card__badge">{event.category}</span>
+
+        <div className="event-card__hero-details">
+          <h3 className="event-card__title">{event.title}</h3>
+          <p className="event-card__tagline">{event.tagline}</p>
+        </div>
       </div>
 
       {/* Body */}
       <div className="event-card__body">
-        {/* Title + tagline */}
-        <h3 className="event-card__title">{event.title}</h3>
-        <p className="event-card__tagline">{event.tagline}</p>
-
-        {/* Organizer row */}
         <div className="event-card__organizer-row">
           <div className="event-card__organizer-info">
             <div className="event-card__organizer-icon">
@@ -78,34 +73,39 @@ function EventCard({ event, index, cardRef }) {
               <span className="event-card__organizer-name">{event.organizer}</span>
             </div>
           </div>
+        </div>
 
-          {/* Like button */}
-          <button
-            className={`event-card__like-btn ${liked ? 'liked' : ''}`}
-            onClick={handleLike}
-            aria-label={`Like ${event.title}`}
-          >
-            <i className={`bi ${liked ? 'bi-heart-fill' : 'bi-heart'}`} />
-            <span>{likeCount.toLocaleString()}</span>
-          </button>
+        <div className="event-card__metrics">
+          <div className="event-card__metric">
+            <span className="event-card__metric-value">{event.registeredStudents || 0}</span>
+            <span className="event-card__metric-label">Users Registered</span>
+          </div>
+          <div className="event-card__metric">
+            <span className="event-card__metric-value">{String(event.feeAmount)}</span>
+            <span className="event-card__metric-label">Rupees</span>
+          </div>
+          <div className="event-card__metric">
+            <span className="event-card__metric-value">{event.participants || 0}</span>
+            <span className="event-card__metric-label">Participation</span>
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="event-card__footer">
-          <div className="event-card__event-count">
-            <i className="bi bi-calendar-event" />
-            <span>
-              <strong>{event.eventCount}</strong> Events
-            </span>
-          </div>
+        <div className="event-card__footer event-card__footer--compact">
           <button
             className="event-card__cta"
-            onClick={() => navigateToDetail(event.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigateToDetail(event.id);
+            }}
             aria-label={`View ${event.title} events`}
           >
-            Events
+            View Events
             <i className="bi bi-arrow-right" />
           </button>
+          <div className="event-card__event-count">
+            <strong>{event.eventCount}</strong> Events
+          </div>
         </div>
       </div>
     </div>
@@ -116,10 +116,10 @@ function EventCard({ event, index, cardRef }) {
 export default function Events() {
   const sectionRef = useRef(null);
   const cardsRef = useRef([]);
-  const { events, loading, error } = useEvents();
+  const { groups, loading, error } = useEvents();
 
   useEffect(() => {
-    if (loading || events.length === 0) return;
+    if (loading || groups.length === 0) return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -157,7 +157,7 @@ export default function Events() {
       ctx.revert();
       cleanups.forEach((c) => c && c());
     };
-  }, [loading, events]);
+  }, [loading, groups]);
 
   return (
     <section ref={sectionRef} id="events" className="events-section">
@@ -189,10 +189,16 @@ export default function Events() {
             ? Array.from({ length: 5 }).map((_, i) => (
                 <EventCardSkeleton key={i} />
               ))
-            : events.map((event, index) => (
+            : groups.map((group, index) => (
                 <EventCard
-                  key={event.id}
-                  event={event}
+                  key={group.id}
+                  event={{
+                    ...group,
+                    category: group.category || group.organizer,
+                    organizer: group.organizer || group.category,
+                    tagline: group.tagline || 'Explore more events in this group',
+                    image: group.image || '/events/techno.png',
+                  }}
                   index={index}
                   cardRef={(el) => (cardsRef.current[index] = el)}
                 />

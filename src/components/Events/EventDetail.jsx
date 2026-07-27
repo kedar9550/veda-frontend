@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { useSubEvents } from './useSubEvents';
 import { EVENTS_DATA } from './eventsData';
 
 /* ─── Skeleton card (minimal) ─── */
@@ -14,6 +13,21 @@ function SubEventSkeleton() {
       </div>
     </div>
   );
+}
+
+function formatEventDate(date) {
+  if (!date) return 'TBD';
+  const parsed = new Date(date);
+  return Number.isNaN(parsed.getTime())
+    ? 'TBD'
+    : parsed.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+
+function formatEventFee(feeAmount) {
+  const feeText = feeAmount === undefined || feeAmount === null || feeAmount === ''
+    ? 'Free'
+    : String(feeAmount);
+  return feeText;
 }
 
 /* ─── Minimal event card — image + title only ─── */
@@ -60,9 +74,26 @@ function SubEventCard({ event, cardRef, schoolId }) {
       {/* Minimal body — just tagline */}
       <div className="sub-event-card__simple-body">
         <p className="sub-event-card__simple-tagline">{event.tagline}</p>
+        <div className="sub-event-card__stats">
+          <span>
+            <i className="bi bi-people-fill" />
+            <strong>{event.registeredStudents || 0}</strong>
+            <small>Users Registered</small>
+          </span>
+          <span>
+            <i className="bi bi-currency-rupee" />
+            <strong>{formatEventFee(event.feeAmount)}</strong>
+            <small>Rupees</small>
+          </span>
+          <span>
+            <i className="bi bi-people" />
+            <strong>{event.participants || 0}</strong>
+            <small>Participation</small>
+          </span>
+        </div>
         <div className="sub-event-card__simple-meta">
           <span><i className="bi bi-trophy" /> {event.prize}</span>
-          <span><i className="bi bi-calendar3" /> {new Date(event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+          <span><i className="bi bi-calendar3" /> {formatEventDate(event.date)}</span>
         </div>
       </div>
     </div>
@@ -77,9 +108,22 @@ export default function EventDetail({ schoolId, onBack }) {
   const cardsRef = useRef([]);
   const heroRef = useRef(null);
 
-  const { events } = useEvents();
-  const school = events.find(e => e.id === schoolId) || EVENTS_DATA.find(e => e.id === schoolId);
-  const { subEvents, loading, error } = useSubEvents(schoolId, school?._id);
+  const { events, loading, error } = useEvents();
+  const groupEvents = events.filter((e) => e.groupSlug === schoolId);
+  const school = groupEvents.length > 0
+    ? {
+        id: schoolId,
+        title: groupEvents[0].groupName,
+        tagline: groupEvents[0].groupTagline || groupEvents[0].tagline,
+        image: groupEvents[0].groupImage || groupEvents[0].image,
+        organizer: groupEvents[0].groupCategory,
+        organizerIcon: groupEvents[0].organizerIcon,
+        likes: groupEvents[0].likes,
+        eventCount: groupEvents.length,
+        accentColor: groupEvents[0].accentColor,
+      }
+    : EVENTS_DATA.find(e => e.id === schoolId);
+  const subEvents = groupEvents;
 
   // Hero entrance
   useEffect(() => {
@@ -165,6 +209,7 @@ export default function EventDetail({ schoolId, onBack }) {
                   cardRef={(el) => (cardsRef.current[index] = el)}
                 />
               ))}
+              
         </div>
       </div>
     </section>

@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { EVENTS_DATA } from './eventsData';
 import { useEvents } from './useEvents';
-import { useSubEvents } from './useSubEvents';
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
@@ -17,10 +16,9 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
   const statsRef = useRef(null);
   const bodyRef = useRef(null);
 
-  const { events } = useEvents();
-  const school = events.find(e => e.id === schoolId) || EVENTS_DATA.find(e => e.id === schoolId);
-  const { subEvents, loading } = useSubEvents(schoolId, school?._id);
-  const event = subEvents.find(e => e.id === eventId);
+  const { events, loading } = useEvents();
+  const school = events.find((e) => e.groupSlug === schoolId) || EVENTS_DATA.find(e => e.id === schoolId);
+  const event = events.find((e) => e.groupSlug === schoolId && e.id === eventId);
 
   useEffect(() => {
     if (!event || !school) return;
@@ -68,7 +66,22 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
           </button>
         </div>
 
-        {/* Bottom info on hero */}
+        <div className="esingle-hero__content">
+          <span className="esingle-hero__badge">{event.category || school.title}</span>
+          <h1 className="esingle-hero__title">{event.title}</h1>
+          {event.tagline && <p className="esingle-hero__subtitle">{event.tagline}</p>}
+          <div className="esingle-hero__details-row">
+            <div className="esingle-hero__detail">
+              <i className="bi bi-calendar3" />
+              <span>{event.date ? formatDate(event.date) : 'Date TBD'}</span>
+            </div>
+            <div className="esingle-hero__detail">
+              <i className="bi bi-geo-alt" />
+              <span>{event.venue || 'Venue TBD'}</span>
+            </div>
+          </div>
+        </div>
+
         <div className="esingle-hero__bottom">
           {!event.isOpen && (
             <span className="sub-event-card__closed-badge" style={{ position: 'static' }}>
@@ -78,13 +91,24 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
         </div>
       </div>
 
-      {/* ── Main body ── */}
-      <div ref={bodyRef} className="container-premium esingle-body">
-
-        {/* Title */}
-        <div className="esingle-title-block">
-          <h1 className="esingle-title">{event.title}</h1>
+      <div className="esingle-stats-bar">
+        <div className="esingle-stats-bar__inner">
+          <div className="esingle-stat">
+            <span className="esingle-stat__number">{event.registeredStudents || 0}</span>
+            <span className="esingle-stat__label">Users Registered</span>
+          </div>
+          <div className="esingle-stat">
+            <span className="esingle-stat__number">{String(event.feeAmount)}</span>
+            <span className="esingle-stat__label">Rupees</span>
+          </div>
+          <div className="esingle-stat">
+            <span className="esingle-stat__number">{event.participants || 0}</span>
+            <span className="esingle-stat__label">Participation</span>
+          </div>
         </div>
+      </div>
+
+      <div ref={bodyRef} className="container-premium esingle-body">
 
         {/* ── OVERVIEW ── */}
         {event.overview && (
