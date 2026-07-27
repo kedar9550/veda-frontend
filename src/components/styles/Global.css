@@ -130,6 +130,16 @@ section {
   padding: 0 20px;
 }
 
+main {
+  padding-top: 96px;
+}
+
+@media (max-width: 768px) {
+  main {
+    padding-top: 88px;
+  }
+}
+
 /* ==========================================================================
    Dark Theme Override Configurations
    ========================================================================== */
@@ -4505,6 +4515,149 @@ textarea.form-input-custom {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+  /* Coordinator code small label */
+  .esingle-coordinator-code {
+    display: inline-block;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  /* Coordinator photo + info layout */
+  .esingle-coordinator-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .esingle-coordinator-photo {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.08);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.12));
+  }
+
+  .esingle-coordinator-info .esingle-section-text {
+    margin: 0;
+  }
+
+  /* Registration form styles */
+  .register-form .register-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+
+  .participants-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .participant-block {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .participant-block h4 {
+    grid-column: 1 / -1;
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    color: var(--text-light);
+  }
+
+  .remove-participant {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-light);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background 0.2s ease;
+  }
+
+  .remove-participant:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  .participant-block > div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .register-form label {
+    display: block;
+    font-weight: 700;
+    color: var(--text-light);
+    margin-bottom: 0.35rem;
+  }
+
+  .register-form input,
+  .register-form select {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-card);
+    color: var(--text);
+  }
+
+  .register-page {
+    padding-top: 6.5rem;
+  }
+
+  .register-page .register-form {
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .register-page {
+      padding-top: 5rem;
+    }
+  }
+
+  .field-error {
+    color: #f43f5e;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+  }
+
+  @media (max-width: 900px) {
+    .register-form .register-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .participant-block {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .register-form .register-grid,
+    .participants-grid,
+    .participant-block {
+      grid-template-columns: 1fr;
+    }
+  }
 
 @media (max-width: 480px) {
   .esingle-info-grid {

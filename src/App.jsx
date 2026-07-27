@@ -7,6 +7,7 @@ import Home from './components/Home/Home';
 import Events from './components/Events/Events';
 import EventDetail from './components/Events/EventDetail';
 import EventSingleDetail from './components/Events/EventSingleDetail';
+import RegisterForm from './components/Events/RegisterForm';
 import Team from './components/Team/Team';
 import Contact from './components/Contact/Contact';
 import AboutPage from './components/About/AboutPage';
@@ -48,6 +49,12 @@ export default function App() {
     if (page === 'poster') return <Poster />;
     if (page === 'contact') return <Contact />;
 
+    if (page === 'register') {
+      return (
+        <RegisterForm schoolId={subPage} eventId={subSubPage} onCancel={() => { window.location.hash = `events/${subPage}/${subSubPage}`; }} />
+      );
+    }
+
     if (page === 'events') {
       // Level 3: single event detail (#events/krishi/agro-innovate)
       if (subPage && subSubPage) {
@@ -60,6 +67,12 @@ export default function App() {
           />
         );
       }
+        // Registration page (#register/krishi/agro-innovate)
+        if (page === 'register') {
+          return (
+            <RegisterForm schoolId={subPage} eventId={subSubPage} onCancel={() => { window.location.hash = `events/${subPage}/${subSubPage}`; }} />
+          );
+        }
       // Level 2: school event list (#events/krishi)
       if (subPage) {
         return (
