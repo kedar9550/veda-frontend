@@ -38,6 +38,31 @@ function buildTeamSizeOptions(teamSizeValue) {
   });
 }
 
+function parseAmountToPaisa(value) {
+  if (!value) return 0;
+
+  const numericValue = Number(String(value).replace(/[^0-9.]/g, ''));
+  if (!Number.isFinite(numericValue)) {
+    const matches = String(value).match(/(\d+)/g);
+    if (!matches) return 0;
+    return Number(matches[0]) * 100;
+  }
+
+  return Math.round(numericValue * 100);
+}
+
+function getRazorpayKeyId() {
+  return import.meta.env.VITE_RAZORPAY_KEY_ID || '';
+}
+
+function getRazorpayOrderUrl() {
+  return import.meta.env.VITE_RAZORPAY_ORDER_URL || '/api/razorpay/create-order';
+}
+
+function getRazorpayVerifyUrl() {
+  return import.meta.env.VITE_RAZORPAY_VERIFY_URL || '/api/razorpay/verify-payment';
+}
+
 const defaultParticipant = () => ({
   name: '',
   college: '',
@@ -66,7 +91,6 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   const { events } = useEvents();
   const { departments, error: departmentsError } = useDepartments();
   const event = events.find(e => e.groupSlug === schoolId && e.id === eventId) || null;
-
   const [form, setForm] = useState({
     category: '',
     amount: '',
@@ -74,10 +98,12 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     teamSize: '',
     participants: createParticipants(1),
   });
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState('');
 
   const teamSizeOptions = useMemo(
-    () => buildTeamSizeOptions(event?.teamSize || event?.registrationTeamSize || '1'),
-    [event?.teamSize, event?.registrationTeamSize]
+    () => buildTeamSizeOptions(event?.teamSize || event?.maxTeamSize || event?.registrationTeamSize || '1'),
+    [event?.teamSize, event?.maxTeamSize, event?.registrationTeamSize]
   );
 
   useEffect(() => {
@@ -90,7 +116,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     setForm((prev) => ({
       ...prev,
       category: event.groupCategory || event.category || schoolId || '',
-      amount: event.feeAmount || event.registrationFee || '',
+      amount: event.feeText || event.feeAmount || event.registrationFee || '',
       eventName: event.title || eventId || '',
       teamSize: prev.teamSize || defaultTeamSize,
     }));
@@ -148,7 +174,21 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   }, [form.teamSize]);
 
   const validate = () => {
+    const participantCount = Number(form.teamSize) || 1;
     const err = { participants: [] };
+
+    if (!form.teamSize || participantCount < 1) {
+      err.teamSize = 'Please select a valid team size.';
+    }
+
+    if (form.participants.length < 1) {
+      err.teamSize = 'At least one participant is required for this event.';
+    }
+
+    if (form.participants.length !== participantCount) {
+      err.teamSize = `Selected team size is ${participantCount}, but ${form.participants.length} participant form${form.participants.length === 1 ? '' : 's'} is present.`;
+    }
+
     form.participants.forEach((participant, idx) => {
       const pErr = {};
       if (!participant.name) pErr.name = 'Please provide a valid name.';
@@ -164,17 +204,207 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       if (!participant.location) pErr.location = 'Please provide a valid Location.';
       err.participants[idx] = pErr;
     });
-    const hasErrors = err.participants.some(p => Object.keys(p).length > 0);
+
+    const hasErrors = Object.keys(err).some((key) => {
+      if (key === 'participants') {
+        return err.participants.some((p) => Object.keys(p).length > 0);
+      }
+      return Boolean(err[key]);
+    });
+
     setErrors(hasErrors ? err : {});
     return !hasErrors;
   };
 
-  const handleSubmit = (e) => {
+  const completeRegistration = (paymentDetails = {}) => {
+    //console.log('Registration submitted', { form, event, paymentDetails });
+    setPaymentMessage('');
+    window.location.hash = `events/${schoolId}/${eventId}`;
+  };
+
+  const loadRazorpayScript = () => new Promise((resolve, reject) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+
+    const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve(true), { once: true });
+      existingScript.addEventListener('error', () => reject(new Error('Unable to load Razorpay SDK.')), { once: true });
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => reject(new Error('Unable to load Razorpay SDK.'));
+    document.body.appendChild(script);
+  });
+
+  const createRazorpayOrder = async (amountInPaisa) => {
+    const orderUrl = getRazorpayOrderUrl();
+    const response = await fetch(orderUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: amountInPaisa,
+        currency: 'INR',
+        receipt: `event-${eventId || schoolId || 'registration'}-${Date.now()}`,
+      }),
+    });
+
+    const text = await response.text();
+    let data = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (err) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      const serverMsg = data?.error || data?.message || text || response.statusText || 'Unable to create payment order.';
+      throw new Error(serverMsg);
+    }
+
+    return data?.orderId || data?.id || data?.order_id;
+  };
+
+  const submitRegistration = async (paymentDetails) => {
+    const verifyUrl = getRazorpayVerifyUrl();
+    const amountInPaisa = Number(paymentDetails.amountInPaisa ?? parseAmountToPaisa(form.amount));
+    const amountInRupees = Number(paymentDetails.amountInRupees ?? (amountInPaisa / 100));
+
+    const response = await fetch(verifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        eventId,
+        schoolId,
+        category: form.category,
+        eventName: form.eventName,
+        amount: amountInRupees,
+        amountInPaisa,
+        amountInRupees,
+        currency: 'INR',
+        teamSize: Number(form.teamSize) || 1,
+        participants: form.participants,
+        receipt: `event-${eventId || schoolId || 'registration'}-${Date.now()}`,
+        order_id: paymentDetails.orderId,
+        payment_id: paymentDetails.paymentId,
+        signature: paymentDetails.signature,
+        rawPaymentData: {
+          ...paymentDetails,
+          razorpayResponse: paymentDetails.razorpayResponse,
+          amountInPaisa,
+          amountInRupees,
+        },
+      }),
+    });
+
+    const text = await response.text();
+    let data = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (err) {
+      data = null;
+    }
+
+    if (!response.ok) {
+      const serverMsg = data?.error || data?.message || text || response.statusText || 'Unable to verify payment and save registration.';
+      throw new Error(serverMsg);
+    }
+
+    return data;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    // For now, just log and navigate back to event
-    console.log('Registration submitted', { form, event });
-    window.location.hash = `events/${schoolId}/${eventId}`;
+
+    const participantCount = Number(form.teamSize) || 1;
+    const participantSummary = form.participants
+      .map((participant, idx) => `${idx + 1}. ${participant.name || 'Unnamed participant'}`)
+      .join('\n');
+
+    const confirmMessage = `Please confirm the registration for ${participantCount} participant${participantCount > 1 ? 's' : ''}.\n\n${participantSummary}`;
+
+    if (!window.confirm(confirmMessage)) return;
+
+    const amountInPaisa = parseAmountToPaisa(form.amount);
+
+    if (amountInPaisa <= 0) {
+      setIsProcessingPayment(false);
+      completeRegistration();
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    setPaymentMessage('');
+
+    try {
+      const razorpayKeyId = getRazorpayKeyId();
+      if (!razorpayKeyId) {
+        throw new Error('Razorpay key is missing. Set VITE_RAZORPAY_KEY_ID in your environment.');
+      }
+
+      await loadRazorpayScript();
+      const orderId = await createRazorpayOrder(amountInPaisa);
+
+      const options = {
+        key: razorpayKeyId,
+        amount: amountInPaisa,
+        currency: 'INR',
+        order_id: orderId,
+        name: 'Aditya Premium',
+        description: form.eventName || 'Event Registration',
+        prefill: {
+          name: form.participants[0]?.name || '',
+          email: form.participants[0]?.email || '',
+          contact: form.participants[0]?.mobile || '',
+        },
+        theme: {
+          color: '#7c3aed',
+        },
+        handler: async (response) => {
+          try {
+            await submitRegistration({
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature,
+              amountInPaisa,
+              amountInRupees: amountInPaisa / 100,
+              razorpayResponse: response,
+            });
+            completeRegistration({
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature,
+              amountInPaisa,
+              amountInRupees: amountInPaisa / 100,
+              razorpayResponse: response,
+            });
+          } catch (error) {
+            console.error('Payment verification failed', error);
+            const message = error?.message || 'Unable to verify payment and save registration. Please try again.';
+            setPaymentMessage(message);
+            window.alert(message);
+          } finally {
+            setIsProcessingPayment(false);
+          }
+        },
+      };
+
+      const razorpayInstance = new window.Razorpay(options);
+      razorpayInstance.open();
+    } catch (error) {
+      console.error('Razorpay payment failed', error);
+      const message = error?.message || 'Unable to initialize Razorpay payment. Please try again.';
+      setPaymentMessage(message);
+      window.alert(message);
+      setIsProcessingPayment(false);
+    }
   };
 
   return (
@@ -209,6 +439,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
+            {errors.teamSize && <div className="field-error">{errors.teamSize}</div>}
           </label>
         </div>
 
@@ -314,9 +545,15 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
           ))}
         </div>
 
+        {paymentMessage && (
+          <div style={{ marginTop: '1rem', color: '#ff6b6b', fontWeight: 600 }}>{paymentMessage}</div>
+        )}
+
         <div style={{ marginTop: '1.25rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
           <button type="button" className="esingle-back-link" onClick={onCancel}>Cancel</button>
-          <button type="submit" className="esingle-cta">Register</button>
+          <button type="submit" className="esingle-cta" disabled={isProcessingPayment}>
+            {isProcessingPayment ? 'Processing...' : 'Register'}
+          </button>
         </div>
       </form>
     </div>

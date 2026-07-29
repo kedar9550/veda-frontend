@@ -105,7 +105,7 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
             <span className="esingle-stat__label">Users Registered</span>
           </div>
           <div className="esingle-stat">
-            <span className="esingle-stat__number">{String(event.feeAmount)}</span>
+            <span className="esingle-stat__number">{event.feeText || String(event.feeAmount)}</span>
             <span className="esingle-stat__label">Rupees</span>
           </div>
           <div className="esingle-stat">
