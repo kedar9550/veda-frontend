@@ -47,13 +47,13 @@ function getEventId(value) {
 function normalizeTeamSize(entry) {
   const rawValues = [
     entry.teamSize,
+    entry.maxTeamSize,
+    entry.max_team_size,
     entry.registrationTeamSize,
     entry.registrationTeamSizeLimit,
     entry.teamSizeLimit,
     entry.teamSizeRange,
     entry.team_size,
-    entry.maxTeamSize,
-    entry.max_team_size,
     entry.maximumTeamSize,
     entry.maximum_team_size,
     entry.maxTeams,
@@ -89,6 +89,20 @@ function normalizeTeamSize(entry) {
   }
 
   return '';
+}
+
+function formatFeeValue(value) {
+  if (value === undefined || value === null || value === '') return '';
+  if (typeof value === 'number') return `₹${value}`;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+    // If string already contains a currency symbol or non-numeric characters, return as-is
+    if (/[^0-9.,\s-]/.test(trimmed)) return trimmed;
+    // Otherwise treat as a plain number and prefix with currency symbol
+    return `₹${trimmed}`;
+  }
+  return String(value);
 }
 
 function extractEventItems(payload) {
@@ -213,7 +227,9 @@ export function useEvents() {
               const eventVenue = entry.venue || entry.location || entry.venueLocation || '';
               const eventRules = Array.isArray(entry.rules) ? entry.rules : entry.rules ? [entry.rules] : [];
               const registrationLink = entry.registrationLink || entry.registrationUrl || entry.registration || '';
-              const feeAmount = entry.registrationFee || entry.fee || entry.feeAmount || entry.fees || '₹100';
+              const rawFee = entry.registrationFee ?? entry.fee ?? entry.feeAmount ?? entry.fees ?? entry.price ?? '';
+              const feeText = formatFeeValue(rawFee) || '';
+              const feeAmount = rawFee;
               const participants = entry.participants || entry.participation || entry.attendees || entry.attendeeCount || 0;
               const teamSize = normalizeTeamSize(entry);
               const registeredStudents = entry.registeredStudents || entry.usersRegistered || entry.studentCount || entry.registrations || 0;
@@ -230,6 +246,7 @@ export function useEvents() {
 
               return {
                 feeAmount,
+                feeText,
                 participants,
                 registeredStudents,
                 _id: entry._id || entry.id,

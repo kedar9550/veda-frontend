@@ -82,7 +82,7 @@ function SubEventCard({ event, cardRef, schoolId }) {
           </span>
           <span>
             <i className="bi bi-currency-rupee" />
-            <strong>{formatEventFee(event.feeAmount)}</strong>
+            <strong>{event.feeText || formatEventFee(event.feeAmount)}</strong>
             <small>Rupees</small>
           </span>
           <span>
@@ -183,7 +183,7 @@ export default function EventDetail({ schoolId, onBack }) {
             </div>
             <div className="event-detail-page-stat">
               <i className="bi bi-people-fill" style={{ color: school.accentColor }} />
-              <span><strong>{school.likes.toLocaleString()}</strong> Total Students</span>
+              <span><strong>0</strong> Total Students</span>
             </div>
           </div>
         </div>
