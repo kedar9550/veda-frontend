@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useEvents } from './useEvents';
 import { useDepartments } from './useDepartments';
+import StudentRegistrationPopup from './StudentRegistrationPopup';
 
 function parseTeamSize(value) {
   if (value === undefined || value === null || value === '') {
@@ -100,6 +101,60 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState('');
+  const [showRegistrationPopup, setShowRegistrationPopup] = useState(false);
+
+  useEffect(() => {
+    const savedStudentStr = localStorage.getItem('eventStudent');
+    if (savedStudentStr) {
+      try {
+        const student = JSON.parse(savedStudentStr);
+        setForm(prev => {
+          const newParticipants = [...prev.participants];
+          if (newParticipants.length > 0) {
+            newParticipants[0] = {
+              ...newParticipants[0],
+              name: student.name || '',
+              college: student.college || '',
+              otherCollege: student.otherCollege || '',
+              roll: student.roll || '',
+              gender: student.gender || '',
+              mobile: student.mobile || '',
+              email: student.email || ''
+            };
+          }
+          return { ...prev, participants: newParticipants };
+        });
+      } catch (err) {
+        console.error('Failed to parse eventStudent from localStorage', err);
+        setShowRegistrationPopup(true);
+      }
+    } else {
+      setShowRegistrationPopup(true);
+    }
+  }, []);
+
+  const handleRegistrationSuccess = (studentData) => {
+    localStorage.setItem('eventStudent', JSON.stringify(studentData));
+    window.dispatchEvent(new Event('studentLoggedIn'));
+    
+    setForm(prev => {
+      const newParticipants = [...prev.participants];
+      if (newParticipants.length > 0) {
+        newParticipants[0] = {
+          ...newParticipants[0],
+          name: studentData.name || '',
+          college: studentData.college || '',
+          otherCollege: studentData.otherCollege || '',
+          roll: studentData.roll || '',
+          gender: studentData.gender || '',
+          mobile: studentData.mobile || '',
+          email: studentData.email || ''
+        };
+      }
+      return { ...prev, participants: newParticipants };
+    });
+    setShowRegistrationPopup(false);
+  };
 
   const teamSizeOptions = useMemo(
     () => buildTeamSizeOptions(event?.teamSize || event?.maxTeamSize || event?.registrationTeamSize || '1'),
@@ -217,9 +272,8 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   };
 
   const completeRegistration = (paymentDetails = {}) => {
-    //console.log('Registration submitted', { form, event, paymentDetails });
     setPaymentMessage('');
-    window.location.hash = `events/${schoolId}/${eventId}`;
+    window.location.hash = 'dashboard';
   };
 
   const loadRazorpayScript = () => new Promise((resolve, reject) => {
@@ -408,9 +462,16 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   };
 
   return (
-    <div className="container-premium register-page" style={{ padding: '2.5rem 0' }}>
-      <div style={{ background: 'var(--gradient-primary)', padding: '1.2rem', borderRadius: '12px', textAlign: 'center', color: '#fff', marginBottom: '1.5rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1.75rem' }}>Drop Your Details</h2>
+    <>
+      {showRegistrationPopup && (
+        <StudentRegistrationPopup 
+          onClose={() => setShowRegistrationPopup(false)} 
+          onSuccess={handleRegistrationSuccess} 
+        />
+      )}
+      <div className="container-premium register-page" style={{ padding: '2.5rem 0' }}>
+        <div style={{ background: 'var(--gradient-primary)', padding: '1.2rem', borderRadius: '12px', textAlign: 'center', color: '#fff', marginBottom: '1.5rem' }}>
+          <h2 style={{ margin: 0, fontSize: '1.75rem' }}>Drop Your Details</h2>
         {departmentsError && (
           <p style={{ marginTop: '1rem', color: '#ffd700', fontSize: '0.95rem' }}>
             {departmentsError}
@@ -557,5 +618,6 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
         </div>
       </form>
     </div>
+    </>
   );
 }

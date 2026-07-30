@@ -12,6 +12,7 @@ import Team from './components/Team/Team';
 import Contact from './components/Contact/Contact';
 import AboutPage from './components/About/AboutPage';
 import Poster from './components/Poster/Poster';
+import StudentDashboard from './components/Dashboard/StudentDashboard';
 import Footer from './components/Footer/Footer';
 
 /**
@@ -48,6 +49,7 @@ export default function App() {
     if (page === 'team') return <Team />;
     if (page === 'poster') return <Poster />;
     if (page === 'contact') return <Contact />;
+    if (page === 'dashboard') return <StudentDashboard onNavigate={navigateTo} />;
 
     if (page === 'register') {
       return (
