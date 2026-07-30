@@ -1,6 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import gsap from 'gsap';
-const WORDS = ["INNOVATE", "EXCEL", "LEAD", "RESEARCH", "ADITYA UNIVERSITY"];
+const WORDS = ["INNOVATE", "EXCEL", "LEAD", "RESEARCH", "INNOVATE",
+  "PIONEER",
+  "DISCOVER",
+  "CREATE",
+  "IGNITE",
+  "TRANSFORM",
+  "CATALYZE",
+  "BREAKTHROUGH",
+  "FUTURE",
+  "IMPACT", "ADITYA UNIVERSITY", "VEDA"];
 
 export default function Loader({ onComplete }) {
   const [progress, setProgress] = useState(0);
@@ -9,6 +18,9 @@ export default function Loader({ onComplete }) {
   const textRef = useRef(null);
   const circleRef = useRef(null);
 
+  const activeWordRef = useRef('');
+  const scrambleTimerRef = useRef(null);
+
   // Animate progress percentage
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -16,12 +28,12 @@ export default function Loader({ onComplete }) {
       const progressObj = { value: 0 };
       gsap.to(progressObj, {
         value: 100,
-        duration: 3,
+        duration: 4,
         ease: 'power2.out',
         onUpdate: () => {
           const currentVal = Math.floor(progressObj.value);
           setProgress(currentVal);
-          
+
           // Animate SVG circle dashoffset
           // Circle radius is 45, perimeter is 282.7. Map 0-100 to 283-0
           if (circleRef.current) {
@@ -46,18 +58,34 @@ export default function Loader({ onComplete }) {
     return () => ctx.revert();
   }, [onComplete]);
 
-  // Scramble and cycle text
+  // Scramble and cycle text based on progress
   useEffect(() => {
-    let wordIndex = 0;
-    let frame = 0;
-    let timer;
+    let targetWord = '';
+    if (progress >= 92) {
+      targetWord = 'VEDA';
+    } else if (progress >= 70) {
+      targetWord = 'ADITYA UNIVERSITY';
+    } else {
+      // For progress 0 to 69, map to index 0 to 13 of the first 14 words
+      const subWords = WORDS.slice(0, 14);
+      const index = Math.min(
+        Math.floor((progress / 70) * subWords.length),
+        subWords.length - 1
+      );
+      targetWord = subWords[index];
+    }
 
-    const scrambleText = (targetWord) => {
+    if (targetWord !== activeWordRef.current) {
+      activeWordRef.current = targetWord;
+
       const chars = '!@#$%^&*()_+{}:"<>?|[];\',./~`ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       let iteration = 0;
-      clearInterval(timer);
 
-      timer = setInterval(() => {
+      if (scrambleTimerRef.current) {
+        clearInterval(scrambleTimerRef.current);
+      }
+
+      scrambleTimerRef.current = setInterval(() => {
         const scrambled = targetWord
           .split('')
           .map((char, index) => {
@@ -72,28 +100,22 @@ export default function Loader({ onComplete }) {
         setCurrentWord(scrambled);
 
         if (iteration >= targetWord.length) {
-          clearInterval(timer);
+          clearInterval(scrambleTimerRef.current);
         }
-        iteration += 1 / 3;
+        
+        // Make longer words resolve faster so they are readable sooner
+        const step = targetWord.length > 10 ? 0.8 : 0.4;
+        iteration += step;
       }, 30);
-    };
+    }
+  }, [progress]);
 
-    // Initial word
-    scrambleText(WORDS[0]);
-
-    // Word cycling timer matching progress (3 seconds split)
-    const cycleInterval = setInterval(() => {
-      wordIndex++;
-      if (wordIndex < WORDS.length) {
-        scrambleText(WORDS[wordIndex]);
-      } else {
-        clearInterval(cycleInterval);
-      }
-    }, 600);
-
+  // Clean up timers on unmount
+  useEffect(() => {
     return () => {
-      clearInterval(timer);
-      clearInterval(cycleInterval);
+      if (scrambleTimerRef.current) {
+        clearInterval(scrambleTimerRef.current);
+      }
     };
   }, []);
 

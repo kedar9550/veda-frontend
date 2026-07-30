@@ -79,9 +79,6 @@ export function useSubEvents(schoolId, groupId) {
               const eventName = event.eventName || event.name || event.title || 'Event';
               const eventKey = String(eventName).toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-              const staticList = SUB_EVENTS_DATA[schoolId] || [];
-              const staticEvent = staticList.find(e => e.id === eventKey || e.title.toLowerCase() === String(eventName).toLowerCase());
-
               const coordinatorInfo = event.coordinator ? {
                 name: event.coordinator.employeeName || event.coordinator.name,
                 department: event.coordinator.department,
@@ -89,15 +86,6 @@ export function useSubEvents(schoolId, groupId) {
                 role: event.coordinator.roleAssigned || event.coordinator.role,
                 employeeCode: event.coordinator.employeeCode || event.coordinator.employeeId || event.coordinator.id || event.coordinator._id || ''
               } : null;
-
-              if (staticEvent) {
-                return {
-                  ...staticEvent,
-                  _id: event._id || event.id,
-                  title: eventName,
-                  coordinator: coordinatorInfo,
-                };
-              }
 
               return {
                 id: eventKey,
@@ -138,7 +126,9 @@ export function useSubEvents(schoolId, groupId) {
       }
 
       if (!isMounted) return;
-      setSubEvents(SUB_EVENTS_DATA[schoolId] ?? []);
+      console.warn('Backend API did not return sub-events data.');
+      setSubEvents([]);
+      setError('Failed to fetch sub-events from backend');
       setLoading(false);
     };
 
