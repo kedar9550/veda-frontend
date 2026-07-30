@@ -318,9 +318,10 @@ export function useEvents() {
       }
 
       if (!isMounted) return;
-      console.warn('Backend API did not return events data. Falling back to static EVENTS_DATA.');
-      setEvents(EVENTS_DATA.filter(e => e.isActive));
-      setGroups(EVENTS_DATA.filter(e => e.isActive));
+      console.warn('Backend API did not return events data.');
+      setEvents([]);
+      setGroups([]);
+      setError('Failed to fetch events from backend');
       setLoading(false);
     };
 
