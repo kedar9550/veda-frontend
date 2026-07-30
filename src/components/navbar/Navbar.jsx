@@ -1,11 +1,36 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { applyMagneticEffect } from '../utils/animationUtils';
+
 export default function Navbar({ activePage, onNavigate }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileActive, setIsMobileActive] = useState(false);
+  const [loggedStudent, setLoggedStudent] = useState(null);
   const [themeMode, setThemeMode] = useState(() => {
     return localStorage.getItem('theme') || 'light';
   });
+
+  useEffect(() => {
+    const studentStr = localStorage.getItem('eventStudent');
+    if (studentStr) {
+      try { setLoggedStudent(JSON.parse(studentStr)); } catch (e) {}
+    }
+    
+    const handleStorageChange = () => {
+      const updated = localStorage.getItem('eventStudent');
+      if (updated) {
+        try { setLoggedStudent(JSON.parse(updated)); } catch (e) {}
+      } else {
+        setLoggedStudent(null);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('studentLoggedIn', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('studentLoggedIn', handleStorageChange);
+    };
+  }, []);
 
   const admissionsBtnRef = useRef(null);
   const themeToggleRef = useRef(null);
@@ -152,6 +177,18 @@ export default function Navbar({ activePage, onNavigate }) {
               Poster
             </a>
           </li>
+          <li>
+            <a
+              href="#dashboard"
+              className={`nav-item-link ${activePage === 'dashboard' ? 'active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                handleLinkClick('dashboard', null);
+              }}
+            >
+              Dashboard
+            </a>
+          </li>
         </ul>
 
         {/* Actions (Admissions, Theme) */}
@@ -166,19 +203,59 @@ export default function Navbar({ activePage, onNavigate }) {
             <i className={`bi ${themeMode === 'dark' ? 'bi-moon-stars-fill' : 'bi-sun-fill'}`}></i>
           </button>
 
-          {/* Admissions CTA */}
-          <a
-            ref={admissionsBtnRef}
-            href="#admissions"
-            className="btn-admissions"
-            onClick={(e) => {
-              e.preventDefault();
-              handleLinkClick('contact', null);
-            }}
-          >
-            Login
-            <i className="bi bi-arrow-right"></i>
-          </a>
+          {/* Admissions CTA / Logged in User */}
+          {loggedStudent ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <a
+                href="#dashboard"
+                className="btn-admissions"
+                style={{
+                  cursor: 'pointer',
+                  background: 'rgba(0, 123, 255, 0.1)',
+                  color: '#007bff',
+                  border: '1px solid rgba(0, 123, 255, 0.3)',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleLinkClick('dashboard', null);
+                }}
+                title="Go to Student Dashboard"
+              >
+                <i className="bi bi-person-circle"></i>
+                {loggedStudent.name}
+              </a>
+              <button
+                className="theme-toggle-btn"
+                style={{ color: '#dc3545', border: '1px solid rgba(220, 53, 69, 0.3)', background: 'rgba(220, 53, 69, 0.1)' }}
+                onClick={() => {
+                  localStorage.removeItem('eventStudent');
+                  window.dispatchEvent(new Event('studentLoggedIn'));
+                  setLoggedStudent(null);
+                  window.location.hash = '';
+                }}
+                title="Logout"
+              >
+                <i className="bi bi-box-arrow-right"></i>
+              </button>
+            </div>
+          ) : (
+            <a
+              ref={admissionsBtnRef}
+              href="#login"
+              className="btn-admissions"
+              onClick={(e) => {
+                e.preventDefault();
+                handleLinkClick('dashboard', null);
+              }}
+            >
+              Login / Profile
+              <i className="bi bi-arrow-right"></i>
+            </a>
+          )}
         </div>
 
         {/* Mobile Toggle Button */}
