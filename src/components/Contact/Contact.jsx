@@ -10,7 +10,7 @@ export default function Contact() {
   const rightColRef = useRef(null);
   const submitBtnRef = useRef(null);
 
-  const [formData, setFormData] = useState({ name: '', email: '', school: '', message: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: 'Select', message: '' });
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   useEffect(() => {
@@ -67,14 +67,17 @@ export default function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.email) return;
-    
+    if (!formData.name || !formData.email || formData.subject === 'Select') {
+      alert("Please fill in all required fields and select a query subject.");
+      return;
+    }
+
     // Simulate API request
     setFormSubmitted(true);
     setTimeout(() => {
-      setFormData({ name: '', email: '', school: '', message: '' });
+      setFormData({ name: '', email: '', phone: '', subject: 'Select', message: '' });
       setFormSubmitted(false);
-      alert("Inquiry successfully submitted! Our admissions counselor will contact you shortly.");
+      alert("Inquiry successfully submitted! Our team will contact you shortly.");
     }, 1200);
   };
 
@@ -86,109 +89,101 @@ export default function Contact() {
       </div>
 
       <div className="container-premium admissions-content">
-        <div className="row align-items-center">
-          
-          {/* Left Column: Admissions Process info */}
-          <div ref={leftColRef} className="col-lg-6 pr-lg-5">
-            <span className="admissions-header-tag">Admissions 2026</span>
-            <h2 className="admissions-title text-gradient">
-              Unlock Your Creative Potential
+        <div className="row align-items-stretch">
+
+          {/* Left Column: Contact information */}
+          <div ref={leftColRef} className="col-lg-6 pr-lg-5 contact-info-left">
+            <h2 className="admissions-title text-gradient font-weight-bold">
+              Contact Us
             </h2>
-            <p className="admissions-desc">
-              Ready to take the next step towards your professional career? Our admission process is 
-              designed to recognize merit, creativity, and leadership potential. Fill out the 
-              quick inquiry form to schedule a one-on-one consulting counseling session.
-            </p>
+            <div className="contact-title-underline"></div>
 
-            <div className="admissions-steps">
-              <div className="admissions-step-item">
-                <div className="admissions-step-num">01</div>
-                <div>
-                  <h4 className="admissions-step-title">Online Inquiry</h4>
-                  <p className="admissions-step-desc">
-                    Submit your basic educational credentials and preferred branch of interest.
-                  </p>
-                </div>
+            <div className="contact-info-list">
+              <div className="contact-info-item">
+                <i className="bi bi-geo-alt"></i>
+                <span>Aditya Nagar, ADB Road,Surampalem - Pin:533437</span>
               </div>
-
-              <div className="admissions-step-item">
-                <div className="admissions-step-num">02</div>
-                <div>
-                  <h4 className="admissions-step-title">Counseling Review</h4>
-                  <p className="admissions-step-desc">
-                    Connect with an academic counselor to explore scholarship eligibility options.
-                  </p>
-                </div>
+              <div className="contact-info-item">
+                <i className="bi bi-telephone"></i>
+                <span>+91 9876543210</span>
               </div>
-
-              <div className="admissions-step-item">
-                <div className="admissions-step-num">03</div>
-                <div>
-                  <h4 className="admissions-step-title">Offer & Onboarding</h4>
-                  <p className="admissions-step-desc">
-                    Receive your admission docket and secure your campus hostel slots.
-                  </p>
-                </div>
+              <div className="contact-info-item">
+                <i className="bi bi-envelope"></i>
+                <span>veda2026@adityauniversity.in</span>
               </div>
             </div>
           </div>
 
-          {/* Right Column: Inquiry Form Card */}
-          <div ref={rightColRef} className="col-lg-6">
+          {/* Right Column: Contact Inquiry Form Card */}
+          <div ref={rightColRef} className="col-lg-6 pl-lg-5">
             <div className="admissions-form-card">
-              <h3 className="text-light mb-4 font-weight-bold">Quick Admissions Inquiry</h3>
-              
               <form onSubmit={handleSubmit}>
-                <div className="form-group-custom">
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="form-input-custom"
-                    placeholder="Full Name"
-                    required
-                  />
+                <div className="row">
+                  <div className="col-md-6 col-12 form-group-custom">
+                    <label className="contact-label">Your name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="form-input-custom"
+                      required
+                    />
+                  </div>
+
+                  <div className="col-md-6 col-12 form-group-custom">
+                    <label className="contact-label">Your email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="form-input-custom"
+                      required
+                    />
+                  </div>
                 </div>
 
-                <div className="form-group-custom">
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="form-input-custom"
-                    placeholder="Email Address"
-                    required
-                  />
+                <div className="row">
+                  <div className="col-md-6 col-12 form-group-custom">
+                    <label className="contact-label">Your phone</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="form-input-custom"
+                    />
+                  </div>
+
+                  <div className="col-md-6 col-12 form-group-custom">
+                    <label className="contact-label">Query Subject</label>
+                    <select
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      className="form-input-custom"
+                      required
+                    >
+                      <option value="Select">Select</option>
+                      <option value="Payment">Payment</option>
+                      <option value="Event">Event</option>
+                      <option value="Others">Others</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div className="form-group-custom">
-                  <select
-                    name="school"
-                    value={formData.school}
-                    onChange={handleChange}
-                    className="form-input-custom"
-                    required
-                  >
-                    <option value="" disabled>Select Preferred School</option>
-                    <option value="engineering">School of Engineering</option>
-                    <option value="management">School of Management</option>
-                    <option value="pharmacy">School of Pharmacy</option>
-                    <option value="science">School of Science</option>
-                    <option value="agriculture">School of Agriculture</option>
-                  </select>
-                </div>
-
-                <div className="form-group-custom">
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    className="form-input-custom"
-                    placeholder="Inquiry Details / Message"
-                    required
-                  />
+                <div className="row">
+                  <div className="col-12 form-group-custom">
+                    <label className="contact-label">Message</label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      className="form-input-custom"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="submit-btn-wrap">
@@ -198,7 +193,7 @@ export default function Contact() {
                     className="btn-admissions-submit"
                     disabled={formSubmitted}
                   >
-                    {formSubmitted ? "Submitting..." : "Submit Inquiry"}
+                    {formSubmitted ? "Sending..." : "Send Now"}
                     <i className="bi bi-send-fill"></i>
                   </button>
                 </div>

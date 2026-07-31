@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   /* Monochromatic Premium Color System (Light Mode by Default) */
   --primary: #000000;
   --primary-rgb: 0, 0, 0;
@@ -49,6 +50,7 @@
 }
 
 .dark-theme {
+  color-scheme: dark;
   /* Theme Colors (Dark Mode overrides) */
   --primary: #ffffff;
   --primary-rgb: 255, 255, 255;

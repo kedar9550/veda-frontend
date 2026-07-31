@@ -366,12 +366,14 @@ main {
   inherits: false;
 }
 
-/* Small inner dot — light theme: navy blue gradient */
+/* Theme-based custom SVG cursor */
 .custom-cursor {
-  width: 5px;
-  height: 5px;
-  background: radial-gradient(circle, #6ea8fe 0%, #013c6e 60%, #000428 100%);
-  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  background-image: url('/src/assets/Cursor_A_Light.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   position: fixed;
   top: 0;
   left: 0;
@@ -379,17 +381,17 @@ main {
   pointer-events: none;
   z-index: 100000;
   opacity: 0;
-  box-shadow: 0 0 6px rgba(1, 60, 110, 0.7);
-  transition: width 0.2s ease, height 0.2s ease, opacity 0.2s ease;
+  transition: width 0.35s cubic-bezier(0.215, 0.61, 0.355, 1), height 0.35s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.2s ease;
   will-change: left, top;
 }
 
-/* Outer ring — light theme: spinning navy blue gradient border */
 .custom-cursor-follower {
-  --cursor-angle: 0deg;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  background-image: url('/src/assets/Cursor_Sun_Light.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   position: fixed;
   top: 0;
   left: 0;
@@ -397,68 +399,33 @@ main {
   pointer-events: none;
   z-index: 99999;
   opacity: 0;
-  background: conic-gradient(from var(--cursor-angle),
-      #000428 0%,
-      #013c6e 25%,
-      #6ea8fe 50%,
-      #013c6e 75%,
-      #000428 100%);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 1.8px), black 0);
-  mask: radial-gradient(farthest-side, transparent calc(100% - 1.8px), black 0);
-  animation: cursor-gradient-spin 2.5s linear infinite;
-  transition: width 0.35s cubic-bezier(0.215, 0.61, 0.355, 1),
-    height 0.35s cubic-bezier(0.215, 0.61, 0.355, 1),
-    opacity 0.2s ease;
+  transition: width 0.35s cubic-bezier(0.215, 0.61, 0.355, 1), height 0.35s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.2s ease;
   will-change: left, top;
-  filter: drop-shadow(0 0 4px rgba(1, 60, 110, 0.5));
 }
 
-@keyframes cursor-gradient-spin {
-  to {
-    --cursor-angle: 360deg;
-  }
-}
-
-/* Hover State — ring expands, glow intensifies */
 .custom-cursor.hovered {
-  width: 3px;
-  height: 3px;
+  width: 90px;
+  height: 90px;
 }
 
 .custom-cursor-follower.hovered {
-  width: 52px;
-  height: 52px;
-  animation-duration: 1.2s;
-  filter: drop-shadow(0 0 10px rgba(1, 60, 110, 0.8));
+  opacity: 0 !important;
 }
 
-/* Dark theme — restore gold gradient */
+/* Dark theme overrides */
 .dark-theme .custom-cursor {
-  background: radial-gradient(circle, #fffbe6 0%, #c9a84c 60%, #8b6914 100%);
-  box-shadow: 0 0 6px rgba(201, 168, 76, 0.7);
+  background-image: url('/src/assets/Cursor_A_Dark.svg');
 }
 
 .dark-theme .custom-cursor-follower {
-  background: conic-gradient(from var(--cursor-angle),
-      #8b6914 0%,
-      #c9a84c 20%,
-      #fff4c2 40%,
-      #ffe066 55%,
-      #c9a84c 75%,
-      #8b6914 100%);
-  filter: drop-shadow(0 0 4px rgba(201, 168, 76, 0.5));
-}
-
-.dark-theme .custom-cursor-follower.hovered {
-  filter: drop-shadow(0 0 10px rgba(201, 168, 76, 0.8));
+  background-image: url('/src/assets/Cursor_Sun_Dark.svg');
 }
 
 /* Hide on mobile/touch devices */
 @media (max-width: 768px) {
-
   .custom-cursor,
   .custom-cursor-follower {
-    display: none;
+    display: none !important;
   }
 }
 
@@ -1376,13 +1343,13 @@ main {
   left: 50%;
   top: 0;
   width: 2px;
-  background: linear-gradient(to bottom, var(--primary), var(--secondary));
+  background: #ffffff; /* Bright white line */
   transform: translateX(-50%);
   transform-origin: top;
   scale: 1 0;
   /* ScaleY = 0 initially, animated by GSAP */
   z-index: 2;
-  box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.5);
+  box-shadow: 0 0 15px var(--secondary), 0 0 5px rgba(255, 255, 255, 0.8); /* Strong double glow effect */
   height: 100%;
 }
 
@@ -1410,6 +1377,35 @@ main {
 /* Info block container */
 .timeline-card-wrap {
   width: 45%;
+  position: relative;
+}
+
+.timeline-connector {
+  position: absolute;
+  top: 24px; /* Align with the vertical center of the timeline-dot */
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08); /* matches the default vertical line */
+  transform: scaleX(0); /* initially collapsed, animated via GSAP scaleX */
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+  z-index: 1;
+}
+
+.timeline-item-left .timeline-connector {
+  left: 100%;
+  width: 11.11%;
+  transform-origin: right; /* Grows outwards from dot (right) to card (left) */
+}
+
+.timeline-item-right .timeline-connector {
+  right: 100%;
+  width: 11.11%;
+  transform-origin: left; /* Grows outwards from dot (left) to card (right) */
+}
+
+/* Active connector line highlight */
+.timeline-item.active .timeline-connector {
+  background: #ffffff !important; /* Bright white glow to match the active dot */
+  box-shadow: 0 0 15px var(--secondary), 0 0 5px rgba(255, 255, 255, 0.8) !important; /* Intense double glow matching the progress line */
 }
 
 /* Center node indicator */
@@ -1492,6 +1488,13 @@ main {
   .timeline-card-wrap {
     width: calc(100% - 40px);
     margin-left: 40px;
+  }
+
+  .timeline-card-wrap .timeline-connector {
+    left: auto !important;
+    right: 100% !important;
+    width: 20px !important;
+    transform-origin: left !important; /* Grows outwards from the dot (left) to the card (right) */
   }
 
   .timeline-dot {
@@ -2448,6 +2451,50 @@ main {
   letter-spacing: -0.02em;
 }
 
+.contact-title-underline {
+  width: 60px;
+  height: 3px;
+  background: var(--gradient-primary);
+  margin-top: 15px;
+  margin-bottom: 40px;
+  border-radius: 99px;
+}
+
+@media (min-width: 992px) {
+  .contact-info-left {
+    border-right: 1px solid var(--glass-border);
+  }
+}
+
+.contact-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.contact-info-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 1rem;
+  color: var(--text-light);
+}
+
+.contact-info-item i {
+  font-size: 1.25rem;
+  color: var(--secondary);
+}
+
+.contact-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-light);
+  margin-bottom: 8px;
+  text-align: left;
+}
+
 .admissions-desc {
   font-size: 1.05rem;
   line-height: 1.7;
@@ -2524,6 +2571,11 @@ main {
   transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
 }
 
+.form-input-custom option {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
+
 .form-input-custom:focus {
   background: rgba(255, 255, 255, 0.06);
   border-color: var(--primary);
@@ -2545,7 +2597,7 @@ textarea.form-input-custom {
 
 .btn-admissions-submit {
   width: 100%;
-  background: linear-gradient(135deg, var(--secondary) 0%, #ff8c58 100%);
+  background: var(--gradient-primary);
   color: white;
   border: none;
   font-size: 1rem;
@@ -2553,7 +2605,7 @@ textarea.form-input-custom {
   padding: 14px 30px;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(var(--secondary-rgb), 0.3);
+  box-shadow: 0 4px 15px rgba(var(--primary-rgb), 0.3);
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -2562,7 +2614,7 @@ textarea.form-input-custom {
 }
 
 .btn-admissions-submit:hover {
-  box-shadow: 0 6px 20px rgba(var(--secondary-rgb), 0.5);
+  box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.5);
   color: white;
 }
 
@@ -3436,6 +3488,7 @@ textarea.form-input-custom {
   border-radius: 999px;
   text-decoration: none;
   cursor: pointer;
+  border: none;
   transition: all 0.25s ease;
   box-shadow: 0 2px 12px rgba(var(--primary-rgb), 0.25);
   font-family: var(--font-family);
@@ -4816,4 +4869,18 @@ textarea.form-input-custom {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Autofill overrides for inputs and select fields to preserve theme styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active,
+select:-webkit-autofill,
+select:-webkit-autofill:hover, 
+select:-webkit-autofill:focus, 
+select:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-dark) inset !important;
+  -webkit-text-fill-color: var(--text-light) !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
