@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { EVENTS_DATA } from './eventsData';
+// import { EVENTS_DATA } from './eventsData';
 
 /* ─── Skeleton card (minimal) ─── */
 function SubEventSkeleton() {
@@ -112,17 +112,17 @@ export default function EventDetail({ schoolId, onBack }) {
   const groupEvents = events.filter((e) => e.groupSlug === schoolId);
   const school = groupEvents.length > 0
     ? {
-        id: schoolId,
-        title: groupEvents[0].groupName,
-        tagline: groupEvents[0].groupTagline || groupEvents[0].tagline,
-        image: groupEvents[0].groupImage || groupEvents[0].image,
-        organizer: groupEvents[0].groupCategory,
-        organizerIcon: groupEvents[0].organizerIcon,
-        likes: groupEvents[0].likes,
-        eventCount: groupEvents.length,
-        accentColor: groupEvents[0].accentColor,
-      }
-    : EVENTS_DATA.find(e => e.id === schoolId);
+      id: schoolId,
+      title: groupEvents[0].groupName,
+      tagline: groupEvents[0].groupTagline || groupEvents[0].tagline,
+      image: groupEvents[0].groupImage || groupEvents[0].image,
+      organizer: groupEvents[0].groupCategory,
+      organizerIcon: groupEvents[0].organizerIcon,
+      likes: groupEvents[0].likes,
+      eventCount: groupEvents.length,
+      accentColor: groupEvents[0].accentColor,
+    }
+    : 0;
   const subEvents = groupEvents;
 
   // Hero entrance
@@ -158,7 +158,7 @@ export default function EventDetail({ schoolId, onBack }) {
 
       {/* Content */}
       <div className="container-premium">
-        
+
         {/* School Page Header Block */}
         <div className="event-detail-page-header">
           <div className="event-detail-header-left">
@@ -202,14 +202,14 @@ export default function EventDetail({ schoolId, onBack }) {
           {loading
             ? Array.from({ length: 4 }).map((_, i) => <SubEventSkeleton key={i} />)
             : subEvents.map((event, index) => (
-                <SubEventCard
-                  key={event.id}
-                  event={event}
-                  schoolId={schoolId}
-                  cardRef={(el) => (cardsRef.current[index] = el)}
-                />
-              ))}
-              
+              <SubEventCard
+                key={event.id}
+                event={event}
+                schoolId={schoolId}
+                cardRef={(el) => (cardsRef.current[index] = el)}
+              />
+            ))}
+
         </div>
       </div>
     </section>

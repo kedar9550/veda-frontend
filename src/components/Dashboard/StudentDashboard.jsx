@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import StudentRegistrationPopup from '../Events/StudentRegistrationPopup';
+import Barcode from 'react-barcode';
 import './StudentDashboard.css';
 
 export default function StudentDashboard({ onNavigate }) {
@@ -9,6 +11,7 @@ export default function StudentDashboard({ onNavigate }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [selectedPass, setSelectedPass] = useState(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -95,7 +98,7 @@ export default function StudentDashboard({ onNavigate }) {
       alert('Please fill in all required fields');
       return;
     }
-    
+
     setSavingProfile(true);
     try {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
@@ -559,6 +562,7 @@ export default function StudentDashboard({ onNavigate }) {
                         <th>Mobile</th>
                         <th>Email</th>
                         <th>Accommodation</th>
+                        <th>Pass</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -574,6 +578,15 @@ export default function StudentDashboard({ onNavigate }) {
                             <td>{p.mobile || 'N/A'}</td>
                             <td>{p.email || 'N/A'}</td>
                             <td>{p.accommodation || 'No'}</td>
+                            <td>
+                              {p.barcode ? (
+                                <button className="btn-receipt" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setSelectedPass({ ...p, eventName: reg.eventName })}>
+                                  <i className="bi bi-upc-scan"></i> View Pass
+                                </button>
+                              ) : (
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No Pass</span>
+                              )}
+                            </td>
                           </tr>
                         ))
                       ) : (
@@ -704,6 +717,68 @@ export default function StudentDashboard({ onNavigate }) {
                 onClick={() => window.print()}
               >
                 <i className="bi bi-printer-fill"></i> Print Receipt
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Participant Pass Modal */}
+      {selectedPass && (
+        <div className="modal-overlay" onClick={() => setSelectedPass(null)}>
+          <div id="pass-modal-content" className="receipt-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px', textAlign: 'center', position: 'relative' }}>
+            <div className="receipt-header" style={{ borderBottom: 'none', paddingBottom: '0' }}>
+              <div style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: '#007bff' }}>
+                VEDA 2026 EVENT PASS
+              </div>
+              <h2 style={{ fontSize: '1.5rem', margin: '0.5rem 0' }}>{selectedPass.eventName}</h2>
+            </div>
+
+            <div style={{ padding: '1rem', background: '#f8f9fa', borderRadius: '12px', margin: '1rem 0' }}>
+              <h3 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>{selectedPass.name}</h3>
+              <p style={{ margin: '0 0 0.2rem 0', fontSize: '0.9rem', color: '#555' }}>Roll: {selectedPass.roll}</p>
+              <p style={{ margin: '0', fontSize: '0.9rem', color: '#555' }}>
+                {selectedPass.college === 'Other College' ? selectedPass.otherCollege : selectedPass.college}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '1.5rem 0' }}>
+              <Barcode value={selectedPass.barcode} width={2} height={80} displayValue={true} />
+            </div>
+
+            <div className="receipt-actions" style={{ justifyContent: 'center', gap: '1rem' }}>
+              <button
+                className="btn-receipt"
+                style={{ background: '#28a745', color: '#ffffff', border: 'none', flex: 1 }}
+                onClick={async () => {
+                  const passElement = document.getElementById('pass-modal-content');
+                  if (passElement) {
+                    const actionsDiv = passElement.querySelector('.receipt-actions');
+                    if (actionsDiv) actionsDiv.style.display = 'none';
+                    try {
+                      const html2canvas = (await import('html2canvas')).default;
+                      const canvas = await html2canvas(passElement, { scale: 2 });
+                      const dataUrl = canvas.toDataURL('image/png');
+                      const link = document.createElement('a');
+                      link.download = `${selectedPass.eventName}_Pass_${selectedPass.roll}.png`;
+                      link.href = dataUrl;
+                      link.click();
+                    } catch (err) {
+                      console.error('Failed to download pass:', err);
+                    } finally {
+                      if (actionsDiv) actionsDiv.style.display = 'flex';
+                    }
+                  }
+                }}
+              >
+                <i className="bi bi-download"></i> Download
+              </button>
+              <button
+                className="btn-receipt"
+                style={{ background: '#007bff', color: '#ffffff', border: 'none', flex: 1 }}
+                onClick={() => setSelectedPass(null)}
+              >
+                Close Pass
               </button>
             </div>
           </div>
