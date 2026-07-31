@@ -118,47 +118,55 @@ export default function AboutPage() {
         },
       });
 
-      // 6. Timeline Section: Animate items & dots
+      // 6. Timeline Section: Sequential animation per item (dot -> connector -> card)
       itemsRef.current.forEach((item, index) => {
         if (!item) return;
 
         const isEven = index % 2 === 0;
         const card = item.querySelector('.timeline-card');
+        const connector = item.querySelector('.timeline-connector');
         const dot = dotsRef.current[index];
 
-        // Animate card slide-in
-        gsap.fromTo(
-          card,
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: item,
+            start: 'top 55%',
+            toggleActions: 'play none none reverse',
+          }
+        });
+
+        // Step 1: Activate dot & parent container
+        tl.to([dot, item], {
+          onStart: () => {
+            dot.classList.add('active');
+            item.classList.add('active');
+          },
+          onReverseComplete: () => {
+            dot.classList.remove('active');
+            item.classList.remove('active');
+          },
+          duration: 0.1,
+        })
+        // Step 2: Animate horizontal connector line scaleX (extends sideways)
+        .to(connector, {
+          scaleX: 1,
+          duration: 0.35,
+          ease: 'power2.out',
+        })
+        // Step 3: Animate card appearance (fade-in & slide-in)
+        .fromTo(card,
           {
             opacity: 0,
-            x: isEven ? -100 : 100,
+            x: isEven ? -40 : 40,
           },
           {
             opacity: 1,
             x: 0,
-            duration: 1,
+            duration: 0.55,
             ease: 'power3.out',
-            scrollTrigger: {
-              trigger: item,
-              start: 'top 75%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
-
-        // Animate dot activation
-        gsap.to(dot, {
-          borderColor: 'var(--secondary)',
-          backgroundColor: '#ffffff',
-          boxShadow: '0 0 15px var(--secondary)',
-          scrollTrigger: {
-            trigger: item,
-            start: 'top 50%',
-            toggleActions: 'play none none reverse',
-            onEnter: () => dot.classList.add('active'),
-            onLeaveBack: () => dot.classList.remove('active'),
           },
-        });
+          '-=0.15' // Overlap slightly for a smoother flow
+        );
       });
     }, sectionRef);
 
@@ -171,66 +179,26 @@ export default function AboutPage() {
       <section ref={sectionRef} id="about" className="about-section">
         <div className="container-premium">
           <div className="row align-items-center">
-            
+
             {/* Left Column: Text & Features */}
             <div className="col-lg-6 pr-lg-5">
               <div ref={textContentRef}>
-                <span className="about-header-tag">About Aditya</span>
+                <span className="about-header-tag">About VEDA</span>
                 <h2 className="about-title text-gradient">
-                  A Legacy of Educational Excellence
+                  Honoring Engineers Inspiring Innovators
                 </h2>
                 <p className="about-desc">
-                  Aditya University is committed to fostering a culture of innovation, research, and global 
-                  citizenship. For over two decades, we have mentored pioneers, industry leaders, 
-                  and change-makers, providing a rich, multi-disciplinary ecosystem that challenges 
-                  students to think beyond boundaries.
+                  Celebrated annually on Engineers' Day, VEDA is Aditya University's premier National-Level Technical Fest dedicated to recognizing engineering excellence and fostering a culture of innovation. The event provides a vibrant platform for aspiring engineers to showcase their talent through technical competitions, research presentations, workshops, project exhibitions, and collaborative learning experiences. By bringing together academia, industry, and young innovators, VEDA empowers participants to transform ideas into real-world solutions while celebrating the spirit of engineering that drives progress and innovation.
                 </p>
 
-                {/* Bullet Features */}
-                <div className="about-features">
-                  <div className="about-feature-item">
-                    <div className="about-feature-icon">
-                      <i className="bi bi-mortarboard-fill"></i>
-                    </div>
-                    <div>
-                      <h3 className="about-feature-title">World-Class Pedagogy</h3>
-                      <p className="about-feature-desc">
-                        Curriculum integrated with current industry practices, supported by hands-on labs.
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="about-feature-item">
-                    <div className="about-feature-icon">
-                      <i className="bi bi-globe-americas"></i>
-                    </div>
-                    <div>
-                      <h3 className="about-feature-title">Global Academic Network</h3>
-                      <p className="about-feature-desc">
-                        Exchange programs and collaborations with 30+ international universities.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="about-feature-item">
-                    <div className="about-feature-icon">
-                      <i className="bi bi-cpu-fill"></i>
-                    </div>
-                    <div>
-                      <h3 className="about-feature-title">Advanced Research Hub</h3>
-                      <p className="about-feature-desc">
-                        Dedicated incubation centers, tech hubs, and state-of-the-art innovation labs.
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
             {/* Right Column: Parallax Images */}
             <div className="col-lg-6">
               <div className="about-image-wrapper">
-                
+
                 {/* Main Image Box */}
                 <div className="about-main-image-card">
                   {/* Curtain mask that slides away */}
@@ -248,9 +216,9 @@ export default function AboutPage() {
                   <div className="overlap-icon">
                     <i className="bi bi-shield-fill-check"></i>
                   </div>
-                  <h4 className="overlap-title">Accreditations</h4>
+                  <h4 className="overlap-title">Veda</h4>
                   <p className="overlap-desc">
-                    Ranked 'A++' Grade by NAAC. Approved by UGC & AICTE for premium quality standards.
+                    Inspiring Engineers, Igniting Innovation, Shaping Tomorrow.
                   </p>
                 </div>
 
@@ -264,11 +232,11 @@ export default function AboutPage() {
       {/* 2. Timeline Component Content */}
       <section ref={containerRef} id="programs" className="programs-section">
         <div className="container-premium">
-          
+
           {/* Section Header */}
           <span className="programs-header-tag text-center">Journey</span>
           <h2 className="programs-title text-center text-gradient">
-            Aditya Student Lifecycle
+            Timeline of Veda Event
           </h2>
 
           {/* Timeline */}
@@ -284,12 +252,12 @@ export default function AboutPage() {
                 <div
                   key={item.id}
                   ref={(el) => (itemsRef.current[index] = el)}
-                  className={`timeline-item ${
-                    isEven ? 'timeline-item-left' : 'timeline-item-right'
-                  }`}
+                  className={`timeline-item ${isEven ? 'timeline-item-left' : 'timeline-item-right'
+                    }`}
                 >
                   {/* Info Card */}
                   <div className="timeline-card-wrap">
+                    <div className="timeline-connector"></div>
                     <div className="timeline-card">
                       <span className="timeline-badge">{item.stage}</span>
                       <h4 className="timeline-card-title">{item.title}</h4>

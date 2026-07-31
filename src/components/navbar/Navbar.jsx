@@ -5,8 +5,10 @@ export default function Navbar({ activePage, onNavigate }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileActive, setIsMobileActive] = useState(false);
   const [loggedStudent, setLoggedStudent] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const [themeMode, setThemeMode] = useState(() => {
-    return localStorage.getItem('theme') || 'light';
+    return localStorage.getItem('theme') || 'dark';
   });
 
   useEffect(() => {
@@ -23,17 +25,24 @@ export default function Navbar({ activePage, onNavigate }) {
         setLoggedStudent(null);
       }
     };
+
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
     
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('studentLoggedIn', handleStorageChange);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('studentLoggedIn', handleStorageChange);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
   const admissionsBtnRef = useRef(null);
-  const themeToggleRef = useRef(null);
 
   // Synchronize theme to document body and LocalStorage
   useEffect(() => {
@@ -59,14 +68,12 @@ export default function Navbar({ activePage, onNavigate }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Apply magnetic effect to Admissions & Theme Toggle buttons
+  // Apply magnetic effect to Admissions button
   useEffect(() => {
     const cleanupAdmissions = applyMagneticEffect(admissionsBtnRef.current, null, 0.25);
-    const cleanupTheme = applyMagneticEffect(themeToggleRef.current, null, 0.35);
 
     return () => {
       if (cleanupAdmissions) cleanupAdmissions();
-      if (cleanupTheme) cleanupTheme();
     };
   }, []);
 
@@ -82,6 +89,15 @@ export default function Navbar({ activePage, onNavigate }) {
   const handleLinkClick = (targetPage) => {
     setIsMobileActive(false);
     window.location.hash = targetPage === 'home' ? '' : `#${targetPage}`;
+  };
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
   };
 
   return (
@@ -177,70 +193,190 @@ export default function Navbar({ activePage, onNavigate }) {
               Poster
             </a>
           </li>
-          <li>
-            <a
-              href="#dashboard"
-              className={`nav-item-link ${activePage === 'dashboard' ? 'active' : ''}`}
-              onClick={(e) => {
-                e.preventDefault();
-                handleLinkClick('dashboard', null);
-              }}
-            >
-              Dashboard
-            </a>
-          </li>
         </ul>
 
         {/* Actions (Admissions, Theme) */}
         <div className="nav-actions">
-          {/* Theme Toggle */}
-          <button
-            ref={themeToggleRef}
-            className="theme-toggle-btn"
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-          >
-            <i className={`bi ${themeMode === 'dark' ? 'bi-moon-stars-fill' : 'bi-sun-fill'}`}></i>
-          </button>
+
 
           {/* Admissions CTA / Logged in User */}
           {loggedStudent ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <a
-                href="#dashboard"
-                className="btn-admissions"
+            <div ref={dropdownRef} className="profile-dropdown-container" style={{ position: 'relative' }}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="profile-trigger-btn"
                 style={{
                   cursor: 'pointer',
-                  background: 'rgba(0, 123, 255, 0.1)',
-                  color: '#007bff',
-                  border: '1px solid rgba(0, 123, 255, 0.3)',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '50%',
+                  background: 'var(--gradient-primary)',
+                  color: '#ffffff',
+                  border: '2px solid rgba(var(--primary-rgb), 0.3)',
+                  display: 'flex',
                   alignItems: 'center',
-                  gap: '0.4rem'
+                  justifyContent: 'center',
+                  fontWeight: '700',
+                  fontSize: '0.95rem',
+                  padding: 0,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 4px 10px rgba(var(--primary-rgb), 0.2)',
+                  userSelect: 'none'
                 }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleLinkClick('dashboard', null);
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.borderColor = 'rgba(var(--primary-rgb), 0.6)';
                 }}
-                title="Go to Student Dashboard"
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.borderColor = 'rgba(var(--primary-rgb), 0.3)';
+                }}
+                title="Profile Menu"
               >
-                <i className="bi bi-person-circle"></i>
-                {loggedStudent.name}
-              </a>
-              <button
-                className="theme-toggle-btn"
-                style={{ color: '#dc3545', border: '1px solid rgba(220, 53, 69, 0.3)', background: 'rgba(220, 53, 69, 0.1)' }}
-                onClick={() => {
-                  localStorage.removeItem('eventStudent');
-                  window.dispatchEvent(new Event('studentLoggedIn'));
-                  setLoggedStudent(null);
-                  window.location.hash = '';
-                }}
-                title="Logout"
-              >
-                <i className="bi bi-box-arrow-right"></i>
+                {getInitials(loggedStudent.name)}
               </button>
+
+              {dropdownOpen && (
+                <div
+                  className="profile-dropdown-menu"
+                  style={{
+                    position: 'absolute',
+                    top: '52px',
+                    right: 0,
+                    backgroundColor: 'var(--bg-dark)',
+                    border: '1px solid var(--glass-border)',
+                    borderRadius: '16px',
+                    boxShadow: '0 12px 30px rgba(0, 0, 0, 0.4)',
+                    padding: '16px',
+                    minWidth: '240px',
+                    zIndex: 1000,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                    backdropFilter: 'blur(16px)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '12px' }}>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      background: 'rgba(var(--primary-rgb), 0.1)',
+                      color: 'var(--text-light)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1rem'
+                    }}>
+                      <i className="bi bi-person-fill"></i>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontWeight: '600', color: 'var(--text-light)', fontSize: '0.9rem', wordBreak: 'break-all', lineHeight: '1.2' }}>
+                        {loggedStudent.name}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                        Student Account
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <a
+                    href="#dashboard"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      color: 'var(--text-muted)',
+                      textDecoration: 'none',
+                      fontSize: '0.85rem',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      transition: 'all 0.2s ease',
+                      backgroundColor: 'transparent'
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setDropdownOpen(false);
+                      handleLinkClick('dashboard', null);
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'var(--text-light)';
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'var(--text-muted)';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <i className="bi bi-speedometer2" style={{ fontSize: '1rem' }}></i>
+                    Dashboard
+                  </a>
+
+                  <button
+                    onClick={toggleTheme}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      color: 'var(--text-muted)',
+                      background: 'transparent',
+                      border: 'none',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      width: '100%',
+                      textAlign: 'left',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'var(--text-light)';
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'var(--text-muted)';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <i className={`bi ${themeMode === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'}`} style={{ fontSize: '1rem' }}></i>
+                    {themeMode === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                  </button>
+
+                  <button
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      color: '#dc3545',
+                      background: 'transparent',
+                      border: 'none',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      width: '100%',
+                      textAlign: 'left',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onClick={() => {
+                      localStorage.removeItem('eventStudent');
+                      window.dispatchEvent(new Event('studentLoggedIn'));
+                      setLoggedStudent(null);
+                      setDropdownOpen(false);
+                      window.location.hash = '';
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <i className="bi bi-box-arrow-right" style={{ fontSize: '1rem' }}></i>
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <a
@@ -249,10 +385,10 @@ export default function Navbar({ activePage, onNavigate }) {
               className="btn-admissions"
               onClick={(e) => {
                 e.preventDefault();
-                handleLinkClick('dashboard', null);
+                handleLinkClick('login', null);
               }}
             >
-              Login / Profile
+              Login
               <i className="bi bi-arrow-right"></i>
             </a>
           )}
