@@ -1,7 +1,59 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { EVENTS_DATA } from './eventsData';
+// import { EVENTS_DATA } from './eventsData';
 import { useEvents } from './useEvents';
+
+/**
+ * Tries each campus photo base URL in order:
+ *   1. https://info.aec.edu.in/aus/employeephotos/
+ *   2. https://info.aec.edu.in/aec/employeephotos/
+ *   3. https://info.aec.edu.in/acet/employeephotos/
+ *   4. https://info.aec.edu.in/acoe/employeephotos/
+ * Falls back to initials SVG placeholder if all fail.
+ */
+const CAMPUS_PHOTO_BASES = [
+  'https://info.aec.edu.in/aus/employeephotos',
+  'https://info.aec.edu.in/aec/employeephotos',
+  'https://info.aec.edu.in/acet/employeephotos',
+  'https://info.aec.edu.in/acoe/employeephotos',
+];
+
+function CoordinatorPhoto({ employeeCode, name, className }) {
+  const initials = (name || '').split(' ').filter(Boolean).slice(0, 2).map(n => n[0]).join('').toUpperCase() || 'FC';
+  const placeholderSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='100%' height='100%' fill='%23222222'/><text x='50%' y='50%' dy='.35em' text-anchor='middle' font-family='Inter, Arial, Helvetica, sans-serif' font-size='46' fill='%23ffffff'>${initials}</text></svg>`;
+  const placeholderDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(placeholderSvg)}`;
+
+  const [attemptIndex, setAttemptIndex] = useState(0);
+  const [imgSrc, setImgSrc] = useState(
+    employeeCode ? `${CAMPUS_PHOTO_BASES[0]}/${employeeCode}.jpg` : placeholderDataUrl
+  );
+
+  useEffect(() => {
+    setAttemptIndex(0);
+    setImgSrc(employeeCode ? `${CAMPUS_PHOTO_BASES[0]}/${employeeCode}.jpg` : placeholderDataUrl);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [employeeCode]);
+
+  const handleError = () => {
+    const nextIndex = attemptIndex + 1;
+    if (nextIndex < CAMPUS_PHOTO_BASES.length) {
+      setAttemptIndex(nextIndex);
+      setImgSrc(`${CAMPUS_PHOTO_BASES[nextIndex]}/${employeeCode}.jpg`);
+    } else {
+      // All bases exhausted — show initials placeholder
+      setImgSrc(placeholderDataUrl);
+    }
+  };
+
+  return (
+    <img
+      src={imgSrc}
+      alt={`Photo of ${name || 'Coordinator'}`}
+      className={className}
+      onError={handleError}
+    />
+  );
+}
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
@@ -17,16 +69,13 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
   const bodyRef = useRef(null);
 
   const { events, loading } = useEvents();
-  const school = events.find((e) => e.groupSlug === schoolId) || EVENTS_DATA.find(e => e.id === schoolId);
+  const school = events.find((e) => e.groupSlug === schoolId);
   const event = events.find((e) => e.groupSlug === schoolId && e.id === eventId);
-  
+
   const coordinator = event?.coordinator || null;
   const coordinatorName = coordinator?.employeeName || coordinator?.name || coordinator?.fullName || '';
   const coordinatorCode = coordinator?.employeeCode || coordinator?.employeeId || coordinator?.id || coordinator?._id || '';
-  const empBase = import.meta.env.VITE_EMP_URL || import.meta.env.EMP_URL || '';
-  const initials = (coordinatorName || '').split(' ').filter(Boolean).slice(0,2).map(n => n[0]).join('').toUpperCase() || 'FC';
-  const placeholderSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='100%' height='100%' fill='%23222222'/><text x='50%' y='50%' dy='.35em' text-anchor='middle' font-family='Inter, Arial, Helvetica, sans-serif' font-size='46' fill='%23ffffff'>${initials}</text></svg>`;
-  const placeholderDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(placeholderSvg)}`;
+
   useEffect(() => {
     if (!event || !school) return;
     window.scrollTo(0, 0);
@@ -36,7 +85,7 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
     tl.fromTo(heroRef.current, { opacity: 0 }, { opacity: 1, duration: 0.5 })
       .fromTo(statsRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5 }, '-=0.2')
       .fromTo(bodyRef.current, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.2');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
   if (loading) {
@@ -161,16 +210,10 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
               <span>FACULTY COORDINATOR</span><span className="esingle-section-colon"> :</span>
             </h2>
             <div className="esingle-coordinator-row">
-              <img
-                src={coordinatorCode ? `${empBase}/${coordinatorCode}.jpg` : placeholderDataUrl}
-                alt={`Photo of ${coordinatorName || 'Coordinator'}`}
+              <CoordinatorPhoto
+                employeeCode={coordinatorCode}
+                name={coordinatorName}
                 className="esingle-coordinator-photo"
-                onError={(e) => {
-                  if (e.currentTarget.src !== placeholderDataUrl) {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = placeholderDataUrl;
-                  }
-                }}
               />
 
               <div className="esingle-coordinator-info">

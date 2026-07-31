@@ -17,7 +17,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import { EVENTS_DATA } from './eventsData';
 
 function getApiBaseUrl() {
   const configuredUrl = import.meta.env.VITE_API_URL?.trim();
