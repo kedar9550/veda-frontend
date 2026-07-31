@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import StudentRegistrationPopup from '../Events/StudentRegistrationPopup';
 import './StudentDashboard.css';
 
 export default function StudentDashboard({ onNavigate }) {
   const [student, setStudent] = useState(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  // showLoginModal state removed
   const [activeTab, setActiveTab] = useState('overview');
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    college: '',
+    otherCollege: '',
+    roll: '',
+    gender: '',
+    mobile: '',
+    email: ''
+  });
 
   // Load logged-in student info
   useEffect(() => {
@@ -21,9 +31,11 @@ export default function StudentDashboard({ onNavigate }) {
           setStudent(parsed);
         } catch (e) {
           setStudent(null);
+          window.location.hash = 'login';
         }
       } else {
         setStudent(null);
+        window.location.hash = 'login';
       }
     };
 
@@ -72,54 +84,56 @@ export default function StudentDashboard({ onNavigate }) {
     fetchRegistrations();
   }, [student]);
 
-  // Logout handler
-  const handleLogout = () => {
-    localStorage.removeItem('eventStudent');
-    window.dispatchEvent(new Event('studentLoggedIn'));
-    setStudent(null);
-    if (onNavigate) {
-      onNavigate('home');
-    } else {
-      window.location.hash = '';
-    }
-  };
 
   // Helper calculation for total amount paid
   const totalAmountPaid = registrations.reduce((sum, reg) => {
     return sum + (reg.amountRupees || reg.amount || 0);
   }, 0);
 
+  const handleSaveProfile = async () => {
+    if (!editForm.name || !editForm.college || !editForm.roll || !editForm.gender || !editForm.mobile || !editForm.email) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    setSavingProfile(true);
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const response = await fetch(`${baseUrl}/api/event-students/update`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: student._id || student.id,
+          ...editForm
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update profile');
+      }
+
+      // Update student local state & localStorage
+      const updatedStudent = data.student;
+      localStorage.setItem('eventStudent', JSON.stringify(updatedStudent));
+      window.dispatchEvent(new Event('studentLoggedIn'));
+      setStudent(updatedStudent);
+      setIsEditingProfile(false);
+      alert('Profile updated successfully!');
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   if (!student) {
     return (
-      <div className="container-premium dashboard-container">
-        <div className="empty-state">
-          <i className="bi bi-person-lock"></i>
-          <h2>Student Portal Login Required</h2>
-          <p style={{ maxWidth: '500px', margin: '0.5rem auto 1.5rem auto' }}>
-            Please log in or register to access your profile, registered events, team participant details, and payment receipts.
-          </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            <button
-              className="btn-admissions"
-              style={{ background: '#007bff', color: '#fff', border: 'none' }}
-              onClick={() => setShowLoginModal(true)}
-            >
-              Login / Register Now
-            </button>
-          </div>
-        </div>
-
-        {showLoginModal && (
-          <StudentRegistrationPopup
-            onClose={() => setShowLoginModal(false)}
-            onSuccess={(loggedStudent) => {
-              localStorage.setItem('eventStudent', JSON.stringify(loggedStudent));
-              window.dispatchEvent(new Event('studentLoggedIn'));
-              setStudent(loggedStudent);
-              setShowLoginModal(false);
-            }}
-          />
-        )}
+      <div className="container-premium dashboard-container" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: 'var(--text-muted)' }}>Redirecting to login...</p>
       </div>
     );
   }
@@ -153,12 +167,6 @@ export default function StudentDashboard({ onNavigate }) {
                 <i className="bi bi-envelope"></i> {student.email}
               </span>
             </div>
-          </div>
-          <div className="dashboard-header-actions">
-            <button className="btn-logout" onClick={handleLogout} title="Logout of Student Account">
-              <i className="bi bi-box-arrow-right"></i>
-              Logout
-            </button>
           </div>
         </div>
       </div>
@@ -337,42 +345,167 @@ export default function StudentDashboard({ onNavigate }) {
                 Your personal and academic account details
               </p>
             </div>
-            <button className="btn-logout" onClick={handleLogout}>
-              <i className="bi bi-box-arrow-right"></i> Logout Account
-            </button>
+            {!isEditingProfile ? (
+              <button
+                className="btn-admissions"
+                style={{ background: 'var(--gradient-primary)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
+                onClick={() => {
+                  setEditForm({
+                    name: student.name || '',
+                    college: student.college || '',
+                    otherCollege: student.otherCollege || '',
+                    roll: student.roll || '',
+                    gender: student.gender || '',
+                    mobile: student.mobile || '',
+                    email: student.email || ''
+                  });
+                  setIsEditingProfile(true);
+                }}
+              >
+                <i className="bi bi-pencil-square"></i> Edit Profile
+              </button>
+            ) : (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="btn-admissions"
+                  style={{ background: '#28a745', color: '#fff', border: 'none' }}
+                  onClick={handleSaveProfile}
+                  disabled={savingProfile}
+                >
+                  {savingProfile ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  className="btn-logout"
+                  style={{ color: 'var(--text-muted)', border: '1px solid var(--glass-border)', background: 'var(--glass)' }}
+                  onClick={() => setIsEditingProfile(false)}
+                  disabled={savingProfile}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="profile-grid">
-            <div className="profile-field-group">
-              <label>Full Name</label>
-              <div className="value">{student.name}</div>
-            </div>
+          {isEditingProfile ? (
+            <form onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }} className="profile-grid" style={{ marginTop: '1.5rem' }}>
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Full Name</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                />
+              </div>
 
-            <div className="profile-field-group">
-              <label>Roll Number</label>
-              <div className="value">{student.roll}</div>
-            </div>
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Roll Number</label>
+                <input
+                  type="text"
+                  value={editForm.roll}
+                  onChange={(e) => setEditForm({ ...editForm, roll: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                />
+              </div>
 
-            <div className="profile-field-group">
-              <label>College</label>
-              <div className="value">{student.college === 'Other College' ? student.otherCollege : student.college}</div>
-            </div>
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>College</label>
+                <select
+                  value={editForm.college}
+                  onChange={(e) => setEditForm({ ...editForm, college: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                >
+                  <option value="Aditya University">Aditya University</option>
+                  <option value="ACET">ACET</option>
+                  <option value="Other College">Other College</option>
+                </select>
+              </div>
 
-            <div className="profile-field-group">
-              <label>Email Address</label>
-              <div className="value">{student.email}</div>
-            </div>
+              {editForm.college === 'Other College' && (
+                <div className="profile-field-group">
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Other College Name</label>
+                  <input
+                    type="text"
+                    value={editForm.otherCollege}
+                    onChange={(e) => setEditForm({ ...editForm, otherCollege: e.target.value })}
+                    style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                    required
+                  />
+                </div>
+              )}
 
-            <div className="profile-field-group">
-              <label>Mobile Number</label>
-              <div className="value">{student.mobile}</div>
-            </div>
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Email Address</label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                />
+              </div>
 
-            <div className="profile-field-group">
-              <label>Gender</label>
-              <div className="value">{student.gender}</div>
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Mobile Number</label>
+                <input
+                  type="text"
+                  value={editForm.mobile}
+                  onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                />
+              </div>
+
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Gender</label>
+                <select
+                  value={editForm.gender}
+                  onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </form>
+          ) : (
+            <div className="profile-grid">
+              <div className="profile-field-group">
+                <label>Full Name</label>
+                <div className="value">{student.name}</div>
+              </div>
+
+              <div className="profile-field-group">
+                <label>Roll Number</label>
+                <div className="value">{student.roll}</div>
+              </div>
+
+              <div className="profile-field-group">
+                <label>College</label>
+                <div className="value">{student.college === 'Other College' ? student.otherCollege : student.college}</div>
+              </div>
+
+              <div className="profile-field-group">
+                <label>Email Address</label>
+                <div className="value">{student.email}</div>
+              </div>
+
+              <div className="profile-field-group">
+                <label>Mobile Number</label>
+                <div className="value">{student.mobile}</div>
+              </div>
+
+              <div className="profile-field-group">
+                <label>Gender</label>
+                <div className="value">{student.gender}</div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 

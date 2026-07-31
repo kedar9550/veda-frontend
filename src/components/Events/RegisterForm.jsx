@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useEvents } from './useEvents';
 import { useDepartments } from './useDepartments';
-import StudentRegistrationPopup from './StudentRegistrationPopup';
 
 function parseTeamSize(value) {
   if (value === undefined || value === null || value === '') {
@@ -101,7 +100,6 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState('');
-  const [showRegistrationPopup, setShowRegistrationPopup] = useState(false);
 
   useEffect(() => {
     const savedStudentStr = localStorage.getItem('eventStudent');
@@ -126,35 +124,14 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
         });
       } catch (err) {
         console.error('Failed to parse eventStudent from localStorage', err);
-        setShowRegistrationPopup(true);
+        sessionStorage.setItem('authRedirect', window.location.hash);
+        window.location.hash = 'login';
       }
     } else {
-      setShowRegistrationPopup(true);
+      sessionStorage.setItem('authRedirect', window.location.hash);
+      window.location.hash = 'login';
     }
   }, []);
-
-  const handleRegistrationSuccess = (studentData) => {
-    localStorage.setItem('eventStudent', JSON.stringify(studentData));
-    window.dispatchEvent(new Event('studentLoggedIn'));
-    
-    setForm(prev => {
-      const newParticipants = [...prev.participants];
-      if (newParticipants.length > 0) {
-        newParticipants[0] = {
-          ...newParticipants[0],
-          name: studentData.name || '',
-          college: studentData.college || '',
-          otherCollege: studentData.otherCollege || '',
-          roll: studentData.roll || '',
-          gender: studentData.gender || '',
-          mobile: studentData.mobile || '',
-          email: studentData.email || ''
-        };
-      }
-      return { ...prev, participants: newParticipants };
-    });
-    setShowRegistrationPopup(false);
-  };
 
   const teamSizeOptions = useMemo(
     () => buildTeamSizeOptions(event?.teamSize || event?.maxTeamSize || event?.registrationTeamSize || '1'),
@@ -463,12 +440,6 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
   return (
     <>
-      {showRegistrationPopup && (
-        <StudentRegistrationPopup 
-          onClose={() => setShowRegistrationPopup(false)} 
-          onSuccess={handleRegistrationSuccess} 
-        />
-      )}
       <div className="container-premium register-page" style={{ padding: '2.5rem 0' }}>
         <div style={{ background: 'var(--gradient-primary)', padding: '1.2rem', borderRadius: '12px', textAlign: 'center', color: '#fff', marginBottom: '1.5rem' }}>
           <h2 style={{ margin: 0, fontSize: '1.75rem' }}>Drop Your Details</h2>

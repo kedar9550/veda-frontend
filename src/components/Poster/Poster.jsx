@@ -42,9 +42,9 @@ export default function Poster() {
   return (
     <section ref={sectionRef} id="campus" className="campus-section">
       <div className="container-premium text-center">
-        <span className="campus-header-tag">Campus Showcase</span>
+        <span className="campus-header-tag">Veda Poster</span>
         <h2 className="campus-title text-gradient">
-          Explore Aditya's Eco-Smart Campus
+          Explore Aditya's Veda Events
         </h2>
       </div>
 
@@ -57,7 +57,7 @@ export default function Poster() {
           alt="Aditya University Smart Campus"
           loading="lazy"
         />
-        
+
         {/* Shadow Overlay */}
         <div className="campus-img-overlay"></div>
 
@@ -65,8 +65,8 @@ export default function Poster() {
         <div className={`campus-overlay-card ${showCard ? 'visible' : ''}`}>
           <h3 className="campus-overlay-title">An Environment Designed for Excellence</h3>
           <p className="campus-overlay-desc">
-            Nestled across 180 acres of lush greenery, our carbon-neutral smart campus includes 
-            sustainable solar grids, ultra-high-speed fiber networks, state-of-the-art sports stadiums, 
+            Nestled across 180 acres of lush greenery, our carbon-neutral smart campus includes
+            sustainable solar grids, ultra-high-speed fiber networks, state-of-the-art sports stadiums,
             and a central digital knowledge library.
           </p>
 

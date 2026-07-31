@@ -14,6 +14,7 @@ import AboutPage from './components/About/AboutPage';
 import Poster from './components/Poster/Poster';
 import StudentDashboard from './components/Dashboard/StudentDashboard';
 import Footer from './components/Footer/Footer';
+import LoginPage from './components/Login/LoginPage';
 
 /**
  * Parse hash → { page, subPage, subSubPage }
@@ -49,6 +50,7 @@ export default function App() {
     if (page === 'team') return <Team />;
     if (page === 'poster') return <Poster />;
     if (page === 'contact') return <Contact />;
+    if (page === 'login') return <LoginPage />;
     if (page === 'dashboard') return <StudentDashboard onNavigate={navigateTo} />;
 
     if (page === 'register') {
