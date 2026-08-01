@@ -147,7 +147,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
     setForm((prev) => ({
       ...prev,
-      category: event.groupCategory || event.category || schoolId || '',
+      category: event.category || event.groupCategory || schoolId || '',
       amount: event.feeText || event.feeAmount || event.registrationFee || '',
       eventName: event.title || eventId || '',
       teamSize: prev.teamSize || defaultTeamSize,
