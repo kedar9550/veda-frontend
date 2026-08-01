@@ -100,7 +100,7 @@ export function useDepartments() {
       }
 
       if (!isMounted) return;
-      setDepartments(DEFAULT_DEPARTMENTS);
+      setDepartments([]);
       setLoading(false);
       setError(authError
         ? 'Departments backend requires authentication; using default department list.'

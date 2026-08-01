@@ -120,6 +120,19 @@ function extractEventItems(payload) {
   return [];
 }
 
+function formatDepartment(entry) {
+  if (entry.department) {
+    return entry.department.replace(/,\s*/g, ' & ');
+  }
+  if (entry.group && Array.isArray(entry.group.department)) {
+    return entry.group.department.map(d => d?.name).join(' & ');
+  }
+  if (entry.group && entry.group.department && entry.group.department.name) {
+    return entry.group.department.name;
+  }
+  return '';
+}
+
 const DEPT_META = {
   krishi: {
     tagline: 'Roots of Innovation',
@@ -233,6 +246,7 @@ export function useEvents() {
               const teamSize = normalizeTeamSize(entry);
               const registeredStudents = entry.registeredStudents || entry.usersRegistered || entry.studentCount || entry.registrations || 0;
               const categoryColor = entry.categoryColor || entry.accentColor || meta.accentColor;
+              const formattedDepartment = formatDepartment(entry);
               const rawCoordinator = entry.coordinator || entry.facultyCoordinator || entry.facultyCoordinators?.[0] || null;
               const eventCoordinator = rawCoordinator ? {
                 name: rawCoordinator.employeeName || rawCoordinator.name || rawCoordinator.fullName || null,
@@ -258,7 +272,7 @@ export function useEvents() {
                 organizerIcon: meta.organizerIcon,
                 likes: entry.likes || meta.likes,
                 eventCount: 1,
-                category: entry.category || meta.category,
+                category: formattedDepartment || entry.category || meta.category,
                 accentColor: entry.accentColor || meta.accentColor,
                 categoryColor,
                 isOpen: entry.isOpen !== false,
@@ -276,7 +290,7 @@ export function useEvents() {
                 groupSlug,
                 groupCategory: meta.category,
                 groupImage: entry.group?.image || entry.group?.bannerImage || entry.bannerImage || entry.image || meta.image,
-                groupTagline: entry.group?.tagline || entry.group?.description || entry.department || meta.tagline,
+                groupTagline: entry.group?.tagline || formattedDepartment || entry.group?.description || meta.tagline,
                 raw: entry
               };
             });
