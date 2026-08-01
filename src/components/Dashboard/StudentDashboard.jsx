@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import StudentRegistrationPopup from '../Events/StudentRegistrationPopup';
 import Barcode from 'react-barcode';
+import GoldLogo from '../SDGs/GoldLogo';
 import './StudentDashboard.css';
 
 export default function StudentDashboard({ onNavigate }) {
@@ -23,6 +24,36 @@ export default function StudentDashboard({ onNavigate }) {
     mobile: '',
     email: ''
   });
+
+  const [eventVenues, setEventVenues] = useState({});
+
+  // Fetch all event venues to map registration names to venues
+  useEffect(() => {
+    const fetchVenues = async () => {
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+        const res = await fetch(`${baseUrl}/api/events`);
+        if (res.ok) {
+          const data = await res.json();
+          const items = Array.isArray(data) ? data : (data.events || data.data || []);
+          if (Array.isArray(items)) {
+            const venueMap = {};
+            items.forEach(item => {
+              const name = item.eventName || item.title || item.name || '';
+              const venue = item.venue || item.location || item.venueLocation || '';
+              if (name && venue) {
+                venueMap[name.toLowerCase().trim()] = venue;
+              }
+            });
+            setEventVenues(prev => ({ ...prev, ...venueMap }));
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching event venues:', err);
+      }
+    };
+    fetchVenues();
+  }, []);
 
   // Load logged-in student info
   useEffect(() => {
@@ -580,7 +611,7 @@ export default function StudentDashboard({ onNavigate }) {
                             <td>{p.accommodation || 'No'}</td>
                             <td>
                               {p.barcode ? (
-                                <button className="btn-receipt" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setSelectedPass({ ...p, eventName: reg.eventName })}>
+                                <button className="btn-receipt" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setSelectedPass({ ...p, eventName: reg.eventName, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) })}>
                                   <i className="bi bi-upc-scan"></i> View Pass
                                 </button>
                               ) : (
@@ -726,38 +757,371 @@ export default function StudentDashboard({ onNavigate }) {
       {/* Participant Pass Modal */}
       {selectedPass && (
         <div className="modal-overlay" onClick={() => setSelectedPass(null)}>
-          <div id="pass-modal-content" className="receipt-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '400px', textAlign: 'center', position: 'relative' }}>
-            <div className="receipt-header" style={{ borderBottom: 'none', paddingBottom: '0' }}>
-              <div style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: '#007bff' }}>
-                VEDA 2026 EVENT PASS
+          <div className="receipt-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '680px', textAlign: 'center', position: 'relative', padding: '1.5rem', background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1' }}>
+            <div className="receipt-header" style={{ borderBottom: 'none', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.3rem', margin: '0', fontWeight: '700', color: '#0f172a' }}>Event Pass Preview</h2>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>This pass is generated for your event entry.</p>
+            </div>
+
+            {/* The Pass Card container (5in x 2in) scaled up for display preview */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '1.5rem 0', height: '2.4in' }}>
+              <div
+                id="event-pass-card"
+                style={{
+                  width: '5in',
+                  height: '2in',
+                  transform: 'scale(1.3)',
+                  transformOrigin: 'center',
+                  color: '#1a202c',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-start',
+                  padding: '0.1in 0.15in 0in 0.15in',
+                  boxSizing: 'border-box',
+                  fontFamily: "'Stem', sans-serif",
+                  position: 'relative',
+                  overflow: 'hidden',
+                  textAlign: 'left'
+                }}
+              >
+                {/* SVG Ticket Shape Background (White fill, Orange borders, transparent cutouts) */}
+                <svg
+                  width="100%"
+                  height="100%"
+                  viewBox="0 0 480 192"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    zIndex: 0,
+                    pointerEvents: 'none'
+                  }}
+                >
+                  <defs>
+                    <clipPath id="ticket-clip">
+                      <path d="M 10 0 L 480 0 L 473 6 L 480 12 L 473 18 L 480 24 L 473 30 L 480 36 L 473 42 L 480 48 L 473 54 L 480 60 L 473 66 L 480 72 L 473 78 L 480 84 L 473 90 L 480 96 L 473 102 L 480 108 L 473 114 L 480 120 L 473 126 L 480 132 L 473 138 L 480 144 L 473 150 L 480 156 L 473 162 L 480 168 L 473 174 L 480 180 L 473 186 L 480 192 L 10 192 A 10 10 0 0 0 0 182 L 0 104 A 8 8 0 0 0 0 88 L 0 10 A 10 10 0 0 0 10 0 Z" />
+                    </clipPath>
+                  </defs>
+
+                  {/* White background shape */}
+                  <path
+                    d="M 10 0 L 480 0 L 473 6 L 480 12 L 473 18 L 480 24 L 473 30 L 480 36 L 473 42 L 480 48 L 473 54 L 480 60 L 473 66 L 480 72 L 473 78 L 480 84 L 473 90 L 480 96 L 473 102 L 480 108 L 473 114 L 480 120 L 473 126 L 480 132 L 473 138 L 480 144 L 473 150 L 480 156 L 473 162 L 480 168 L 473 174 L 480 180 L 473 186 L 480 192 L 10 192 A 10 10 0 0 0 0 182 L 0 104 A 8 8 0 0 0 0 88 L 0 10 A 10 10 0 0 0 10 0 Z"
+                    fill="#ffffff"
+                  />
+
+                  {/* Footer light-grey background shape, clipped to the ticket bounds */}
+                  <rect x="0" y="162" width="480" height="30" fill="#f8fafc" clipPath="url(#ticket-clip)" />
+                  <line x1="0" y1="162" x2="480" y2="162" stroke="#e2e8f0" strokeWidth="1" clipPath="url(#ticket-clip)" />
+
+                  {/* Orange border path outline */}
+                  <path
+                    d="M 10 0 L 480 0 L 473 6 L 480 12 L 473 18 L 480 24 L 473 30 L 480 36 L 473 42 L 480 48 L 473 54 L 480 60 L 473 66 L 480 72 L 473 78 L 480 84 L 473 90 L 480 96 L 473 102 L 480 108 L 473 114 L 480 120 L 473 126 L 480 132 L 473 138 L 480 144 L 473 150 L 480 156 L 473 162 L 480 168 L 473 174 L 480 180 L 473 186 L 480 192 L 10 192 A 10 10 0 0 0 0 182 L 0 104 A 8 8 0 0 0 0 88 L 0 10 A 10 10 0 0 0 10 0 Z"
+                    fill="none"
+                    stroke="#fd7e14"
+                    strokeWidth="1.5"
+                  />
+                </svg>
+
+                {/* Subtle tech grid/gradient overlay background */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'linear-gradient(135deg, rgba(253, 126, 20, 0.07) 0%, rgba(255, 255, 255, 0) 70%)',
+                  zIndex: 1,
+                  pointerEvents: 'none'
+                }} />
+
+                {/* Gold Logo Watermark centered and fitting pass height */}
+                <div style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '192px',
+                  height: '192px',
+                  opacity: 0.12,
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }}>
+                  <GoldLogo />
+                </div>
+
+                {/* Row 1: Centered Event & Pass Header (Full Width) */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  width: '100%',
+                  position: 'relative',
+                  zIndex: 2
+                }}>
+                  <div style={{
+                    fontSize: '13px',
+                    fontWeight: '700',
+                    color: '#fd7e14',
+                    letterSpacing: '1px',
+                    textTransform: 'uppercase',
+                    lineHeight: '1.1'
+                  }}>
+                    VEDA 2026 EVENT PASS
+                  </div>
+                  <div style={{
+                    fontSize: '18px',
+                    fontWeight: '800',
+                    color: '#0f172a',
+                    marginTop: '1px',
+                    lineHeight: '1.1',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '4.6in',
+                    textTransform: 'uppercase'
+                  }}>
+                    {selectedPass.eventName}
+                  </div>
+
+                  {/* Designer HR Line */}
+                  <div style={{
+                    width: '58%',
+                    height: '1px',
+                    background: 'linear-gradient(to right, rgba(253, 126, 20, 0) 0%, rgba(253, 126, 20, 0.4) 15%, rgba(253, 126, 20, 0.4) 85%, rgba(253, 126, 20, 0) 100%)',
+                    margin: '4px 0 2px 0',
+                    position: 'relative',
+                    zIndex: 2,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    alignSelf: 'flex-start'
+                  }}>
+                    <div style={{
+                      width: '4px',
+                      height: '4px',
+                      borderRadius: '50%',
+                      backgroundColor: '#fd7e14',
+                      position: 'absolute'
+                    }} />
+                  </div>
+                </div>
+
+                {/* Row 2: Bottom Details (60/40 Split with Vertical Separator) */}
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  width: '100%',
+                  position: 'relative',
+                  zIndex: 2,
+                  marginTop: 'auto',
+                  marginBottom: 'auto',
+                  boxSizing: 'border-box'
+                }}>
+                  {/* Left Side: Photo & Details (60% width) */}
+                  <div style={{
+                    width: '60%',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    boxSizing: 'border-box',
+                    paddingRight: '4px'
+                  }}>
+                    {/* Profile Photo */}
+                    <div style={{ marginRight: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {selectedPass.photoUrl ? (
+                        <img
+                          src={selectedPass.photoUrl}
+                          alt="Student"
+                          style={{
+                            width: '50px',
+                            height: '50px',
+                            borderRadius: '6px',
+                            objectFit: 'cover',
+                            border: '1px solid #cbd5e1',
+                            background: '#f8f9fa'
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: '50px',
+                          height: '50px',
+                          borderRadius: '6px',
+                          background: '#f1f5f9',
+                          border: '1px solid #e2e8f0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxSizing: 'border-box'
+                        }}>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12Z" fill="#94a3b8" />
+                            <path d="M12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="#94a3b8" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Student Details Text */}
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      textAlign: 'left',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        fontSize: '14px',
+                        fontWeight: '700',
+                        color: '#1e293b',
+                        lineHeight: '1.1',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        width: '100%'
+                      }}>
+                        {selectedPass.name}
+                      </div>
+                      <div style={{
+                        fontSize: '10px',
+                        color: '#475569',
+                        marginTop: '2px',
+                        lineHeight: '1.1',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        width: '100%'
+                      }}>
+                        Roll: {selectedPass.roll} | {selectedPass.college === 'Other College' ? selectedPass.otherCollege : selectedPass.college}
+                      </div>
+                      <div style={{
+                        fontSize: '10px',
+                        color: '#64748b',
+                        marginTop: '2px',
+                        lineHeight: '1.1',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        width: '100%'
+                      }}>
+                        Mobile: {selectedPass.mobile || 'N/A'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Vertical Separator Line */}
+                  <div style={{
+                    width: '0px',
+                    height: '52px',
+                    borderLeft: '1.5px dashed #cbd5e1',
+                    margin: '0 8px',
+                    flexShrink: 0,
+                    zIndex: 2
+                  }} />
+
+                  {/* Right Side: Barcode (40% width, rotated vertically) */}
+                  <div style={{
+                    width: '40%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    boxSizing: 'border-box',
+                    paddingRight: '6px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transform: 'rotate(-90deg)',
+                      transformOrigin: 'center',
+                      boxSizing: 'border-box',
+                      marginRight: '-32px'
+                    }}>
+                      <Barcode
+                        value={selectedPass.barcode}
+                        width={1.05}
+                        height={48}
+                        fontSize={8}
+                        margin={2}
+                        displayValue={true}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Row 3: Full Width Venue Details Footer */}
+                <div style={{
+                  position: 'relative',
+                  margin: '0 -0.15in 0 -0.15in',
+                  padding: '6px 0.15in',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 2,
+                  marginTop: 'auto',
+                  background: 'none',
+                  borderTop: 'none'
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '6px', flexShrink: 0, marginTop: '1px', alignSelf: 'flex-start' }}>
+                    <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="#ef4444" />
+                  </svg>
+                  <span style={{
+                    fontSize: '9px',
+                    fontWeight: '700',
+                    color: '#334155',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    textAlign: 'center',
+                    lineHeight: '1.2',
+                    maxWidth: '4.4in',
+                    wordBreak: 'break-word'
+                  }}>
+                    Venue: {
+                      (() => {
+                        const lookupKey = (selectedPass.eventName || '').toLowerCase().trim();
+                        const SUB_EVENT_VENUES_FALLBACK = {
+                          'agro innovate': 'Room 202, R&C LAB, Second Floor, Bill Gates Bhavan',
+                          'smart farm hackathon': 'Innovation Hub, Ground Floor, Main Block',
+                          'soil analysis challenge': 'Soil Science Lab, Block B, Agriculture Building',
+                          'agri exhibit': 'Online + Exhibition Hall, Admin Block',
+                          'drone sprint': 'University Grounds, Open Area near Sports Complex',
+                          'agri design': 'Open Air Theatre (OAT), Central Ground',
+                          'cultivators': 'AC Seminar Hall, Cotton Bhavan',
+                          'pharma quest': 'Advanced Research Lab, Pharmacy Block',
+                          'scitech model': 'Ramanujan Hall, Science Block',
+                          'biz pitch': 'MBA Seminar Hall, Newton Bhavan'
+                        };
+                        return selectedPass.venue || eventVenues[lookupKey] || SUB_EVENT_VENUES_FALLBACK[lookupKey] || 'Main Campus Blocks';
+                      })()
+                    }
+                  </span>
+                </div>
               </div>
-              <h2 style={{ fontSize: '1.5rem', margin: '0.5rem 0' }}>{selectedPass.eventName}</h2>
             </div>
 
-            <div style={{ padding: '1rem', background: '#f8f9fa', borderRadius: '12px', margin: '1rem 0' }}>
-              <h3 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>{selectedPass.name}</h3>
-              <p style={{ margin: '0 0 0.2rem 0', fontSize: '0.9rem', color: '#555' }}>Roll: {selectedPass.roll}</p>
-              <p style={{ margin: '0', fontSize: '0.9rem', color: '#555' }}>
-                {selectedPass.college === 'Other College' ? selectedPass.otherCollege : selectedPass.college}
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'center', margin: '1.5rem 0' }}>
-              <Barcode value={selectedPass.barcode} width={2} height={80} displayValue={true} />
-            </div>
-
-            <div className="receipt-actions" style={{ justifyContent: 'center', gap: '1rem' }}>
+            <div className="receipt-actions" style={{ justifyContent: 'center', gap: '1rem', marginTop: '1.5rem' }}>
               <button
                 className="btn-receipt"
-                style={{ background: '#28a745', color: '#ffffff', border: 'none', flex: 1 }}
+                style={{ background: '#28a745', color: '#ffffff', border: 'none', flex: 1, padding: '0.6rem 1rem', borderRadius: '8px', fontWeight: '600' }}
                 onClick={async () => {
-                  const passElement = document.getElementById('pass-modal-content');
+                  const passElement = document.getElementById('event-pass-card');
                   if (passElement) {
-                    const actionsDiv = passElement.querySelector('.receipt-actions');
-                    if (actionsDiv) actionsDiv.style.display = 'none';
                     try {
                       const html2canvas = (await import('html2canvas')).default;
-                      const canvas = await html2canvas(passElement, { scale: 2 });
+                      const canvas = await html2canvas(passElement, {
+                        scale: 3, // High scale for crisp text and scannable barcode
+                        useCORS: true,
+                        backgroundColor: null,
+                        onclone: (clonedDoc) => {
+                          const clonedCard = clonedDoc.getElementById('event-pass-card');
+                          if (clonedCard) {
+                            clonedCard.style.transform = 'none';
+                          }
+                        }
+                      });
                       const dataUrl = canvas.toDataURL('image/png');
                       const link = document.createElement('a');
                       link.download = `${selectedPass.eventName}_Pass_${selectedPass.roll}.png`;
@@ -765,8 +1129,6 @@ export default function StudentDashboard({ onNavigate }) {
                       link.click();
                     } catch (err) {
                       console.error('Failed to download pass:', err);
-                    } finally {
-                      if (actionsDiv) actionsDiv.style.display = 'flex';
                     }
                   }
                 }}
@@ -775,7 +1137,7 @@ export default function StudentDashboard({ onNavigate }) {
               </button>
               <button
                 className="btn-receipt"
-                style={{ background: '#007bff', color: '#ffffff', border: 'none', flex: 1 }}
+                style={{ background: '#007bff', color: '#ffffff', border: 'none', flex: 1, padding: '0.6rem 1rem', borderRadius: '8px', fontWeight: '600' }}
                 onClick={() => setSelectedPass(null)}
               >
                 Close Pass
