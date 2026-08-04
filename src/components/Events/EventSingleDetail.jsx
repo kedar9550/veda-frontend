@@ -235,7 +235,13 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
             <h2 className="esingle-section-title">
               <span>VENUE</span><span className="esingle-section-colon"> :</span>
             </h2>
-            <p className="esingle-section-text">{event.venue}</p>
+            <p className="esingle-section-text">
+              {event.raw?.venueType === 'Indoor' && event.raw?.building && event.raw?.floor 
+                ? `${event.raw?.roomNo ? `Room No: ${event.raw.roomNo}, ` : ''}${event.raw.building.name || event.raw.building} - ${event.raw.floor.name || event.raw.floor}` 
+                : event.raw?.venueType === 'Outdoor' && event.raw?.ground 
+                  ? `${event.raw?.roomNo ? `Room No: ${event.raw.roomNo}, ` : ''}${event.raw.ground.name || event.raw.ground}` 
+                  : event.venue || 'N/A'}
+            </p>
           </div>
 
           <button
