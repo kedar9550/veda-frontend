@@ -191,7 +191,9 @@ function EventCard({ event, index, cardRef }) {
             <i className="bi bi-people" />
           </div>
           <span className="event-card__stat-label">Participants</span>
-          <span className="event-card__stat-val">{meta.participants}</span>
+          <span className="event-card__stat-val">
+            {event.participantsCount > 0 ? `${event.participantsCount}+` : meta.participants}
+          </span>
         </div>
       </div>
 

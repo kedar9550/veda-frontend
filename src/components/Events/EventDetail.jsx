@@ -79,7 +79,7 @@ function SubEventCard({ event, cardRef, schoolId }) {
         <div className="sub-event-card__stats">
           <span>
             <i className="bi bi-people-fill" />
-            <strong>{event.registeredStudents || 0}</strong>
+            <strong>{event.realRegistrationsCount || event.registeredStudents || 0}</strong>
             <small>Students Registered</small>
           </span>
           <span>
@@ -89,7 +89,7 @@ function SubEventCard({ event, cardRef, schoolId }) {
           </span>
           <span>
             <i className="bi bi-people" />
-            <strong>{event.participants || 0}</strong>
+            <strong>{event.realParticipantsCount || event.participants || 0}</strong>
             <small>Participation</small>
           </span>
         </div>
@@ -127,6 +127,8 @@ export default function EventDetail({ schoolId }) {
     }
     : 0;
   const subEvents = groupEvents;
+
+  const schoolParticipants = subEvents.reduce((acc, curr) => acc + (curr.realParticipantsCount || curr.participants || 0), 0);
 
   // Hero entrance
   useEffect(() => {
@@ -186,7 +188,7 @@ export default function EventDetail({ schoolId }) {
             </div>
             <div className="event-detail-page-stat">
               <i className="bi bi-people-fill" style={{ color: school.accentColor }} />
-              <span><strong>0</strong> Total Students</span>
+              <span><strong>{schoolParticipants}</strong> Total Students</span>
             </div>
           </div>
         </div>

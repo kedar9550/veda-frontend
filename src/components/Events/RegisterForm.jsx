@@ -99,10 +99,19 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     amount: '',
     eventName: '',
     teamSize: '',
+    extraTeamSize: '0',
     participants: createParticipants(1),
   });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState('');
+
+  // Computation for amount based on extra team
+  const computedTotalAmountInPaisa = useMemo(() => {
+    const baseAmountInPaisa = parseAmountToPaisa(event?.feeText || event?.feeAmount || event?.raw?.price || 0);
+    const extraTeamSizeNum = Number(form.extraTeamSize) || 0;
+    const extraAmountPerHeadInPaisa = parseAmountToPaisa(event?.raw?.extraAmountPerHead || 0);
+    return baseAmountInPaisa + (extraTeamSizeNum * extraAmountPerHeadInPaisa);
+  }, [event, form.extraTeamSize]);
 
   useEffect(() => {
     const savedStudentStr = localStorage.getItem('eventStudent');
@@ -137,9 +146,15 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   }, [location.pathname]);
 
   const teamSizeOptions = useMemo(
-    () => buildTeamSizeOptions(event?.teamSize || event?.maxTeamSize || event?.registrationTeamSize || '1'),
-    [event?.teamSize, event?.maxTeamSize, event?.registrationTeamSize]
+    () => buildTeamSizeOptions(event?.teamSize || event?.maxTeamSize || event?.raw?.maxTeamSize || event?.registrationTeamSize || '1'),
+    [event?.teamSize, event?.maxTeamSize, event?.raw?.maxTeamSize, event?.registrationTeamSize]
   );
+
+  const extraTeamSizeOptions = useMemo(() => {
+    const maxExtra = Number(event?.raw?.extraTeamSize) || 0;
+    if (maxExtra <= 0) return [];
+    return Array.from({ length: maxExtra + 1 }, (_, idx) => ({ value: String(idx), label: String(idx) }));
+  }, [event?.raw?.extraTeamSize]);
 
   useEffect(() => {
     if (!event) return;
@@ -151,17 +166,79 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     setForm((prev) => ({
       ...prev,
       category: event.category || event.groupCategory || schoolId || '',
-      amount: event.feeText || event.feeAmount || event.registrationFee || '',
+      amount: `₹${computedTotalAmountInPaisa / 100}`,
       eventName: event.title || eventId || '',
       teamSize: prev.teamSize || defaultTeamSize,
     }));
-  }, [event, schoolId, eventId, teamSizeOptions]);
+  }, [event, schoolId, eventId, teamSizeOptions, computedTotalAmountInPaisa]);
 
   const [errors, setErrors] = useState({});
+  const [participantValidation, setParticipantValidation] = useState({});
   const colleges = ['Choose...', 'Aditya University', 'ACET', 'Other College'];
   const years = ['Select', '1', '2', '3', '4'];
   const genders = ['Select', 'Male', 'Female', 'Other'];
   const accommodations = ['Select', 'Yes', 'No'];
+
+  const validateParticipantRegistration = async (index, type, value) => {
+    if (!value || !form.eventName) return;
+    
+    setParticipantValidation(prev => ({
+      ...prev,
+      [index]: { ...prev[index], [`${type}Loading`]: true, [`${type}Error`]: '' }
+    }));
+
+    try {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9022';
+      const formCategory = (form.category || '').toLowerCase();
+      const queryParams = new URLSearchParams();
+      queryParams.append(type, value);
+
+      const res = await fetch(`${baseUrl}/api/razorpay/registrations?${queryParams.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        const payments = data.payments || [];
+        const hasRegistered = payments.some(payment => 
+          payment.eventId === eventId && 
+          payment.schoolId === schoolId && 
+          (payment.category || '').toLowerCase() === formCategory
+        );
+        
+        const searchVal = value.toLowerCase();
+        const hasAccommodation = payments.some(payment => 
+          payment.participants && payment.participants.some(pt => 
+            ((pt.roll || '').toLowerCase() === searchVal || (pt.email || '').toLowerCase() === searchVal) && 
+            (pt.accommodation === 'Yes' || pt.accommodation === 'yes')
+          )
+        );
+
+        if (hasAccommodation) {
+          setForm(prev => {
+            const newParticipants = [...prev.participants];
+            if (newParticipants[index]) {
+              newParticipants[index] = { ...newParticipants[index], accommodation: 'No' };
+            }
+            return { ...prev, participants: newParticipants };
+          });
+        }
+
+        setParticipantValidation(prev => ({
+          ...prev,
+          [index]: { 
+            ...prev[index], 
+            [`${type}Loading`]: false, 
+            [`${type}Error`]: hasRegistered ? 'Already registered for this event.' : '',
+            hasAccommodation
+          }
+        }));
+      }
+    } catch (err) {
+      console.error(err);
+      setParticipantValidation(prev => ({
+        ...prev,
+        [index]: { ...prev[index], [`${type}Loading`]: false }
+      }));
+    }
+  };
 
   const departmentOptions = [
     { title: 'Select', value: '' },
@@ -189,24 +266,43 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     setForm((prev) => {
       const participants = prev.participants.filter((_, i) => i !== index);
       const newCount = Math.max(1, participants.length);
+      
+      // We also need to adjust extraTeamSize if we remove an extra participant manually
+      const maxBaseTeamSize = Number(teamSizeOptions[teamSizeOptions.length - 1]?.value) || 1;
+      const baseTeamSize = Math.min(newCount, maxBaseTeamSize);
+      const extraTeamSize = newCount > baseTeamSize ? newCount - baseTeamSize : 0;
+
       return {
         ...prev,
         participants,
-        teamSize: String(newCount),
+        teamSize: String(baseTeamSize),
+        extraTeamSize: String(extraTeamSize)
       };
     });
   };
 
   useEffect(() => {
     if (!form.teamSize) return;
-    const count = Number(form.teamSize) || 1;
+    const count = (Number(form.teamSize) || 1) + (Number(form.extraTeamSize) || 0);
     if (form.participants.length !== count) {
       setForm(prev => ({
         ...prev,
         participants: createParticipants(count, prev.participants),
       }));
     }
-  }, [form.teamSize]);
+  }, [form.teamSize, form.extraTeamSize]);
+
+  // Auto-validate Participant 1 (logged-in user) since their fields are disabled and can't trigger onBlur
+  useEffect(() => {
+    if (form.eventName && (form.participants[0]?.roll || form.participants[0]?.email)) {
+      if (form.participants[0].roll) {
+        validateParticipantRegistration(0, 'roll', form.participants[0].roll);
+      } else if (form.participants[0].email) {
+        validateParticipantRegistration(0, 'email', form.participants[0].email);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.eventName]);
 
   const validate = () => {
     const participantCount = Number(form.teamSize) || 1;
@@ -322,7 +418,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
         amountInPaisa,
         amountInRupees,
         currency: 'INR',
-        teamSize: Number(form.teamSize) || 1,
+        teamSize: (Number(form.teamSize) || 1) + (Number(form.extraTeamSize) || 0),
         participants: form.participants,
         receipt: `event-${eventId || schoolId || 'registration'}-${Date.now()}`,
         order_id: paymentDetails.orderId,
@@ -378,6 +474,52 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     setPaymentMessage('');
 
     try {
+      // 1. Check for duplicates within the form itself
+      const emails = form.participants.map(p => p.email).filter(Boolean);
+      const rolls = form.participants.map(p => p.roll).filter(Boolean);
+      if (new Set(emails).size !== emails.length) {
+        setPaymentMessage('Duplicate email addresses found within the participant list.');
+        setIsProcessingPayment(false);
+        return;
+      }
+      if (new Set(rolls).size !== rolls.length) {
+        setPaymentMessage('Duplicate roll numbers found within the participant list.');
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      // 2. Check backend if any participant is already registered for this event
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9022';
+      const formCategory = (form.category || '').toLowerCase();
+      
+      for (let i = 0; i < form.participants.length; i++) {
+        const p = form.participants[i];
+        const queryParams = new URLSearchParams();
+        if (p.email) queryParams.append('email', p.email);
+        if (p.roll) queryParams.append('roll', p.roll);
+
+        try {
+          const res = await fetch(`${baseUrl}/api/razorpay/registrations?${queryParams.toString()}`);
+          if (res.ok) {
+            const data = await res.json();
+            const payments = data.payments || [];
+            const hasRegistered = payments.some(payment => 
+              payment.eventId === eventId && 
+              payment.schoolId === schoolId && 
+              (payment.category || '').toLowerCase() === formCategory
+            );
+            
+            if (hasRegistered) {
+              setPaymentMessage(`Participant ${i + 1} (${p.name} - ${p.roll || p.email}) is already registered for this event.`);
+              setIsProcessingPayment(false);
+              return;
+            }
+          }
+        } catch (err) {
+          console.error('Error verifying participant registration status:', err);
+        }
+      }
+
       const razorpayKeyId = getRazorpayKeyId();
       if (!razorpayKeyId) {
         throw new Error('Razorpay key is missing. Set VITE_RAZORPAY_KEY_ID in your environment.');
@@ -476,6 +618,16 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
             </select>
             {errors.teamSize && <div className="field-error">{errors.teamSize}</div>}
           </label>
+          {extraTeamSizeOptions.length > 0 && (
+            <label>
+              Extra Team Size
+              <select name="extraTeamSize" value={form.extraTeamSize} onChange={handleChange}>
+                {extraTeamSizeOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
 
         <h3 style={{ marginTop: '1.25rem' }}>Enter Participant-1 Details</h3>
@@ -499,13 +651,13 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
               <div>
                 <label>Name</label>
-                <input name="name" value={participant.name} onChange={(e) => handleParticipantChange(index, e)} />
+                <input name="name" value={participant.name} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0} />
                 {errors.participants?.[index]?.name && <div className="field-error">{errors.participants[index].name}</div>}
               </div>
 
               <div>
                 <label>College</label>
-                <select name="college" value={participant.college} onChange={(e) => handleParticipantChange(index, e)}>
+                <select name="college" value={participant.college} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0}>
                   {colleges.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
                 {errors.participants?.[index]?.college && <div className="field-error">{errors.participants[index].college}</div>}
@@ -514,20 +666,30 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               {participant.college === 'Other College' && (
                 <div>
                   <label>Other College Name</label>
-                  <input name="otherCollege" value={participant.otherCollege} onChange={(e) => handleParticipantChange(index, e)} />
+                  <input name="otherCollege" value={participant.otherCollege} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0} />
                   {errors.participants?.[index]?.otherCollege && <div className="field-error">{errors.participants[index].otherCollege}</div>}
                 </div>
               )}
 
               <div>
                 <label>Roll Number</label>
-                <input name="roll" value={participant.roll} onChange={(e) => handleParticipantChange(index, e)} />
-                {errors.participants?.[index]?.roll && <div className="field-error">{errors.participants[index].roll}</div>}
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    name="roll" 
+                    value={participant.roll} 
+                    onChange={(e) => handleParticipantChange(index, e)} 
+                    onBlur={(e) => validateParticipantRegistration(index, 'roll', e.target.value)}
+                    disabled={index === 0}
+                  />
+                  {participantValidation[index]?.rollLoading && <span style={{ position: 'absolute', right: '10px', top: '10px', fontSize: '0.75rem', color: 'var(--primary)' }}>Checking...</span>}
+                </div>
+                {participantValidation[index]?.rollError && <div className="field-error">{participantValidation[index].rollError}</div>}
+                {errors.participants?.[index]?.roll && !participantValidation[index]?.rollError && <div className="field-error">{errors.participants[index].roll}</div>}
               </div>
 
               <div>
                 <label>Gender</label>
-                <select name="gender" value={participant.gender} onChange={(e) => handleParticipantChange(index, e)}>
+                <select name="gender" value={participant.gender} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0}>
                   {genders.map(g => <option key={g} value={g}>{g}</option>)}
                 </select>
                 {errors.participants?.[index]?.gender && <div className="field-error">{errors.participants[index].gender}</div>}
@@ -535,14 +697,24 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
               <div>
                 <label>Mobile</label>
-                <input name="mobile" value={participant.mobile} onChange={(e) => handleParticipantChange(index, e)} />
+                <input name="mobile" value={participant.mobile} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0} />
                 {errors.participants?.[index]?.mobile && <div className="field-error">{errors.participants[index].mobile}</div>}
               </div>
 
               <div>
                 <label>Email</label>
-                <input name="email" value={participant.email} onChange={(e) => handleParticipantChange(index, e)} />
-                {errors.participants?.[index]?.email && <div className="field-error">{errors.participants[index].email}</div>}
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    name="email" 
+                    value={participant.email} 
+                    onChange={(e) => handleParticipantChange(index, e)} 
+                    onBlur={(e) => validateParticipantRegistration(index, 'email', e.target.value)}
+                    disabled={index === 0}
+                  />
+                  {participantValidation[index]?.emailLoading && <span style={{ position: 'absolute', right: '10px', top: '10px', fontSize: '0.75rem', color: 'var(--primary)' }}>Checking...</span>}
+                </div>
+                {participantValidation[index]?.emailError && <div className="field-error">{participantValidation[index].emailError}</div>}
+                {errors.participants?.[index]?.email && !participantValidation[index]?.emailError && <div className="field-error">{errors.participants[index].email}</div>}
               </div>
 
               <div>
@@ -555,10 +727,24 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
               <div>
                 <label>Accomodation</label>
-                <select name="accommodation" value={participant.accommodation} onChange={(e) => handleParticipantChange(index, e)}>
-                  {accommodations.map(a => <option key={a} value={a}>{a}</option>)}
-                </select>
-                {errors.participants?.[index]?.accommodation && <div className="field-error">{errors.participants[index].accommodation}</div>}
+                <div style={{ position: 'relative' }}>
+                  <select 
+                    name="accommodation" 
+                    value={participant.accommodation} 
+                    onChange={(e) => handleParticipantChange(index, e)}
+                    disabled={participantValidation[index]?.hasAccommodation}
+                  >
+                    {accommodations.map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                </div>
+                {participantValidation[index]?.hasAccommodation && (
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                    Accommodation already availed in another event.
+                  </div>
+                )}
+                {errors.participants?.[index]?.accommodation && !participantValidation[index]?.hasAccommodation && (
+                  <div className="field-error">{errors.participants[index].accommodation}</div>
+                )}
               </div>
 
               <div>
@@ -586,7 +772,15 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
         <div style={{ marginTop: '1.25rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
           <button type="button" className="esingle-back-link" onClick={onCancel}>Cancel</button>
-          <button type="submit" className="esingle-cta" disabled={isProcessingPayment}>
+          <button 
+            type="submit" 
+            className="esingle-cta" 
+            disabled={isProcessingPayment || Object.values(participantValidation).some(v => v.rollError || v.emailError)}
+            style={{ 
+              opacity: (isProcessingPayment || Object.values(participantValidation).some(v => v.rollError || v.emailError)) ? 0.6 : 1,
+              cursor: (isProcessingPayment || Object.values(participantValidation).some(v => v.rollError || v.emailError)) ? 'not-allowed' : 'pointer'
+            }}
+          >
             {isProcessingPayment ? 'Processing...' : 'Register'}
           </button>
         </div>

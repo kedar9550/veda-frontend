@@ -410,6 +410,7 @@ export function useEvents() {
                     organizerIcon: event.organizerIcon,
                     likes: event.likes,
                     eventCount: 0,
+                    participantsCount: 0,
                     category: event.category,
                     accentColor: event.accentColor,
                     image: event.groupImage || event.image,
@@ -420,6 +421,43 @@ export function useEvents() {
                 group.eventCount += 1;
                 group.likes = Math.max(group.likes, event.likes || 0);
               });
+
+              // Fetch dynamic registrations to get real participant counts
+              try {
+                const regRes = await fetch(`${API_URL}/api/razorpay/registrations`, {
+                  headers: getAuthHeaders(),
+                  credentials: 'include',
+                });
+                if (regRes.ok) {
+                  const regData = await regRes.json();
+                  const payments = regData.payments || [];
+                  payments.forEach(payment => {
+                    let groupSlug = getEventId(payment.schoolId || payment.category || '');
+                    if (!groupMap.has(groupSlug)) {
+                        // Fallback mapping if schoolId/category doesn't exactly match
+                        // Try to find the group by matching eventName
+                        const matchedEvent = mappedEvents.find(e => e.id === getEventId(payment.eventName) || e.title === payment.eventName);
+                        if (matchedEvent && groupMap.has(matchedEvent.groupSlug)) {
+                            groupSlug = matchedEvent.groupSlug;
+                        }
+                    }
+                    if (groupMap.has(groupSlug) && Array.isArray(payment.participants)) {
+                      groupMap.get(groupSlug).participantsCount += payment.participants.length;
+                    }
+
+                    // Also increment the specific event counts
+                    const exactEvent = mappedEvents.find(e => e.id === getEventId(payment.eventName) || e.title === payment.eventName);
+                    if (exactEvent && Array.isArray(payment.participants)) {
+                      if (exactEvent.realParticipantsCount === undefined) exactEvent.realParticipantsCount = 0;
+                      if (exactEvent.realRegistrationsCount === undefined) exactEvent.realRegistrationsCount = 0;
+                      exactEvent.realParticipantsCount += payment.participants.length;
+                      exactEvent.realRegistrationsCount += payment.participants.length;
+                    }
+                  });
+                }
+              } catch (regErr) {
+                console.warn('Failed to fetch registrations for participant counts', regErr);
+              }
 
               globalEvents = mappedEvents;
               globalGroups = Array.from(groupMap.values());

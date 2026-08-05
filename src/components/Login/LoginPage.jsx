@@ -171,7 +171,18 @@ export default function LoginPage() {
 
         {isLogin ? (
           <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {errors.login && <div style={{ color: '#dc3545', fontSize: '0.85rem', textAlign: 'center', background: 'rgba(220, 53, 69, 0.1)', padding: '10px', borderRadius: '8px' }}>{errors.login}</div>}
+            {errors.login && (
+              <div style={{ 
+                color: errors.login.includes('successful') ? '#10b981' : '#dc3545', 
+                fontSize: '0.85rem', 
+                textAlign: 'center', 
+                background: errors.login.includes('successful') ? 'rgba(16, 185, 129, 0.1)' : 'rgba(220, 53, 69, 0.1)', 
+                padding: '10px', 
+                borderRadius: '8px' 
+              }}>
+                {errors.login}
+              </div>
+            )}
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <label style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)' }}>Email Address</label>
