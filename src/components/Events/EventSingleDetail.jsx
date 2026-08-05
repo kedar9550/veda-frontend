@@ -78,6 +78,52 @@ export default function EventSingleDetail({ schoolId, eventId }) {
   const coordinatorName = coordinator?.employeeName || coordinator?.name || coordinator?.fullName || '';
   const coordinatorCode = coordinator?.employeeCode || coordinator?.employeeId || coordinator?.id || coordinator?._id || '';
 
+  const [student, setStudent] = useState(null);
+  const [isAlreadyRegistered, setIsAlreadyRegistered] = useState(false);
+  const [checkingRegistration, setCheckingRegistration] = useState(false);
+
+  useEffect(() => {
+    const studentStr = localStorage.getItem('eventStudent');
+    if (studentStr) {
+      try {
+        setStudent(JSON.parse(studentStr));
+      } catch (e) {}
+    }
+  }, []);
+
+  useEffect(() => {
+    const checkRegistration = async () => {
+      if (!student || !event) {
+        return;
+      }
+      setCheckingRegistration(true);
+      try {
+        const queryParams = new URLSearchParams();
+        if (student.email) queryParams.append('email', student.email);
+        if (student.roll) queryParams.append('roll', student.roll);
+        
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9022';
+        const res = await fetch(`${baseUrl}/api/razorpay/registrations?${queryParams.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          const payments = data.payments || [];
+          const eventCategory = (event.category || event.groupCategory || schoolId || '').toLowerCase();
+          const hasRegistered = payments.some(p => 
+            p.eventId === eventId && 
+            p.schoolId === schoolId && 
+            (p.category || '').toLowerCase() === eventCategory
+          );
+          setIsAlreadyRegistered(hasRegistered);
+        }
+      } catch (err) {
+        console.error('Error checking registration:', err);
+      } finally {
+        setCheckingRegistration(false);
+      }
+    };
+    checkRegistration();
+  }, [student, event]);
+
   useEffect(() => {
     if (!event || !school) return;
     window.scrollTo(0, 0);
@@ -152,7 +198,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
       <div className="esingle-stats-bar">
         <div className="esingle-stats-bar__inner">
           <div className="esingle-stat">
-            <span className="esingle-stat__number">{event.registeredStudents || 0}</span>
+            <span className="esingle-stat__number">{event.realRegistrationsCount || event.registeredStudents || 0}</span>
             <span className="esingle-stat__label">Users Registered</span>
           </div>
           <div className="esingle-stat">
@@ -160,7 +206,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
             <span className="esingle-stat__label">Rupees</span>
           </div>
           <div className="esingle-stat">
-            <span className="esingle-stat__number">{event.participants || 0}</span>
+            <span className="esingle-stat__number">{event.realParticipantsCount || event.participants || 0}</span>
             <span className="esingle-stat__label">Participation</span>
           </div>
         </div>
@@ -246,17 +292,32 @@ export default function EventSingleDetail({ schoolId, eventId }) {
             </p>
           </div>
 
-          <button
-            type="button"
-            className={`esingle-register-btn ${!event.isOpen ? 'esingle-register-btn--closed' : ''}`}
-            onClick={(e) => {
-              if (!event.isOpen) return e.preventDefault();
-              navigate(`/register/${schoolId}/${eventId}`);
-            }}
-          >
-            {event.isOpen ? 'Register' : 'Closed'}
-            {event.isOpen && <i className="bi bi-arrow-right" />}
-          </button>
+          {checkingRegistration ? (
+            <button type="button" className="esingle-register-btn esingle-register-btn--closed" disabled>
+              Loading...
+            </button>
+          ) : isAlreadyRegistered ? (
+            <button 
+              type="button" 
+              className="esingle-register-btn esingle-register-btn--closed" 
+              style={{ background: '#28a745', color: '#fff', border: 'none', cursor: 'pointer' }}
+              onClick={() => navigate('/dashboard', { state: { activeTab: 'events' } })}
+            >
+              <i className="bi bi-check-circle" style={{ marginRight: '8px' }} /> Already Registered
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={`esingle-register-btn ${!event.isOpen ? 'esingle-register-btn--closed' : ''}`}
+              onClick={(e) => {
+                if (!event.isOpen) return e.preventDefault();
+                navigate(`/register/${schoolId}/${eventId}`);
+              }}
+            >
+              {event.isOpen ? 'Register' : 'Closed'}
+              {event.isOpen && <i className="bi bi-arrow-right" />}
+            </button>
+          )}
         </div>
 
       </div>

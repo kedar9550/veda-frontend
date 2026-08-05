@@ -4959,6 +4959,14 @@ textarea.form-input-custom {
   color: var(--text);
 }
 
+.register-form input:disabled,
+.register-form select:disabled {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.08);
+  cursor: not-allowed;
+}
+
 .register-page {
   padding-top: 6.5rem;
 }
