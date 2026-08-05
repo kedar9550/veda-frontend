@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 
 import Loader from './components/Loader/Loader';
 import Cursor from './components/Cursor/Cursor';
@@ -16,82 +17,47 @@ import StudentDashboard from './components/Dashboard/StudentDashboard';
 import Footer from './components/Footer/Footer';
 import LoginPage from './components/Login/LoginPage';
 
-/**
- * Parse hash → { page, subPage, subSubPage }
- * #events/krishi/agro-innovate → { page:'events', subPage:'krishi', subSubPage:'agro-innovate' }
- */
-function parseHash(hash) {
-  const raw = hash.replace('#', '') || 'home';
-  const [page = 'home', subPage = null, subSubPage = null] = raw.split('/');
-  return { page, subPage, subSubPage };
+function RegisterFormWrapper() {
+  const { schoolId, eventId } = useParams();
+  const navigate = useNavigate();
+  return (
+    <RegisterForm
+      schoolId={schoolId}
+      eventId={eventId}
+      onCancel={() => navigate(`/events/${schoolId}/${eventId}`)}
+    />
+  );
+}
+
+function EventSingleDetailWrapper() {
+  const { schoolId, eventId } = useParams();
+  return <EventSingleDetail schoolId={schoolId} eventId={eventId} />;
+}
+
+function EventDetailWrapper() {
+  const { schoolId } = useParams();
+  return <EventDetail schoolId={schoolId} />;
 }
 
 export default function App() {
   const [loadingComplete, setLoadingComplete] = useState(false);
-  const [route, setRoute] = useState(() => parseHash(window.location.hash));
-
-  React.useEffect(() => {
-    const handleHashChange = () => setRoute(parseHash(window.location.hash));
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     window.scrollTo(0, 0);
-  }, [route.page, route.subPage, route.subSubPage]);
+  }, [location.pathname]);
 
-  const navigateTo = (page) => { window.location.hash = page; };
-
-  const { page, subPage, subSubPage } = route;
-
-  const renderPage = () => {
-    if (page === 'home') return <Home />;
-    if (page === 'about') return <AboutPage />;
-    if (page === 'team') return <Team />;
-    if (page === 'poster') return <Poster />;
-    if (page === 'contact') return <Contact />;
-    if (page === 'login') return <LoginPage />;
-    if (page === 'dashboard') return <StudentDashboard onNavigate={navigateTo} />;
-
-    if (page === 'register') {
-      return (
-        <RegisterForm schoolId={subPage} eventId={subSubPage} onCancel={() => { window.location.hash = `events/${subPage}/${subSubPage}`; }} />
-      );
-    }
-
-    if (page === 'events') {
-      // Level 3: single event detail (#events/krishi/agro-innovate)
-      if (subPage && subSubPage) {
-        return (
-          <EventSingleDetail
-            schoolId={subPage}
-            eventId={subSubPage}
-            onBack={() => { window.location.hash = `events/${subPage}`; }}
-            onBackToSchool={() => { window.location.hash = 'events'; }}
-          />
-        );
-      }
-        // Registration page (#register/krishi/agro-innovate)
-        if (page === 'register') {
-          return (
-            <RegisterForm schoolId={subPage} eventId={subSubPage} onCancel={() => { window.location.hash = `events/${subPage}/${subSubPage}`; }} />
-          );
-        }
-      // Level 2: school event list (#events/krishi)
-      if (subPage) {
-        return (
-          <EventDetail
-            schoolId={subPage}
-            onBack={() => { window.location.hash = 'events'; }}
-          />
-        );
-      }
-      // Level 1: all schools (#events)
-      return <Events />;
-    }
-
-    return <Contact />;
+  const navigateTo = (page) => {
+    navigate(page === 'home' ? '/' : `/${page}`);
   };
+
+  const getActivePage = () => {
+    const path = location.pathname.replace(/^\//, '') || 'home';
+    return path.split('/')[0];
+  };
+
+  const activePage = getActivePage();
 
   return (
     <>
@@ -102,9 +68,23 @@ export default function App() {
 
       {loadingComplete && (
         <div style={{ animation: 'fadeIn 0.8s ease' }}>
-          <Navbar activePage={page} onNavigate={navigateTo} />
+          <Navbar activePage={activePage} onNavigate={navigateTo} />
           <main style={{ minHeight: '80vh' }}>
-            {renderPage()}
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/team" element={<Team />} />
+              <Route path="/poster" element={<Poster />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/dashboard" element={<StudentDashboard />} />
+              <Route path="/register/:schoolId/:eventId" element={<RegisterFormWrapper />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/events/:schoolId" element={<EventDetailWrapper />} />
+              <Route path="/events/:schoolId/:eventId" element={<EventSingleDetailWrapper />} />
+              <Route path="*" element={<Contact />} />
+            </Routes>
           </main>
           <Footer onNavigate={navigateTo} />
         </div>

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { applyMagneticEffect } from '../utils/animationUtils';
 
 export default function Navbar({ activePage, onNavigate }) {
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileActive, setIsMobileActive] = useState(false);
   const [loggedStudent, setLoggedStudent] = useState(null);
@@ -14,13 +16,13 @@ export default function Navbar({ activePage, onNavigate }) {
   useEffect(() => {
     const studentStr = localStorage.getItem('eventStudent');
     if (studentStr) {
-      try { setLoggedStudent(JSON.parse(studentStr)); } catch (e) {}
+      try { setLoggedStudent(JSON.parse(studentStr)); } catch (e) { }
     }
-    
+
     const handleStorageChange = () => {
       const updated = localStorage.getItem('eventStudent');
       if (updated) {
-        try { setLoggedStudent(JSON.parse(updated)); } catch (e) {}
+        try { setLoggedStudent(JSON.parse(updated)); } catch (e) { }
       } else {
         setLoggedStudent(null);
       }
@@ -31,7 +33,7 @@ export default function Navbar({ activePage, onNavigate }) {
         setDropdownOpen(false);
       }
     };
-    
+
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('studentLoggedIn', handleStorageChange);
     document.addEventListener('mousedown', handleClickOutside);
@@ -88,7 +90,7 @@ export default function Navbar({ activePage, onNavigate }) {
   // Unified cross-page navigation handler
   const handleLinkClick = (targetPage) => {
     setIsMobileActive(false);
-    window.location.hash = targetPage === 'home' ? '' : `#${targetPage}`;
+    navigate(targetPage === 'home' ? '/' : `/${targetPage}`);
   };
 
   const getInitials = (name) => {
@@ -279,7 +281,7 @@ export default function Navbar({ activePage, onNavigate }) {
                       </span>
                     </div>
                   </div>
-                  
+
                   <a
                     href="#dashboard"
                     style={{
@@ -297,7 +299,7 @@ export default function Navbar({ activePage, onNavigate }) {
                     onClick={(e) => {
                       e.preventDefault();
                       setDropdownOpen(false);
-                      handleLinkClick('dashboard', null);
+                      navigate('/dashboard', { state: { activeTab: 'overview' } });
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.color = 'var(--text-light)';
@@ -310,6 +312,38 @@ export default function Navbar({ activePage, onNavigate }) {
                   >
                     <i className="bi bi-speedometer2" style={{ fontSize: '1rem' }}></i>
                     Dashboard
+                  </a>
+
+                  <a
+                    href="#profile"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      color: 'var(--text-muted)',
+                      textDecoration: 'none',
+                      fontSize: '0.85rem',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      transition: 'all 0.2s ease',
+                      backgroundColor: 'transparent'
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setDropdownOpen(false);
+                      navigate('/dashboard', { state: { activeTab: 'profile', isEditingProfile: true } });
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = 'var(--text-light)';
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'var(--text-muted)';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <i className="bi bi-person-badge-fill" style={{ fontSize: '1rem' }}></i>
+                    Profile
                   </a>
 
                   <button
@@ -363,7 +397,7 @@ export default function Navbar({ activePage, onNavigate }) {
                       window.dispatchEvent(new Event('studentLoggedIn'));
                       setLoggedStudent(null);
                       setDropdownOpen(false);
-                      window.location.hash = '';
+                      navigate('/');
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';

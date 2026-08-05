@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 // import { EVENTS_DATA } from './eventsData';
 
@@ -32,8 +33,9 @@ function formatEventFee(feeAmount) {
 
 /* ─── Minimal event card — image + title only ─── */
 function SubEventCard({ event, cardRef, schoolId }) {
+  const navigate = useNavigate();
   const handleClick = () => {
-    window.location.hash = `events/${schoolId}/${event.id}`;
+    navigate(`/events/${schoolId}/${event.id}`);
   };
 
   return (
@@ -103,7 +105,8 @@ function SubEventCard({ event, cardRef, schoolId }) {
 import { useEvents } from './useEvents';
 
 /* ─── Main EventDetail page ─── */
-export default function EventDetail({ schoolId, onBack }) {
+export default function EventDetail({ schoolId }) {
+  const navigate = useNavigate();
   const sectionRef = useRef(null);
   const cardsRef = useRef([]);
   const heroRef = useRef(null);
@@ -150,7 +153,7 @@ export default function EventDetail({ schoolId, onBack }) {
         <img src={school.image} alt={school.title} className="event-detail-hero__bg" />
         <div className="event-detail-hero__overlay" />
         <div className="event-detail-hero__content">
-          <button className="event-detail-back" onClick={onBack}>
+          <button className="event-detail-back" onClick={() => navigate('/events')}>
             <i className="bi bi-arrow-left" /> All Events
           </button>
         </div>

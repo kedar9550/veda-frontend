@@ -1,7 +1,7 @@
 /* StudentDashboard.css */
 
 .dashboard-container {
-  padding-top: 120px;
+  padding-top: 90px;
   padding-bottom: 80px;
   min-height: 85vh;
   color: var(--text-light);
@@ -153,25 +153,28 @@
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: currentColor !important;
+  margin-bottom: 0 !important;
 }
 
 .stat-icon.events {
-  background: rgba(13, 110, 253, 0.12);
-  color: #0d6efd;
+  background: rgba(13, 110, 253, 0.12) !important;
+  color: #0d6efd !important;
 }
 
 .stat-icon.payments {
-  background: rgba(25, 135, 84, 0.12);
-  color: #198754;
+  background: rgba(25, 135, 84, 0.12) !important;
+  color: #198754 !important;
 }
 
 .stat-icon.status {
-  background: rgba(255, 193, 7, 0.12);
-  color: #ffc107;
+  background: rgba(255, 193, 7, 0.12) !important;
+  color: #ffc107 !important;
 }
 
 .stat-details .stat-value {
@@ -499,16 +502,33 @@
   .dashboard-header-card {
     padding: 1.5rem;
   }
+
   .user-profile-summary {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .dashboard-header-actions {
     margin-left: 0;
     width: 100%;
   }
+
   .btn-logout {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* Two column layout grid container for desktop, stacked for mobile */
+.dashboard-grid-two-col {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 1.5rem !important;
+}
+
+@media (min-width: 992px) {
+  .dashboard-grid-two-col {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2rem !important;
   }
 }

@@ -8,6 +8,9 @@
 
   /* Primary Gradient for Navbar contents */
   --gradient-primary: linear-gradient(140deg, #000428, #013c6e, #000428);
+  --loader-grad-start: #000428;
+  --loader-grad-mid: #013c6e;
+  --loader-grad-end: #000428;
 
   /* Backgrounds & Textures */
   --bg-dark: #ffffff;
@@ -89,4 +92,7 @@
 
   /* Primary Gradient for Navbar contents */
   --gradient-primary: linear-gradient(140deg, #705000, #8f702e, #705000);
+  --loader-grad-start: #705000;
+  --loader-grad-mid: #8f702e;
+  --loader-grad-end: #705000;
 }

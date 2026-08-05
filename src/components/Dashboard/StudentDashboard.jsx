@@ -1,20 +1,35 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import StudentRegistrationPopup from '../Events/StudentRegistrationPopup';
 import Barcode from 'react-barcode';
 import GoldLogo from '../SDGs/GoldLogo';
 import './StudentDashboard.css';
 
 export default function StudentDashboard({ onNavigate }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [student, setStudent] = useState(null);
-  // showLoginModal state removed
-  const [activeTab, setActiveTab] = useState('overview');
-  const [registrations, setRegistrations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [selectedReceipt, setSelectedReceipt] = useState(null);
-  const [selectedPass, setSelectedPass] = useState(null);
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [savingProfile, setSavingProfile] = useState(false);
+
+  // Helper to detect if the page was reloaded/refreshed
+  const isPageReload = () => {
+    try {
+      const navs = performance.getEntriesByType('navigation');
+      return navs && navs[0] && navs[0].type === 'reload';
+    } catch (e) {
+      return false;
+    }
+  };
+
+  const [activeTab, setActiveTab] = useState(() => {
+    if (isPageReload()) return 'overview';
+    return location.state?.activeTab || 'overview';
+  });
+
+  const [isEditingProfile, setIsEditingProfile] = useState(() => {
+    if (isPageReload()) return false;
+    return !!location.state?.isEditingProfile;
+  });
+
   const [editForm, setEditForm] = useState({
     name: '',
     college: '',
@@ -24,6 +39,51 @@ export default function StudentDashboard({ onNavigate }) {
     mobile: '',
     email: ''
   });
+
+  useEffect(() => {
+    if (isPageReload()) {
+      setActiveTab('overview');
+      setIsEditingProfile(false);
+      return;
+    }
+
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+    if (location.state?.isEditingProfile) {
+      setIsEditingProfile(true);
+      if (student) {
+        setEditForm({
+          name: student.name || '',
+          college: student.college || '',
+          otherCollege: student.otherCollege || '',
+          roll: student.roll || '',
+          gender: student.gender || '',
+          mobile: student.mobile || '',
+          email: student.email || ''
+        });
+      }
+    } else {
+      setIsEditingProfile(false);
+    }
+  }, [location.state?.activeTab, location.state?.isEditingProfile, student]);
+
+  const [registrations, setRegistrations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
+  const [selectedPass, setSelectedPass] = useState(null);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [expandedEvents, setExpandedEvents] = useState({});
+  const [paymentsExpanded, setPaymentsExpanded] = useState(false);
+  const [eventsCardExpanded, setEventsCardExpanded] = useState(false);
+
+  const toggleEventExpand = (index) => {
+    setExpandedEvents(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
 
   const [eventVenues, setEventVenues] = useState({});
 
@@ -65,11 +125,11 @@ export default function StudentDashboard({ onNavigate }) {
           setStudent(parsed);
         } catch (e) {
           setStudent(null);
-          window.location.hash = 'login';
+          navigate('/login');
         }
       } else {
         setStudent(null);
-        window.location.hash = 'login';
+        navigate('/login');
       }
     };
 
@@ -184,12 +244,23 @@ export default function StudentDashboard({ onNavigate }) {
 
   return (
     <div className="container-premium dashboard-container">
-      {/* Student Profile Header Card */}
-      <div className="dashboard-header-card">
+      {/* Student Profile Header Content (Flat Layout) */}
+      <div style={{ marginBottom: '2rem' }}>
         <div className="user-profile-summary">
-          <div className="user-avatar">{getInitials(student.name)}</div>
           <div className="user-info-meta">
-            <h2>{student.name}</h2>
+            <div style={{ marginBottom: '0.75rem' }}>
+              <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: '600', display: 'block', marginBottom: '0.25rem' }}>
+                Welcome back,
+              </span>
+              <h2 style={{ margin: 0, fontWeight: '800', fontSize: '2.25rem', color: 'var(--text-light)', textTransform: 'capitalize' }}>
+                {student.name}
+              </h2>
+            </div>
+
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1.25rem', fontSize: '0.95rem', lineHeight: '1.5' }}>
+              Here is a quick snapshot of your event registrations, participant details, and payment histories for VEDA 2026.
+            </p>
+
             <div className="user-badges">
               <span className="badge-custom badge-roll">
                 <i className="bi bi-card-text"></i> {student.roll}
@@ -240,33 +311,7 @@ export default function StudentDashboard({ onNavigate }) {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="dashboard-tabs">
-        <button
-          className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
-        >
-          <i className="bi bi-grid-fill"></i> Overview
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
-          onClick={() => setActiveTab('profile')}
-        >
-          <i className="bi bi-person-badge-fill"></i> Student Profile
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'events' ? 'active' : ''}`}
-          onClick={() => setActiveTab('events')}
-        >
-          <i className="bi bi-people-fill"></i> Registered Events & Participants ({registrations.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'payments' ? 'active' : ''}`}
-          onClick={() => setActiveTab('payments')}
-        >
-          <i className="bi bi-receipt-cutoff"></i> Payment Data & Receipts
-        </button>
-      </div>
+
 
       {/* Loading state */}
       {loading && (
@@ -284,94 +329,9 @@ export default function StudentDashboard({ onNavigate }) {
         </div>
       )}
 
-      {/* Overview Tab Content */}
-      {!loading && activeTab === 'overview' && (
-        <div>
-          <div className="profile-card" style={{ marginBottom: '2rem' }}>
-            <h3 style={{ marginTop: 0, marginBottom: '0.5rem', fontWeight: '700' }}>
-              Welcome back, {student.name}!
-            </h3>
-            <p style={{ color: 'var(--text-muted)', margin: 0 }}>
-              Here is a quick snapshot of your event registrations, participant details, and payment histories for VEDA 2026.
-            </p>
-          </div>
-
-          <h4 style={{ fontWeight: '700', marginBottom: '1rem', color: 'var(--text-light)' }}>
-            Recent Registered Events
-          </h4>
-          {registrations.length === 0 ? (
-            <div className="empty-state">
-              <i className="bi bi-calendar-x"></i>
-              <h4>No Event Registrations Found</h4>
-              <p>You haven't registered for any events yet.</p>
-              <button
-                className="btn-admissions"
-                style={{ background: '#007bff', color: '#fff', border: 'none', marginTop: '1rem' }}
-                onClick={() => {
-                  if (onNavigate) onNavigate('events');
-                  else window.location.hash = '#events';
-                }}
-              >
-                Browse Events
-              </button>
-            </div>
-          ) : (
-            registrations.slice(0, 2).map((reg) => (
-              <div key={reg._id || reg.razorpayPaymentId} className="event-reg-card">
-                <div className="event-reg-header">
-                  <div className="event-title-meta">
-                    <h3>{reg.eventName || 'Event Registration'}</h3>
-                    <div className="event-sub-info">
-                      {reg.schoolId && <span className="tag-school">Group : {reg.schoolId}</span>}
-                      {reg.category && <span className="tag-category">Category : {reg.category}</span>}
-                      <span><i className="bi bi-people"></i> Team Size: {reg.teamSize}</span>
-                      <span><i className="bi bi-clock-history"></i> {reg.paidAt ? new Date(reg.paidAt).toLocaleDateString('en-IN') : 'Completed'}</span>
-                    </div>
-                  </div>
-                  <span className="tag-paid">
-                    <i className="bi bi-check-circle-fill"></i> {reg.paymentStatus || 'PAID'} (₹{reg.amountRupees || reg.amount})
-                  </span>
-                </div>
-
-                <div className="participants-section-title">
-                  <i className="bi bi-person-lines-fill"></i> Registered Participants ({reg.participants?.length || 0})
-                </div>
-
-                <div className="table-custom-wrapper">
-                  <table className="table-custom">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Roll No</th>
-                        <th>College</th>
-                        <th>Department</th>
-                        <th>Mobile</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {reg.participants && reg.participants.map((p, idx) => (
-                        <tr key={idx}>
-                          <td>{idx + 1}</td>
-                          <td style={{ fontWeight: '600' }}>{p.name || 'N/A'}</td>
-                          <td>{p.roll || 'N/A'}</td>
-                          <td>{p.college === 'Other College' ? p.otherCollege : (p.college || 'N/A')}</td>
-                          <td>{p.department || 'N/A'}</td>
-                          <td>{p.mobile || 'N/A'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-
-      {/* Student Profile Tab */}
+      {/* Student Profile Tab (Rendered above grid when active) */}
       {!loading && activeTab === 'profile' && (
-        <div className="profile-card">
+        <div className="profile-card" style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h3 style={{ margin: 0, fontWeight: '700' }}>Student Profile Details</h3>
@@ -542,6 +502,235 @@ export default function StudentDashboard({ onNavigate }) {
           )}
         </div>
       )}
+
+      {/* Overview Content showing both Event and Payment Cards Side by Side (Always visible below the main content) */}
+      {!loading && (
+        <div className="dashboard-grid-two-col" style={{ marginTop: '2rem' }}>
+          {/* Card 1: Registered Events */}
+          <div 
+            className="profile-card" 
+            style={{ 
+              height: 'fit-content',
+              padding: eventsCardExpanded ? '1.5rem 2rem' : '1rem 1.5rem',
+              transition: 'padding 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            <div 
+              style={{ 
+                cursor: 'pointer', 
+                userSelect: 'none', 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center' 
+              }} 
+              onClick={() => setEventsCardExpanded(!eventsCardExpanded)}
+            >
+              <h3 style={{ 
+                margin: 0, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px',
+                fontSize: eventsCardExpanded ? '1.35rem' : '1.05rem',
+                fontWeight: eventsCardExpanded ? '700' : '600',
+                transition: 'font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1), font-weight 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}>
+                <i 
+                  className={`bi ${eventsCardExpanded ? 'bi-chevron-down' : 'bi-chevron-right'}`} 
+                  style={{ 
+                    color: 'var(--primary)', 
+                    fontSize: eventsCardExpanded ? '1.1rem' : '0.95rem', 
+                    transition: 'font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1)' 
+                  }}
+                ></i>
+                Registered Events
+              </h3>
+            </div>
+            
+            {eventsCardExpanded && (
+              <div style={{ marginTop: '1.25rem', borderTop: '1px dashed var(--glass-border)', paddingTop: '1rem' }}>
+                {registrations.length === 0 ? (
+                  <div className="empty-state">
+                    <i className="bi bi-journal-x"></i>
+                    <h4>No Event Registrations Found</h4>
+                    <p>When you register for events, participant details will be listed here.</p>
+                  </div>
+                ) : (
+                  registrations.map((reg, index) => {
+                    const isExpanded = !!expandedEvents[index];
+                    return (
+                      <div key={reg._id || index} className="event-reg-card" style={{ padding: '1.25rem', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
+                        <div 
+                          className="event-reg-header" 
+                          style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            flexWrap: 'wrap', 
+                            gap: '0.5rem', 
+                            cursor: 'pointer',
+                            userSelect: 'none'
+                          }}
+                          onClick={() => toggleEventExpand(index)}
+                        >
+                          <div className="event-title-meta">
+                            <h4 style={{ margin: 0, fontWeight: '700', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <i className={`bi ${isExpanded ? 'bi-chevron-down' : 'bi-chevron-right'}`} style={{ color: 'var(--primary)', fontSize: '0.9rem' }}></i>
+                              {reg.eventName || 'Event Registration'}
+                            </h4>
+                            <div className="event-sub-info" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1rem', fontSize: '0.8rem', marginTop: '0.25rem', paddingLeft: '1.25rem' }}>
+                              {reg.category && <span className="tag-category" style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.08)' }}>{reg.category}</span>}
+                              {reg.schoolId && <span className="tag-school" style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.08)' }}>School: {reg.schoolId}</span>}
+                              <span><i className="bi bi-people"></i> Team: {reg.teamSize}</span>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                            <span className="tag-paid" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px' }}>
+                              <i className="bi bi-check-circle-fill"></i> PAID
+                            </span>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                              ₹{reg.amountRupees || reg.amount}
+                            </span>
+                          </div>
+                        </div>
+
+                        {isExpanded && (
+                          <div style={{ marginTop: '1.25rem', borderTop: '1px dashed var(--glass-border)', paddingTop: '1rem' }}>
+                            <div className="participants-section-title" style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+                              <i className="bi bi-people-fill"></i> Team Participant Details ({reg.participants?.length || 0})
+                            </div>
+
+                            <div className="table-custom-wrapper">
+                              <table className="table-custom" style={{ fontSize: '0.8rem' }}>
+                                <thead>
+                                  <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Roll No</th>
+                                    <th>College</th>
+                                    <th>Pass</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {reg.participants && reg.participants.length > 0 ? (
+                                    reg.participants.map((p, pIdx) => (
+                                      <tr key={pIdx}>
+                                        <td>{pIdx + 1}</td>
+                                        <td style={{ fontWeight: '600' }}>{p.name || 'N/A'}</td>
+                                        <td>{p.roll || 'N/A'}</td>
+                                        <td>{p.college === 'Other College' ? p.otherCollege : (p.college || 'N/A')}</td>
+                                        <td>
+                                          {p.barcode ? (
+                                            <button className="btn-receipt" style={{ padding: '0.15rem 0.4rem', fontSize: '0.75rem' }} onClick={(e) => { e.stopPropagation(); setSelectedPass({ ...p, eventName: reg.eventName, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) }); }}>
+                                              <i className="bi bi-upc-scan"></i> Pass
+                                            </button>
+                                          ) : (
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No Pass</span>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    ))
+                                  ) : (
+                                    <tr>
+                                      <td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+                                        No specific participant list attached.
+                                      </td>
+                                    </tr>
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Card 2: Payment Details */}
+          <div 
+            className="profile-card" 
+            style={{ 
+              height: 'fit-content',
+              padding: paymentsExpanded ? '1.5rem 2rem' : '1rem 1.5rem',
+              transition: 'padding 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            <div 
+              style={{ 
+                cursor: 'pointer', 
+                userSelect: 'none', 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center' 
+              }} 
+              onClick={() => setPaymentsExpanded(!paymentsExpanded)}
+            >
+              <h3 style={{ 
+                margin: 0, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px',
+                fontSize: paymentsExpanded ? '1.35rem' : '1.05rem',
+                fontWeight: paymentsExpanded ? '700' : '600',
+                transition: 'font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1), font-weight 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}>
+                <i 
+                  className={`bi ${paymentsExpanded ? 'bi-chevron-down' : 'bi-chevron-right'}`} 
+                  style={{ 
+                    color: 'var(--primary)', 
+                    fontSize: paymentsExpanded ? '1.1rem' : '0.95rem', 
+                    transition: 'font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1)' 
+                  }}
+                ></i>
+                Payment Details
+              </h3>
+            </div>
+            
+            {paymentsExpanded && (
+              <div style={{ marginTop: '1.25rem', borderTop: '1px dashed var(--glass-border)', paddingTop: '1rem' }}>
+                {registrations.length === 0 ? (
+                  <div className="empty-state">
+                    <i className="bi bi-cash-stack"></i>
+                    <h4>No Payment History Available</h4>
+                    <p>Completed Razorpay transaction records will appear here.</p>
+                  </div>
+                ) : (
+                  <div className="table-custom-wrapper">
+                    <table className="table-custom" style={{ fontSize: '0.8rem' }}>
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Event Name</th>
+                          <th>Amount</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {registrations.map((reg, idx) => (
+                          <tr key={reg._id || idx}>
+                            <td>{reg.paidAt ? new Date(reg.paidAt).toLocaleDateString('en-IN') : 'N/A'}</td>
+                            <td style={{ fontWeight: '600' }}>{reg.eventName || 'Event Registration'}</td>
+                            <td style={{ fontWeight: '700', color: '#28a745' }}>₹{reg.amountRupees || reg.amount}</td>
+                            <td>
+                              <button className="btn-receipt" style={{ padding: '0.15rem 0.4rem', fontSize: '0.75rem' }} onClick={(e) => { e.stopPropagation(); setSelectedReceipt(reg); }}>
+                                <i className="bi bi-file-earmark-text"></i> Receipt
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+
 
       {/* Events & Participants Tab */}
       {!loading && activeTab === 'events' && (

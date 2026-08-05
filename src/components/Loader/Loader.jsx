@@ -127,8 +127,9 @@ export default function Loader({ onComplete }) {
         <svg viewBox="0 0 100 100">
           <defs>
             <linearGradient id="loaderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="var(--primary)" />
-              <stop offset="100%" stopColor="var(--secondary)" />
+              <stop offset="0%" stopColor="var(--loader-grad-start)" />
+              <stop offset="50%" stopColor="var(--loader-grad-mid)" />
+              <stop offset="100%" stopColor="var(--loader-grad-end)" />
             </linearGradient>
           </defs>
           <circle className="loader-circle-bg" cx="50" cy="50" r="45" />

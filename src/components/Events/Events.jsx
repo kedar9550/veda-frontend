@@ -1,30 +1,143 @@
 import React, { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEvents } from './useEvents';
 gsap.registerPlugin(ScrollTrigger);
 
-/* Navigate to event detail */
-function navigateToDetail(schoolId) {
-  window.location.hash = `events/${schoolId}`;
-}
+/* ─── Cards Extra Metadata Mapping ─── */
+const CARD_METADATA = {
+  'digi': {
+    description: 'Empowering innovators and developers to build smart solutions and shape the digital future.',
+    participants: '150+',
+    achievements: '25+',
+    techFocus: 'Innovation'
+  },
+  'kriya': {
+    description: 'Fostering next-generation intelligence, IoT ecosystems, and data-driven solutions.',
+    participants: '120+',
+    achievements: '15+',
+    techFocus: 'IoT & Data'
+  },
+  'krishi': {
+    description: 'Revolutionizing farming and agricultural practices with smart technology and automation.',
+    participants: '80+',
+    achievements: '10+',
+    techFocus: 'AgriTech'
+  },
+  'aiml': {
+    description: 'Exploring cognitive intelligence, machine learning models, and advanced computing paradigms.',
+    participants: '100+',
+    achievements: '12+',
+    techFocus: 'AI & ML'
+  },
+  'mca': {
+    description: 'Exploring cognitive intelligence, machine learning models, and advanced computing paradigms.',
+    participants: '100+',
+    achievements: '12+',
+    techFocus: 'AI & ML'
+  },
+  'aiml-mca': {
+    description: 'Exploring cognitive intelligence, machine learning models, and advanced computing paradigms.',
+    participants: '100+',
+    achievements: '12+',
+    techFocus: 'AI & ML'
+  },
+  'civil': {
+    description: 'Designing sustainable infrastructure, smart cities, and architectural marvels.',
+    participants: '90+',
+    achievements: '10+',
+    techFocus: 'Structural'
+  },
+  'ece': {
+    description: 'Connecting the world through smart communication systems, VLSI, and signal processing.',
+    participants: '130+',
+    achievements: '20+',
+    techFocus: 'VLSI'
+  },
+  'eee': {
+    description: 'Powering the future with renewable energy, smart grids, and electrical innovations.',
+    participants: '110+',
+    achievements: '18+',
+    techFocus: 'Power Systems'
+  },
+  'fs': {
+    description: 'Advancing food preservation, nutritional security, and processing technologies.',
+    participants: '70+',
+    achievements: '8+',
+    techFocus: 'Food Science'
+  },
+  'food-technology': {
+    description: 'Advancing food preservation, nutritional security, and processing technologies.',
+    participants: '70+',
+    achievements: '8+',
+    techFocus: 'Food Science'
+  },
+  'mech': {
+    description: 'Driving engineering excellence through robotics, automotive tech, and thermal systems.',
+    participants: '140+',
+    achievements: '22+',
+    techFocus: 'Robotics'
+  },
+  'min-e': {
+    description: 'Sustainable extraction technologies and geo-resource management for the industry.',
+    participants: '60+',
+    achievements: '6+',
+    techFocus: 'GeoTech'
+  },
+  'pt': {
+    description: 'Exploring clean energy solutions, reservoir optimization, and petroleum extraction.',
+    participants: '75+',
+    achievements: '9+',
+    techFocus: 'Petroleum'
+  },
+  'school-of-business': {
+    description: 'Molding future business leaders, financial strategists, and marketing disruptors.',
+    participants: '95+',
+    achievements: '14+',
+    techFocus: 'Management'
+  },
+  'business': {
+    description: 'Molding future business leaders, financial strategists, and marketing disruptors.',
+    participants: '95+',
+    achievements: '14+',
+    techFocus: 'Management'
+  },
+  'management': {
+    description: 'Molding future business leaders, financial strategists, and marketing disruptors.',
+    participants: '95+',
+    achievements: '14+',
+    techFocus: 'Management'
+  },
+  'entrix': {
+    description: 'Molding future business leaders, financial strategists, and marketing disruptors.',
+    participants: '95+',
+    achievements: '14+',
+    techFocus: 'Management'
+  }
+};
 
 /* ─── Loading skeleton card ─── */
 function EventCardSkeleton() {
   return (
-    <div className="event-card event-card--skeleton">
-      <div className="event-card__image-wrap skeleton-img" />
-      <div className="event-card__body">
-        <div className="skeleton-line skeleton-title" />
-        <div className="skeleton-row">
-          <div className="skeleton-circle" />
-          <div className="skeleton-line skeleton-org" />
-          <div className="skeleton-line skeleton-likes" />
-        </div>
-        <div className="event-card__footer">
-          <div className="skeleton-line skeleton-count" />
-          <div className="skeleton-btn" />
-        </div>
+    <div className="event-card event-card--modern event-card--skeleton" style={{ minHeight: '340px' }}>
+      <div className="event-card__header-modern">
+        <div className="skeleton-line" style={{ height: '2.2rem', width: '50%', borderRadius: '8px', marginBottom: '0.5rem' }} />
+        <div className="skeleton-line" style={{ height: '3px', width: '70px', borderRadius: '99px' }} />
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', marginTop: '1.5rem' }}>
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div className="skeleton-circle" style={{ width: '42px', height: '42px', marginBottom: '0.6rem' }} />
+            <div className="skeleton-line" style={{ height: '0.68rem', width: '80px', borderRadius: '4px', marginBottom: '0.35rem' }} />
+            <div className="skeleton-line" style={{ height: '0.88rem', width: '50px', borderRadius: '4px' }} />
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+        <div className="skeleton-btn" style={{ width: '120px', height: '36px', borderRadius: '99px' }} />
       </div>
     </div>
   );
@@ -32,68 +145,82 @@ function EventCardSkeleton() {
 
 /* ─── Single Event Card ─── */
 function EventCard({ event, index, cardRef }) {
+  const navigate = useNavigate();
+  const meta = CARD_METADATA[event.id] || CARD_METADATA[event.groupSlug] || {
+    participants: '80+',
+    achievements: '10+',
+    techFocus: 'Technical'
+  };
+
   return (
     <div
       ref={cardRef}
-      className="event-card"
+      className="event-card event-card--modern"
       style={{ '--event-accent': event.accentColor }}
       role="button"
       tabIndex={0}
-      onClick={() => navigateToDetail(event.id)}
-      onKeyDown={(e) => e.key === 'Enter' && navigateToDetail(event.id)}
+      onClick={() => navigate(`/events/${event.id}`)}
+      onKeyDown={(e) => e.key === 'Enter' && navigate(`/events/${event.id}`)}
     >
-      {/* Image */}
-      <div className="event-card__image-wrap">
-        <img
-          src={event.image}
-          alt={event.title}
-          className="event-card__image"
-          loading="lazy"
-        />
-        <div className="event-card__image-overlay" />
+      {/* Decorative Dots Pattern */}
+      <div className="event-card__dots" />
 
+      {/* Top Header Section */}
+      <div className="event-card__header-modern">
         {/* Category badge */}
-        <span className="event-card__badge">{event.category}</span>
+        <span className="event-card__badge-modern">{event.title}</span>
 
-        <div className="event-card__hero-details">
-          <h3 className="event-card__title">{event.title}</h3>
-          <p className="event-card__tagline">{event.tagline}</p>
+        <h3 className="event-card__title-modern">{event.title}</h3>
+        <div className="event-card__divider-modern" style={{ background: `linear-gradient(90deg, ${event.accentColor} 0%, transparent 100%)` }} />
+      </div>
+
+      {/* Stats Row */}
+      <div className="event-card__stats-row">
+        {/* Stat Item: Events */}
+        <div className="event-card__stat-col stat-events">
+          <div className="event-card__stat-icon-wrap">
+            <i className="bi bi-calendar-event" />
+          </div>
+          <span className="event-card__stat-label">Events</span>
+          <span className="event-card__stat-val">{event.eventCount}</span>
+        </div>
+
+        {/* Stat Item: Participants */}
+        <div className="event-card__stat-col stat-participants">
+          <div className="event-card__stat-icon-wrap">
+            <i className="bi bi-people" />
+          </div>
+          <span className="event-card__stat-label">Participants</span>
+          <span className="event-card__stat-val">{meta.participants}</span>
         </div>
       </div>
 
-      {/* Body */}
-      <div className="event-card__body">
-        <div className="event-card__organizer-row">
-          <div className="event-card__organizer-info">
-            <div className="event-card__organizer-icon">
-              <i className={`bi ${event.organizerIcon}`} />
-            </div>
-            <div className="event-card__organizer-text">
-              <span className="event-card__organizer-label">Organized By</span>
-              <span className="event-card__organizer-name">{event.organizer}</span>
-            </div>
+      {/* Organizer Row */}
+      <div className="event-card__organizer-row-modern">
+        <div className="event-card__organizer-info-modern">
+          <div className="event-card__organizer-icon-modern" style={{ color: event.accentColor }}>
+            <i className={`bi ${event.organizerIcon || 'bi-grid'}`} />
+          </div>
+          <div className="event-card__organizer-text-modern">
+            <span className="event-card__organizer-label-modern">Organized By</span>
+            <span className="event-card__organizer-name-modern">{event.organizer}</span>
           </div>
         </div>
+      </div>
 
-        
-
-        {/* Footer */}
-        <div className="event-card__footer event-card__footer--compact">
-          <button
-            className="event-card__cta"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigateToDetail(event.id);
-            }}
-            aria-label={`View ${event.title} events`}
-          >
-            View Events
-            <i className="bi bi-arrow-right" />
-          </button>
-          <div className="event-card__event-count">
-            <strong>{event.eventCount}</strong> Events
-          </div>
-        </div>
+      {/* Footer */}
+      <div className="event-card__footer-modern">
+        <button
+          className="event-card__cta"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/events/${event.id}`);
+          }}
+          aria-label={`View ${event.title} events`}
+        >
+          View Events
+          <i className="bi bi-arrow-right" />
+        </button>
       </div>
     </div>
   );
@@ -174,22 +301,22 @@ export default function Events() {
         <div className="events-grid">
           {loading
             ? Array.from({ length: 5 }).map((_, i) => (
-                <EventCardSkeleton key={i} />
-              ))
+              <EventCardSkeleton key={i} />
+            ))
             : groups.map((group, index) => (
-                <EventCard
-                  key={group.id}
-                  event={{
-                    ...group,
-                    category: group.category || group.organizer,
-                    organizer: group.organizer || group.category,
-                    tagline: group.tagline || 'Explore more events in this group',
-                    image: group.image || '/events/techno.png',
-                  }}
-                  index={index}
-                  cardRef={(el) => (cardsRef.current[index] = el)}
-                />
-              ))}
+              <EventCard
+                key={group.id}
+                event={{
+                  ...group,
+                  category: group.category || group.organizer,
+                  organizer: group.organizer || group.category,
+                  tagline: group.tagline || 'Explore more events in this group',
+                  image: group.image || '/events/techno.png',
+                }}
+                index={index}
+                cardRef={(el) => (cardsRef.current[index] = el)}
+              />
+            ))}
         </div>
 
       </div>

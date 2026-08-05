@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useEvents } from './useEvents';
 import { useDepartments } from './useDepartments';
 
@@ -88,6 +89,8 @@ function createParticipants(count, existing = []) {
 }
 
 export default function RegisterForm({ schoolId, eventId, onCancel }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { events } = useEvents();
   const { departments, error: departmentsError } = useDepartments();
   const event = events.find(e => e.groupSlug === schoolId && e.id === eventId) || null;
@@ -124,14 +127,14 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
         });
       } catch (err) {
         console.error('Failed to parse eventStudent from localStorage', err);
-        sessionStorage.setItem('authRedirect', window.location.hash);
-        window.location.hash = 'login';
+        sessionStorage.setItem('authRedirect', location.pathname);
+        navigate('/login');
       }
     } else {
-      sessionStorage.setItem('authRedirect', window.location.hash);
-      window.location.hash = 'login';
+      sessionStorage.setItem('authRedirect', location.pathname);
+      navigate('/login');
     }
-  }, []);
+  }, [location.pathname]);
 
   const teamSizeOptions = useMemo(
     () => buildTeamSizeOptions(event?.teamSize || event?.maxTeamSize || event?.registrationTeamSize || '1'),
@@ -250,7 +253,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
   const completeRegistration = (paymentDetails = {}) => {
     setPaymentMessage('');
-    window.location.hash = 'dashboard';
+    navigate('/dashboard');
   };
 
   const loadRazorpayScript = () => new Promise((resolve, reject) => {

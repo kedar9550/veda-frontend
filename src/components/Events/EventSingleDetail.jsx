@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 // import { EVENTS_DATA } from './eventsData';
 import { useEvents } from './useEvents';
@@ -62,7 +63,8 @@ function formatDate(dateStr) {
   });
 }
 
-export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToSchool }) {
+export default function EventSingleDetail({ schoolId, eventId }) {
+  const navigate = useNavigate();
   const pageRef = useRef(null);
   const heroRef = useRef(null);
   const statsRef = useRef(null);
@@ -100,7 +102,7 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
     return (
       <div style={{ padding: '6rem 2rem', textAlign: 'center' }}>
         <p style={{ color: 'var(--text-muted)' }}>Event not found.</p>
-        <button className="event-detail-back" onClick={onBack} style={{ position: 'static', marginTop: '1rem' }}>
+        <button className="event-detail-back" onClick={() => navigate(`/events/${schoolId}`)} style={{ position: 'static', marginTop: '1rem' }}>
           <i className="bi bi-arrow-left" /> Go Back
         </button>
       </div>
@@ -117,7 +119,7 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
 
         {/* Breadcrumb / back nav */}
         <div className="esingle-hero__nav">
-          <button className="event-detail-back" onClick={onBack}>
+          <button className="event-detail-back" onClick={() => navigate(`/events/${schoolId}`)}>
             <i className="bi bi-arrow-left" /> {school.title}
           </button>
         </div>
@@ -243,7 +245,7 @@ export default function EventSingleDetail({ schoolId, eventId, onBack, onBackToS
             className={`esingle-register-btn ${!event.isOpen ? 'esingle-register-btn--closed' : ''}`}
             onClick={(e) => {
               if (!event.isOpen) return e.preventDefault();
-              window.location.hash = `register/${schoolId}/${eventId}`;
+              navigate(`/register/${schoolId}/${eventId}`);
             }}
           >
             {event.isOpen ? 'Register' : 'Closed'}

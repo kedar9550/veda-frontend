@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const colleges = ['Choose...', 'Aditya University', 'ACET', 'Other College'];
 const genders = ['Select', 'Male', 'Female', 'Other'];
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({
     name: '',
@@ -25,7 +27,7 @@ export default function LoginPage() {
   useEffect(() => {
     const studentStr = localStorage.getItem('eventStudent');
     if (studentStr) {
-      window.location.hash = 'dashboard';
+      navigate('/dashboard');
     }
   }, []);
 
@@ -115,9 +117,11 @@ export default function LoginPage() {
       const redirect = sessionStorage.getItem('authRedirect');
       if (redirect) {
         sessionStorage.removeItem('authRedirect');
-        window.location.hash = redirect;
+        // Clean hash prefix if present, e.g. #dashboard to /dashboard
+        const cleanedPath = redirect.startsWith('#') ? redirect.substring(1) : redirect;
+        navigate(cleanedPath.startsWith('/') ? cleanedPath : `/${cleanedPath}`);
       } else {
-        window.location.hash = 'dashboard';
+        navigate('/dashboard');
       }
     } catch (err) {
       console.error(err);
