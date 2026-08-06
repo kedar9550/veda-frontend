@@ -4,6 +4,7 @@ import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router
 import Loader from './components/Loader/Loader';
 import Cursor from './components/Cursor/Cursor';
 import Navbar from './components/navbar/Navbar';
+import MobileNav from './components/navbar/MobileNav';
 import Home from './components/Home/Home';
 import Events from './components/Events/Events';
 import EventDetail from './components/Events/EventDetail';
@@ -87,6 +88,7 @@ export default function App() {
             </Routes>
           </main>
           <Footer onNavigate={navigateTo} />
+          <MobileNav activePage={activePage} onNavigate={navigateTo} />
         </div>
       )}
     </>

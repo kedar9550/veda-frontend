@@ -163,29 +163,6 @@ export default function EventSingleDetail({ schoolId, eventId }) {
         <img src={event.image} alt={event.title} className="esingle-hero__img" />
         <div className="esingle-hero__overlay" />
 
-        {/* Breadcrumb / back nav */}
-        <div className="esingle-hero__nav">
-          <button className="event-detail-back" onClick={() => navigate(`/events/${schoolId}`)}>
-            <i className="bi bi-arrow-left" /> {school.title}
-          </button>
-        </div>
-
-        <div className="esingle-hero__content">
-          <span className="esingle-hero__badge">{event.category || school.title}</span>
-          <h1 className="esingle-hero__title">{event.title}</h1>
-          {event.tagline && <p className="esingle-hero__subtitle">{event.tagline}</p>}
-          <div className="esingle-hero__details-row">
-            <div className="esingle-hero__detail">
-              <i className="bi bi-calendar3" />
-              <span>{event.date ? formatDate(event.date) : 'Date TBD'}</span>
-            </div>
-            <div className="esingle-hero__detail">
-              <i className="bi bi-geo-alt" />
-              <span>{event.venue || 'Venue TBD'}</span>
-            </div>
-          </div>
-        </div>
-
         <div className="esingle-hero__bottom">
           {!event.isOpen && (
             <span className="sub-event-card__closed-badge" style={{ position: 'static' }}>
@@ -213,6 +190,33 @@ export default function EventSingleDetail({ schoolId, eventId }) {
       </div>
 
       <div ref={bodyRef} className="container-premium esingle-body">
+
+        {/* ── Event Header Block (Moved from Banner Image) ── */}
+        <div className="esingle-header-block">
+          <div className="esingle-badge-row">
+            <button
+              type="button"
+              className="esingle-back-pill"
+              onClick={() => navigate(`/events/${schoolId}`)}
+              aria-label="Go back"
+            >
+              <i className="bi bi-arrow-left" />
+            </button>
+            <span className="esingle-category-badge">{event.category || school.title}</span>
+          </div>
+          <h1 className="esingle-page-title">{event.title}</h1>
+          {event.tagline && <p className="esingle-page-subtitle">{event.tagline}</p>}
+          <div className="esingle-meta-row">
+            <div className="esingle-meta-chip">
+              <i className="bi bi-calendar3" />
+              <span>{event.date ? formatDate(event.date) : 'Date TBD'}</span>
+            </div>
+            <div className="esingle-meta-chip">
+              <i className="bi bi-geo-alt" />
+              <span>{event.venue || 'Venue TBD'}</span>
+            </div>
+          </div>
+        </div>
 
         {/* ── OVERVIEW ── */}
         {event.overview && (

@@ -1,0 +1,123 @@
+/* ==========================================================================
+   Component: MobileNav.css - Sleek Floating Bottom Navigation Bar (Icon Only)
+   ========================================================================== */
+
+.mobile-nav-wrapper {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.mobile-nav-pill {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 380px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 9999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 0 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark mode glassmorphism pill theme */
+.dark-theme .mobile-nav-pill {
+  background: rgba(12, 16, 26, 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+}
+
+/* Navigation Item */
+.mobile-nav-item {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  padding: 0;
+  cursor: pointer;
+  color: #64748b;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 9999px;
+  outline: none;
+  user-select: none;
+}
+
+.dark-theme .mobile-nav-item {
+  color: #94a3b8;
+}
+
+/* Icon Wrapper */
+.mobile-nav-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 1.45rem;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease, background-color 0.25s ease;
+}
+
+.mobile-nav-item i {
+  line-height: 1;
+  display: inline-block;
+}
+
+/* Active State - Applies --gradient-primary from Variables.css */
+.mobile-nav-item.active .mobile-nav-icon-wrapper {
+  transform: scale(1.18);
+}
+
+.mobile-nav-item.active .mobile-nav-icon-wrapper i {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark-theme .mobile-nav-item.active .mobile-nav-icon-wrapper i {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dark-theme .mobile-nav-item.active .mobile-nav-icon-wrapper {
+  filter: drop-shadow(0 0 10px rgba(143, 112, 46, 0.4));
+}
+
+/* Active press animation */
+.mobile-nav-item:active {
+  transform: scale(0.92);
+}
+
+/* Hide Mobile Navigation on Desktop (> 991px) */
+@media (min-width: 992px) {
+  .mobile-nav-wrapper {
+    display: none !important;
+  }
+}
+
+/* Add bottom padding on mobile (< 992px) so page contents aren't overlapped */
+@media (max-width: 991px) {
+  body {
+    padding-bottom: 75px;
+  }
+}

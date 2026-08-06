@@ -75,9 +75,40 @@ export function useSubEvents(schoolId, groupId) {
           const events = extractEventItems(payload);
 
           if (events.length > 0) {
+            let regStatsMap = new Map();
+            try {
+              const regRes = await fetch(`${API_URL}/api/payments/registrations`, {
+                headers: getAuthHeaders(),
+                credentials: 'include',
+              });
+              if (regRes.ok) {
+                const regData = await regRes.json();
+                const pList = regData.payments || [];
+                pList.forEach(p => {
+                  if (p.paymentStatus && p.paymentStatus !== 'PAID') return;
+                  const eSlug = String(p.eventId || p.eventName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                  const count = (p.participants && p.participants.length) || Number(p.teamSize) || 1;
+                  if (eSlug) {
+                    const cur = regStatsMap.get(eSlug) || { regCount: 0, partCount: 0 };
+                    cur.regCount += 1;
+                    cur.partCount += count;
+                    regStatsMap.set(eSlug, cur);
+                  }
+                });
+              }
+            } catch (rErr) {
+              console.warn('Failed to fetch /api/payments/registrations:', rErr);
+            }
+
             const mapped = events.map(event => {
               const eventName = event.eventName || event.name || event.title || 'Event';
               const eventKey = String(eventName).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              const eventIdSlug = String(event._id || event.id || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              const rStats = regStatsMap.get(eventKey) || regStatsMap.get(eventIdSlug) || { regCount: 0, partCount: 0 };
+
+              const rawFee = event.registrationFee ?? event.fee ?? event.feeAmount ?? event.fees ?? event.price ?? '';
+              const feeTextStr = typeof rawFee === 'number' ? `₹${rawFee}` : String(rawFee || '');
+              const feeText = feeTextStr ? (feeTextStr.startsWith('₹') ? feeTextStr : `₹${feeTextStr}`) : '₹0';
 
               const coordinatorInfo = event.coordinator ? {
                 name: event.coordinator.employeeName || event.coordinator.name,
@@ -86,6 +117,9 @@ export function useSubEvents(schoolId, groupId) {
                 role: event.coordinator.roleAssigned || event.coordinator.role,
                 employeeCode: event.coordinator.employeeCode || event.coordinator.employeeId || event.coordinator.id || event.coordinator._id || ''
               } : null;
+
+              const realRegistrationsCount = event.registeredStudents || event.usersRegistered || rStats.regCount || 0;
+              const realParticipantsCount = event.participants || event.participation || rStats.partCount || 0;
 
               return {
                 id: eventKey,
@@ -109,7 +143,13 @@ export function useSubEvents(schoolId, groupId) {
                   'Strict adherence to schedule is required.',
                   'Decisions of the judges and coordinators are final.'
                 ],
-                registrationFee: event.registrationFee || 'Free registration',
+                registrationFee: event.registrationFee || feeText,
+                feeAmount: rawFee,
+                feeText,
+                realRegistrationsCount,
+                realParticipantsCount,
+                registeredStudents: realRegistrationsCount,
+                participants: realParticipantsCount,
                 coordinator: coordinatorInfo,
                 raw: event
               };

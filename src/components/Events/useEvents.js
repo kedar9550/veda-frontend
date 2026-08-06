@@ -105,6 +105,18 @@ function getApiBaseUrl() {
   return configuredUrl ? configuredUrl.replace(/\/$/, '') : 'http://localhost:9022';
 }
 
+function formatImageUrl(url, apiBaseUrl) {
+  if (!url || typeof url !== 'string') return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) {
+    return trimmed;
+  }
+  const base = apiBaseUrl || getApiBaseUrl();
+  const cleanPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  return `${base}${cleanPath}`;
+}
+
 function getAuthHeaders() {
   const headers = { 'Content-Type': 'application/json' };
   const token = import.meta.env.VITE_API_TOKEN?.trim();
@@ -315,12 +327,71 @@ export function useEvents() {
             const items = extractEventItems(payload);
 
             if (items.length > 0) {
+              let groupsApiMap = new Map();
+              try {
+                const groupsRes = await fetch(`${API_URL}/api/groups`, {
+                  headers: getAuthHeaders(),
+                  credentials: 'include',
+                });
+                if (groupsRes.ok) {
+                  const groupsData = await groupsRes.json();
+                  const gList = groupsData.groups || groupsData.data || (Array.isArray(groupsData) ? groupsData : []);
+                  gList.forEach(g => {
+                    const gName = g.name || g.groupName;
+                    const gSlug = getEventId(gName);
+                    const gLogo = formatImageUrl(g.logo || g.groupLogo, API_URL);
+                    const gBanner = formatImageUrl(g.banner || g.bannerImage, API_URL);
+                    if (g._id) groupsApiMap.set(String(g._id), { logo: gLogo, banner: gBanner, name: gName });
+                  });
+                }
+              } catch (gErr) {
+                console.warn('Failed to fetch /api/groups:', gErr);
+              }
+
+              let regStatsMap = new Map();
+              try {
+                const regRes = await fetch(`${API_URL}/api/payments/registrations`, {
+                  headers: getAuthHeaders(),
+                  credentials: 'include',
+                });
+                if (regRes.ok) {
+                  const regData = await regRes.json();
+                  const pList = regData.payments || [];
+                  pList.forEach(p => {
+                    if (p.paymentStatus && p.paymentStatus !== 'PAID') return;
+                    const eSlug = getEventId(p.eventId || p.eventName);
+                    const sSlug = getEventId(p.schoolId || p.category);
+                    const count = (p.participants && p.participants.length) || Number(p.teamSize) || 1;
+
+                    if (eSlug) {
+                      const cur = regStatsMap.get(eSlug) || { regCount: 0, partCount: 0 };
+                      cur.regCount += 1;
+                      cur.partCount += count;
+                      regStatsMap.set(eSlug, cur);
+                    }
+                    if (sSlug) {
+                      const curS = regStatsMap.get(sSlug) || { regCount: 0, partCount: 0 };
+                      curS.regCount += 1;
+                      curS.partCount += count;
+                      regStatsMap.set(sSlug, curS);
+                    }
+                  });
+                }
+              } catch (rErr) {
+                console.warn('Failed to fetch /api/payments/registrations:', rErr);
+              }
+
               const mappedEvents = items.map((entry) => {
                 const groupName = entry.group?.name || entry.groupName || entry.department || 'General';
                 const groupSlug = getEventId(groupName);
                 const groupId = entry.group?._id || entry.groupId || groupSlug;
                 const eventName = entry.eventName || entry.title || entry.name || 'Event';
                 const key = getEventId(eventName);
+                const entryIdSlug = getEventId(entry._id || entry.id);
+
+                const matchedGroupData = groupsApiMap.get(String(groupId)) || groupsApiMap.get(groupSlug) || groupsApiMap.get(getEventId(entry.department)) || {};
+
+                const regStats = regStatsMap.get(key) || regStatsMap.get(entryIdSlug) || regStatsMap.get(groupSlug) || { regCount: 0, partCount: 0 };
 
                 const meta = DEPT_META[getEventId(groupName)] || {
                   tagline: entry.overview ? entry.overview.slice(0, 120) : 'Department Fest',
@@ -344,9 +415,13 @@ export function useEvents() {
                 const rawFee = entry.registrationFee ?? entry.fee ?? entry.feeAmount ?? entry.fees ?? entry.price ?? '';
                 const feeText = formatFeeValue(rawFee) || '';
                 const feeAmount = rawFee;
-                const participants = entry.participants || entry.participation || entry.attendees || entry.attendeeCount || 0;
+
+                const realRegistrationsCount = entry.registeredStudents || entry.usersRegistered || regStats.regCount || 0;
+                const realParticipantsCount = entry.participants || entry.participation || regStats.partCount || 0;
+
+                const participants = realParticipantsCount;
                 const teamSize = normalizeTeamSize(entry);
-                const registeredStudents = entry.registeredStudents || entry.usersRegistered || entry.studentCount || entry.registrations || 0;
+                const registeredStudents = realRegistrationsCount;
                 const categoryColor = entry.categoryColor || entry.accentColor || meta.accentColor;
                 const formattedDepartment = formatDepartment(entry);
                 const rawCoordinator = entry.coordinator || entry.facultyCoordinator || entry.facultyCoordinators?.[0] || null;
@@ -359,17 +434,48 @@ export function useEvents() {
                 const eventDate = entry.date || entry.eventDate || '';
                 const eventTime = entry.time || entry.eventTime || '';
 
+                const rawGroupLogo = entry.group?.logo
+                  || entry.groupLogo
+                  || entry.logo
+                  || matchedGroupData.logo
+                  || entry.organizerLogo
+                  || entry.departmentLogo
+                  || entry.group?.banner
+                  || entry.group?.image;
+
+                const rawGroupBanner = entry.group?.banner
+                  || entry.groupBanner
+                  || entry.banner
+                  || matchedGroupData.banner
+                  || entry.bannerImage
+                  || entry.image
+                  || entry.group?.logo;
+
+                const groupLogo = formatImageUrl(rawGroupLogo, API_URL)
+                  || formatImageUrl(rawGroupBanner, API_URL)
+                  || getThumbnailForName(groupName)
+                  || getThumbnailForName(entry.department)
+                  || meta.image;
+
+                const groupImage = formatImageUrl(rawGroupBanner, API_URL)
+                  || formatImageUrl(rawGroupLogo, API_URL)
+                  || getThumbnailForName(groupName)
+                  || getThumbnailForName(entry.department)
+                  || meta.image;
+
                 return {
                   feeAmount,
                   feeText,
-                  participants,
-                  registeredStudents,
+                  participants: realParticipantsCount,
+                  registeredStudents: realRegistrationsCount,
+                  realRegistrationsCount,
+                  realParticipantsCount,
                   _id: entry._id || entry.id,
                   id: key || getEventId(entry._id || entry.id || eventName),
                   title: eventName,
                   tagline: eventOverview ? eventOverview.slice(0, 120) : meta.tagline,
                   description: entry.description || eventOverview || meta.tagline,
-                  image: getThumbnailForName(groupName) || getThumbnailForName(entry.department) || getThumbnailForName(eventName) || entry.bannerImage || entry.image || meta.image,
+                  image: groupImage || getThumbnailForName(eventName) || meta.image,
                   organizer,
                   organizerIcon: meta.organizerIcon,
                   likes: entry.likes || meta.likes,
@@ -391,7 +497,8 @@ export function useEvents() {
                   groupName,
                   groupSlug,
                   groupCategory: meta.category,
-                  groupImage: getThumbnailForName(groupName) || getThumbnailForName(entry.department) || entry.group?.image || entry.group?.bannerImage || entry.bannerImage || entry.image || meta.image,
+                  groupImage,
+                  groupLogo,
                   groupTagline: entry.group?.tagline || formattedDepartment || entry.group?.description || meta.tagline,
                   raw: entry
                 };
@@ -408,6 +515,7 @@ export function useEvents() {
                     tagline: event.groupTagline || event.tagline || event.groupCategory,
                     organizer: event.category,
                     organizerIcon: event.organizerIcon,
+                    groupLogo: event.groupLogo || event.groupImage || event.image,
                     likes: event.likes,
                     eventCount: 0,
                     participantsCount: 0,

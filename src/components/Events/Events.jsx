@@ -201,7 +201,15 @@ function EventCard({ event, index, cardRef }) {
       <div className="event-card__organizer-row-modern">
         <div className="event-card__organizer-info-modern">
           <div className="event-card__organizer-icon-modern" style={{ color: event.accentColor }}>
-            <i className={`bi ${event.organizerIcon || 'bi-grid'}`} />
+            {event.groupLogo || event.image ? (
+              <img
+                src={event.groupLogo || event.image}
+                alt={event.organizer || event.title}
+                className="event-card__organizer-logo-img"
+              />
+            ) : (
+              <i className={`bi ${event.organizerIcon || 'bi-grid'}`} />
+            )}
           </div>
           <div className="event-card__organizer-text-modern">
             <span className="event-card__organizer-label-modern">Organized By</span>

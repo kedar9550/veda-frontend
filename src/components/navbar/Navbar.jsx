@@ -28,21 +28,33 @@ export default function Navbar({ activePage, onNavigate }) {
       }
     };
 
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('studentLoggedIn', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('studentLoggedIn', handleStorageChange);
+    };
+  }, []);
+
+  // Close profile dropdown on click outside when open
+  useEffect(() => {
+    if (!dropdownOpen) return;
+
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('studentLoggedIn', handleStorageChange);
-    document.addEventListener('mousedown', handleClickOutside);
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside);
+    }, 0);
+
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('studentLoggedIn', handleStorageChange);
-      document.removeEventListener('mousedown', handleClickOutside);
+      clearTimeout(timer);
+      document.removeEventListener('click', handleClickOutside);
     };
-  }, []);
+  }, [dropdownOpen]);
 
   const admissionsBtnRef = useRef(null);
 
@@ -83,8 +95,67 @@ export default function Navbar({ activePage, onNavigate }) {
     setIsMobileActive(!isMobileActive);
   };
 
-  const toggleTheme = () => {
-    setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  const toggleTheme = (e) => {
+    const isDark = themeMode === 'dark';
+    const nextTheme = isDark ? 'light' : 'dark';
+
+    // Get trigger button / profile avatar position
+    const targetElement = e?.currentTarget || dropdownRef.current?.querySelector('.profile-trigger-btn') || dropdownRef.current;
+    const rect = targetElement ? targetElement.getBoundingClientRect() : null;
+
+    const profileX = rect ? rect.left + rect.width / 2 : window.innerWidth - 40;
+    const profileY = rect ? rect.top + rect.height / 2 : 40;
+
+    if (!document.startViewTransition) {
+      setThemeMode(nextTheme);
+      return;
+    }
+
+    const transition = document.startViewTransition(() => {
+      setThemeMode(nextTheme);
+    });
+
+    transition.ready.then(() => {
+      if (nextTheme === 'dark') {
+        // Dark mode: expands outward from profile avatar (top-right)
+        const endRadius = Math.hypot(
+          Math.max(profileX, window.innerWidth - profileX),
+          Math.max(profileY, window.innerHeight - profileY)
+        );
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${profileX}px ${profileY}px)`,
+              `circle(${endRadius}px at ${profileX}px ${profileY}px)`
+            ],
+          },
+          {
+            duration: 600,
+            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            pseudoElement: '::view-transition-new(root)',
+          }
+        );
+      } else {
+        // Light mode: expands from desktop bottom-left corner towards top-right
+        const startX = 0;
+        const startY = window.innerHeight;
+        const maxRadiusFromBL = Math.hypot(window.innerWidth, window.innerHeight);
+
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${startX}px ${startY}px)`,
+              `circle(${maxRadiusFromBL}px at ${startX}px ${startY}px)`
+            ],
+          },
+          {
+            duration: 600,
+            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            pseudoElement: '::view-transition-new(root)',
+          }
+        );
+      }
+    });
   };
 
   // Unified cross-page navigation handler
@@ -205,7 +276,10 @@ export default function Navbar({ activePage, onNavigate }) {
           {loggedStudent ? (
             <div ref={dropdownRef} className="profile-dropdown-container" style={{ position: 'relative' }}>
               <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDropdownOpen((prev) => !prev);
+                }}
                 className="profile-trigger-btn"
                 style={{
                   cursor: 'pointer',
@@ -222,7 +296,7 @@ export default function Navbar({ activePage, onNavigate }) {
                   fontSize: '0.95rem',
                   padding: 0,
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: '0 4px 10px rgba(var(--primary-rgb), 0.2)',
+                  boxShadow: 'none',
                   userSelect: 'none'
                 }}
                 onMouseEnter={(e) => {
@@ -331,7 +405,8 @@ export default function Navbar({ activePage, onNavigate }) {
                     onClick={(e) => {
                       e.preventDefault();
                       setDropdownOpen(false);
-                      navigate('/dashboard', { state: { activeTab: 'profile', isEditingProfile: true } });
+                      navigate('/dashboard', { state: { activeTab: 'profile', isEditingProfile: true, timestamp: Date.now() } });
+                      window.dispatchEvent(new CustomEvent('openProfileTab'));
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.color = 'var(--text-light)';
@@ -347,7 +422,10 @@ export default function Navbar({ activePage, onNavigate }) {
                   </a>
 
                   <button
-                    onClick={toggleTheme}
+                    onClick={(e) => {
+                      toggleTheme(e);
+                      setDropdownOpen(false);
+                    }}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -423,7 +501,6 @@ export default function Navbar({ activePage, onNavigate }) {
               }}
             >
               Login
-              <i className="bi bi-arrow-right"></i>
             </a>
           )}
         </div>

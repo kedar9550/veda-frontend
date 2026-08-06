@@ -17,16 +17,152 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
     mobile: '',
     email: ''
   });
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [fetchingStudent, setFetchingStudent] = useState(false);
+  const [studentLookupStatus, setStudentLookupStatus] = useState(''); // 'found', 'not_found', 'error', ''
+  const [disabledFields, setDisabledFields] = useState({
+    name: false,
+    email: false,
+    mobile: false,
+    gender: false,
+    college: false
+  });
 
-  const departmentOptions = [
-    { title: 'Select', value: 'Select' },
-    ...(departments && departments.length > 0
-      ? departments.map((dept) => ({ title: dept.name, value: dept.name }))
-      : []
-    )
-  ];
+  const fetchStudentData = async (rollNo) => {
+    const cleanRoll = (rollNo || '').trim().toUpperCase();
+    if (!cleanRoll || cleanRoll.length < 5) {
+      setStudentLookupStatus('');
+      setDisabledFields({ name: false, email: false, mobile: false, gender: false, college: false });
+      return;
+    }
+
+    setFetchingStudent(true);
+    try {
+      const candidates = [cleanRoll];
+      if (cleanRoll.length === 10) {
+        if (cleanRoll.slice(2, 4) === '39') {
+          candidates.push(cleanRoll.slice(0, 2) + 'A9' + cleanRoll.slice(4));
+        } else if (cleanRoll.slice(2, 4) === 'A9') {
+          candidates.push(cleanRoll.slice(0, 2) + '39' + cleanRoll.slice(4));
+        }
+      }
+
+      let data = null;
+
+      for (const targetRoll of candidates) {
+        // Tier 1: Try Backend Proxy (/api/event-students/studentdata/:roll)
+        try {
+          const proxyUrl = import.meta.env.VITE_API_BASE_URL 
+            ? `${import.meta.env.VITE_API_BASE_URL}/api/event-students/studentdata/${encodeURIComponent(targetRoll)}`
+            : `/api/event-students/studentdata/${encodeURIComponent(targetRoll)}`;
+          const res = await fetch(proxyUrl);
+          if (res.ok) {
+            const json = await res.json();
+            if (Array.isArray(json) && json.length > 0 && !json[0].error && json[0].studentname) {
+              data = json;
+              break;
+            }
+          }
+        } catch (err) {
+          console.warn('Backend proxy fetch failed:', err);
+        }
+
+        // Tier 2: Try Vite Dev Proxy (/adityaapi/api/studentdata/:roll)
+        if (!Array.isArray(data) || data.length === 0 || data[0]?.error) {
+          try {
+            const res = await fetch(`/adityaapi/api/studentdata/${encodeURIComponent(targetRoll)}`);
+            if (res.ok) {
+              const json = await res.json();
+              if (Array.isArray(json) && json.length > 0 && !json[0].error && json[0].studentname) {
+                data = json;
+                break;
+              }
+            }
+          } catch (err) {
+            console.warn('Vite proxy fetch failed:', err);
+          }
+        }
+
+        // Tier 3: Direct API URL from env
+        if (!Array.isArray(data) || data.length === 0 || data[0]?.error) {
+          try {
+            const envUrl = import.meta.env.VITE_STUDENT_DATA_URL || 'https://info.aec.edu.in/adityaapi/api/studentdata';
+            const cleanEnvUrl = envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+            const res = await fetch(`${cleanEnvUrl}/${encodeURIComponent(targetRoll)}`);
+            if (res.ok) {
+              const json = await res.json();
+              if (Array.isArray(json) && json.length > 0 && !json[0].error && json[0].studentname) {
+                data = json;
+                break;
+              }
+            }
+          } catch (err) {
+            console.warn('Direct env URL fetch failed:', err);
+          }
+        }
+      }
+
+      if (Array.isArray(data) && data.length > 0 && !data[0].error && data[0].studentname) {
+        const info = data[0];
+        const updatedFields = {};
+        const newDisabled = { name: false, email: false, mobile: false, gender: false, college: false };
+
+        if (info.studentname) {
+          updatedFields.name = info.studentname;
+          newDisabled.name = true;
+        }
+
+        if (info.emailid) {
+          updatedFields.email = info.emailid.toLowerCase();
+          newDisabled.email = true;
+        }
+
+        const mob = info.mobilenumber || info.fathermobilenumber || info.mothermobilenumber;
+        if (mob) {
+          updatedFields.mobile = mob;
+          newDisabled.mobile = true;
+        }
+
+        if (info.gender) {
+          const rawGender = info.gender.trim().toLowerCase();
+          let matchedGender = 'Male';
+          if (rawGender.startsWith('f')) matchedGender = 'Female';
+          else if (rawGender.startsWith('m')) matchedGender = 'Male';
+          else matchedGender = 'Other';
+          updatedFields.gender = matchedGender;
+          newDisabled.gender = true;
+        }
+
+        updatedFields.college = 'Aditya University';
+        newDisabled.college = true;
+
+        setForm(prev => ({
+          ...prev,
+          ...updatedFields
+        }));
+        setDisabledFields(newDisabled);
+        setStudentLookupStatus('found');
+      } else {
+        setStudentLookupStatus('not_found');
+        setDisabledFields({ name: false, email: false, mobile: false, gender: false, college: false });
+      }
+    } catch (err) {
+      console.error('Error fetching student data:', err);
+      setStudentLookupStatus('error');
+      setDisabledFields({ name: false, email: false, mobile: false, gender: false, college: false });
+    } finally {
+      setFetchingStudent(false);
+    }
+  };
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (form.roll && form.roll.trim().length >= 6) {
+        fetchStudentData(form.roll);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [form.roll]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -157,14 +293,52 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-              <label style={{ fontSize: '0.9rem', color: '#444' }}>Name</label>
-              <input name="name" value={form.name} onChange={handleChange} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{ fontSize: '0.9rem', color: '#444' }}>Roll Number</label>
+                {fetchingStudent && <span style={{ fontSize: '0.78rem', color: '#007bff' }}><i className="spinner-border spinner-border-sm me-1" style={{ width: '12px', height: '12px' }}></i> Checking DB...</span>}
+              </div>
+              <input
+                name="roll"
+                value={form.roll}
+                onChange={handleChange}
+                placeholder="Enter Roll Number (e.g. 22A91A0501)"
+                style={{ padding: '0.5rem', border: studentLookupStatus === 'found' ? '1px solid #28a745' : '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem' }}
+              />
+              {studentLookupStatus === 'found' && (
+                <div style={{ color: '#28a745', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <i className="bi bi-patch-check-fill"></i> Student record verified & auto-filled
+                </div>
+              )}
+              {errors.roll && <div style={{ color: 'red', fontSize: '0.8rem' }}>{errors.roll}</div>}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{ fontSize: '0.9rem', color: '#444' }}>Name</label>
+                {disabledFields.name && <span style={{ fontSize: '0.75rem', color: '#28a745' }}><i className="bi bi-lock-fill"></i> Auto-filled</span>}
+              </div>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                readOnly={disabledFields.name}
+                style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem', backgroundColor: disabledFields.name ? '#f5f5f5' : '#fff', cursor: disabledFields.name ? 'not-allowed' : 'text' }}
+              />
               {errors.name && <div style={{ color: 'red', fontSize: '0.8rem' }}>{errors.name}</div>}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-              <label style={{ fontSize: '0.9rem', color: '#444' }}>College</label>
-              <select name="college" value={form.college} onChange={handleChange} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem', backgroundColor: '#fff' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{ fontSize: '0.9rem', color: '#444' }}>College</label>
+                {disabledFields.college && <span style={{ fontSize: '0.75rem', color: '#28a745' }}><i className="bi bi-lock-fill"></i> Auto-filled</span>}
+              </div>
+              <select
+                name="college"
+                value={form.college}
+                onChange={handleChange}
+                disabled={disabledFields.college}
+                style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem', backgroundColor: disabledFields.college ? '#f5f5f5' : '#fff', cursor: disabledFields.college ? 'not-allowed' : 'pointer' }}
+              >
                 {colleges.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
               {errors.college && <div style={{ color: 'red', fontSize: '0.8rem' }}>{errors.college}</div>}
@@ -179,28 +353,49 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-              <label style={{ fontSize: '0.9rem', color: '#444' }}>Roll Number</label>
-              <input name="roll" value={form.roll} onChange={handleChange} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem' }} />
-              {errors.roll && <div style={{ color: 'red', fontSize: '0.8rem' }}>{errors.roll}</div>}
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-              <label style={{ fontSize: '0.9rem', color: '#444' }}>Gender</label>
-              <select name="gender" value={form.gender} onChange={handleChange} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem', backgroundColor: '#fff' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{ fontSize: '0.9rem', color: '#444' }}>Gender</label>
+                {disabledFields.gender && <span style={{ fontSize: '0.75rem', color: '#28a745' }}><i className="bi bi-lock-fill"></i> Auto-filled</span>}
+              </div>
+              <select
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                disabled={disabledFields.gender}
+                style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem', backgroundColor: disabledFields.gender ? '#f5f5f5' : '#fff', cursor: disabledFields.gender ? 'not-allowed' : 'pointer' }}
+              >
                 {genders.map(g => <option key={g} value={g}>{g}</option>)}
               </select>
               {errors.gender && <div style={{ color: 'red', fontSize: '0.8rem' }}>{errors.gender}</div>}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-              <label style={{ fontSize: '0.9rem', color: '#444' }}>Mobile</label>
-              <input name="mobile" value={form.mobile} onChange={handleChange} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{ fontSize: '0.9rem', color: '#444' }}>Mobile</label>
+                {disabledFields.mobile && <span style={{ fontSize: '0.75rem', color: '#28a745' }}><i className="bi bi-lock-fill"></i> Auto-filled</span>}
+              </div>
+              <input
+                name="mobile"
+                value={form.mobile}
+                onChange={handleChange}
+                readOnly={disabledFields.mobile}
+                style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem', backgroundColor: disabledFields.mobile ? '#f5f5f5' : '#fff', cursor: disabledFields.mobile ? 'not-allowed' : 'text' }}
+              />
               {errors.mobile && <div style={{ color: 'red', fontSize: '0.8rem' }}>{errors.mobile}</div>}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-              <label style={{ fontSize: '0.9rem', color: '#444' }}>Email</label>
-              <input name="email" value={form.email} onChange={handleChange} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={{ fontSize: '0.9rem', color: '#444' }}>Email</label>
+                {disabledFields.email && <span style={{ fontSize: '0.75rem', color: '#28a745' }}><i className="bi bi-lock-fill"></i> Auto-filled</span>}
+              </div>
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                readOnly={disabledFields.email}
+                style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem', backgroundColor: disabledFields.email ? '#f5f5f5' : '#fff', cursor: disabledFields.email ? 'not-allowed' : 'text' }}
+              />
               {errors.email && <div style={{ color: 'red', fontSize: '0.8rem' }}>{errors.email}</div>}
             </div>
             

@@ -41,32 +41,50 @@ export default function StudentDashboard({ onNavigate }) {
   });
 
   useEffect(() => {
+    const scrollToProfile = () => {
+      setTimeout(() => {
+        const el = document.getElementById('student-profile-section');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    };
+
+    const handleOpenProfile = () => {
+      setActiveTab('profile');
+      setIsEditingProfile(true);
+      scrollToProfile();
+    };
+
+    window.addEventListener('openProfileTab', handleOpenProfile);
+
     if (isPageReload()) {
       setActiveTab('overview');
       setIsEditingProfile(false);
-      return;
-    }
-
-    if (location.state?.activeTab) {
+    } else if (location.state?.isEditingProfile || location.state?.activeTab === 'profile') {
+      setActiveTab('profile');
+      setIsEditingProfile(true);
+      scrollToProfile();
+    } else if (location.state?.activeTab) {
       setActiveTab(location.state.activeTab);
     }
-    if (location.state?.isEditingProfile) {
-      setIsEditingProfile(true);
-      if (student) {
-        setEditForm({
-          name: student.name || '',
-          college: student.college || '',
-          otherCollege: student.otherCollege || '',
-          roll: student.roll || '',
-          gender: student.gender || '',
-          mobile: student.mobile || '',
-          email: student.email || ''
-        });
-      }
-    } else {
-      setIsEditingProfile(false);
+
+    if (student) {
+      setEditForm({
+        name: student.name || '',
+        college: student.college || '',
+        otherCollege: student.otherCollege || '',
+        roll: student.roll || '',
+        gender: student.gender || '',
+        mobile: student.mobile || '',
+        email: student.email || ''
+      });
     }
-  }, [location.state?.activeTab, location.state?.isEditingProfile, student]);
+
+    return () => {
+      window.removeEventListener('openProfileTab', handleOpenProfile);
+    };
+  }, [location.key, location.state, student]);
 
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -215,6 +233,8 @@ export default function StudentDashboard({ onNavigate }) {
       window.dispatchEvent(new Event('studentLoggedIn'));
       setStudent(updatedStudent);
       setIsEditingProfile(false);
+      setActiveTab('overview');
+      navigate('/dashboard', { state: { activeTab: 'overview', isEditingProfile: false }, replace: true });
       alert('Profile updated successfully!');
     } catch (err) {
       console.error(err);
@@ -329,179 +349,7 @@ export default function StudentDashboard({ onNavigate }) {
         </div>
       )}
 
-      {/* Student Profile Tab (Rendered above grid when active) */}
-      {!loading && activeTab === 'profile' && (
-        <div className="profile-card" style={{ marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <h3 style={{ margin: 0, fontWeight: '700' }}>Student Profile Details</h3>
-              <p style={{ color: 'var(--text-muted)', margin: '0.2rem 0 0 0', fontSize: '0.9rem' }}>
-                Your personal and academic account details
-              </p>
-            </div>
-            {!isEditingProfile ? (
-              <button
-                className="btn-admissions"
-                style={{ background: 'var(--gradient-primary)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
-                onClick={() => {
-                  setEditForm({
-                    name: student.name || '',
-                    college: student.college || '',
-                    otherCollege: student.otherCollege || '',
-                    roll: student.roll || '',
-                    gender: student.gender || '',
-                    mobile: student.mobile || '',
-                    email: student.email || ''
-                  });
-                  setIsEditingProfile(true);
-                }}
-              >
-                <i className="bi bi-pencil-square"></i> Edit Profile
-              </button>
-            ) : (
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button
-                  className="btn-admissions"
-                  style={{ background: '#28a745', color: '#fff', border: 'none' }}
-                  onClick={handleSaveProfile}
-                  disabled={savingProfile}
-                >
-                  {savingProfile ? 'Saving...' : 'Save'}
-                </button>
-                <button
-                  className="btn-logout"
-                  style={{ color: 'var(--text-muted)', border: '1px solid var(--glass-border)', background: 'var(--glass)' }}
-                  onClick={() => setIsEditingProfile(false)}
-                  disabled={savingProfile}
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-          </div>
-
-          {isEditingProfile ? (
-            <form onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }} className="profile-grid" style={{ marginTop: '1.5rem' }}>
-              <div className="profile-field-group">
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Full Name</label>
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                  required
-                />
-              </div>
-
-              <div className="profile-field-group">
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Roll Number</label>
-                <input
-                  type="text"
-                  value={editForm.roll}
-                  onChange={(e) => setEditForm({ ...editForm, roll: e.target.value })}
-                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                  required
-                />
-              </div>
-
-              <div className="profile-field-group">
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>College</label>
-                <select
-                  value={editForm.college}
-                  onChange={(e) => setEditForm({ ...editForm, college: e.target.value })}
-                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                  required
-                >
-                  <option value="Aditya University">Aditya University</option>
-                  <option value="ACET">ACET</option>
-                  <option value="Other College">Other College</option>
-                </select>
-              </div>
-
-              {editForm.college === 'Other College' && (
-                <div className="profile-field-group">
-                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Other College Name</label>
-                  <input
-                    type="text"
-                    value={editForm.otherCollege}
-                    onChange={(e) => setEditForm({ ...editForm, otherCollege: e.target.value })}
-                    style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                    required
-                  />
-                </div>
-              )}
-
-              <div className="profile-field-group">
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Email Address</label>
-                <input
-                  type="email"
-                  value={editForm.email}
-                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                  required
-                />
-              </div>
-
-              <div className="profile-field-group">
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Mobile Number</label>
-                <input
-                  type="text"
-                  value={editForm.mobile}
-                  onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })}
-                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                  required
-                />
-              </div>
-
-              <div className="profile-field-group">
-                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Gender</label>
-                <select
-                  value={editForm.gender}
-                  onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
-                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                  required
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-            </form>
-          ) : (
-            <div className="profile-grid">
-              <div className="profile-field-group">
-                <label>Full Name</label>
-                <div className="value">{student.name}</div>
-              </div>
-
-              <div className="profile-field-group">
-                <label>Roll Number</label>
-                <div className="value">{student.roll}</div>
-              </div>
-
-              <div className="profile-field-group">
-                <label>College</label>
-                <div className="value">{student.college === 'Other College' ? student.otherCollege : student.college}</div>
-              </div>
-
-              <div className="profile-field-group">
-                <label>Email Address</label>
-                <div className="value">{student.email}</div>
-              </div>
-
-              <div className="profile-field-group">
-                <label>Mobile Number</label>
-                <div className="value">{student.mobile}</div>
-              </div>
-
-              <div className="profile-field-group">
-                <label>Gender</label>
-                <div className="value">{student.gender}</div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Student Profile Tab is now rendered below the grid cards */}
 
       {/* Overview Content showing both Event and Payment Cards Side by Side (Always visible below the main content) */}
       {!loading && (
@@ -729,6 +577,194 @@ export default function StudentDashboard({ onNavigate }) {
           </div>
         </div>
       )}
+
+      {/* Student Profile Card (Rendered below Registered Events & Payment Details cards) */}
+      {(activeTab === 'profile' || isEditingProfile) && (
+        <div id="student-profile-section" className="profile-card" style={{ marginTop: '2rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h3 style={{ margin: 0, fontWeight: '700' }}>Student Profile Details</h3>
+              <p style={{ color: 'var(--text-muted)', margin: '0.2rem 0 0 0', fontSize: '0.9rem' }}>
+                Your personal and academic account details
+              </p>
+            </div>
+            {!isEditingProfile ? (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="btn-admissions"
+                  style={{ background: 'var(--gradient-primary)', color: '#fff', border: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  onClick={() => {
+                    setEditForm({
+                      name: student.name || '',
+                      college: student.college || '',
+                      otherCollege: student.otherCollege || '',
+                      roll: student.roll || '',
+                      gender: student.gender || '',
+                      mobile: student.mobile || '',
+                      email: student.email || ''
+                    });
+                    setIsEditingProfile(true);
+                  }}
+                >
+                  <i className="bi bi-pencil-square"></i> Edit Profile
+                </button>
+                <button
+                  className="btn-logout"
+                  style={{ color: 'var(--text-muted)', border: '1px solid var(--glass-border)', background: 'var(--glass)', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer' }}
+                  onClick={() => {
+                    setActiveTab('overview');
+                    setIsEditingProfile(false);
+                    navigate('/dashboard', { state: { activeTab: 'overview', isEditingProfile: false }, replace: true });
+                  }}
+                >
+                  <i className="bi bi-x-lg"></i> Close
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  className="btn-admissions"
+                  style={{ background: '#28a745', color: '#fff', border: 'none' }}
+                  onClick={handleSaveProfile}
+                  disabled={savingProfile}
+                >
+                  {savingProfile ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  className="btn-logout"
+                  style={{ color: 'var(--text-muted)', border: '1px solid var(--glass-border)', background: 'var(--glass)', padding: '6px 14px', borderRadius: '20px', cursor: 'pointer' }}
+                  onClick={() => {
+                    setIsEditingProfile(false);
+                    setActiveTab('overview');
+                    navigate('/dashboard', { state: { activeTab: 'overview', isEditingProfile: false }, replace: true });
+                  }}
+                  disabled={savingProfile}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+
+          {isEditingProfile ? (
+            <form onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }} className="profile-grid" style={{ marginTop: '1.5rem' }}>
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Full Name</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                />
+              </div>
+
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Roll Number</label>
+                <input
+                  type="text"
+                  value={editForm.roll}
+                  onChange={(e) => setEditForm({ ...editForm, roll: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                />
+              </div>
+
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>College</label>
+                <select
+                  value={editForm.college}
+                  onChange={(e) => setEditForm({ ...editForm, college: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                >
+                  <option value="Aditya University">Aditya University</option>
+                  <option value="ACET">ACET</option>
+                  <option value="Other College">Other College</option>
+                </select>
+              </div>
+
+              {editForm.college === 'Other College' && (
+                <div className="profile-field-group">
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>College Name</label>
+                  <input
+                    type="text"
+                    value={editForm.otherCollege}
+                    onChange={(e) => setEditForm({ ...editForm, otherCollege: e.target.value })}
+                    style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Gender</label>
+                <select
+                  value={editForm.gender}
+                  onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Mobile</label>
+                <input
+                  type="text"
+                  value={editForm.mobile}
+                  onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                />
+              </div>
+
+              <div className="profile-field-group">
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Email</label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
+                  required
+                />
+              </div>
+            </form>
+          ) : (
+            <div className="profile-info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginTop: '1.5rem' }}>
+              <div className="info-item">
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Full Name</span>
+                <strong style={{ color: 'var(--text-light)', fontSize: '1rem' }}>{student.name || 'N/A'}</strong>
+              </div>
+              <div className="info-item">
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Roll Number</span>
+                <strong style={{ color: 'var(--text-light)', fontSize: '1rem' }}>{student.roll || 'N/A'}</strong>
+              </div>
+              <div className="info-item">
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Mobile</span>
+                <strong style={{ color: 'var(--text-light)', fontSize: '1rem' }}>{student.mobile || 'N/A'}</strong>
+              </div>
+              <div className="info-item">
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Email</span>
+                <strong style={{ color: 'var(--text-light)', fontSize: '1rem' }}>{student.email || 'N/A'}</strong>
+              </div>
+              <div className="info-item">
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>College</span>
+                <strong style={{ color: 'var(--text-light)', fontSize: '1rem' }}>{student.college === 'Other College' ? student.otherCollege : student.college || 'N/A'}</strong>
+              </div>
+              <div className="info-item">
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block' }}>Gender</span>
+                <strong style={{ color: 'var(--text-light)', fontSize: '1rem' }}>{student.gender || 'N/A'}</strong>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+
 
 
 
