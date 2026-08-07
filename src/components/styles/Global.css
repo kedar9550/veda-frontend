@@ -39,6 +39,20 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: var(--bg-dark, #000000);
+}
+
+html,
+body,
+#root {
+  background-color: var(--bg-dark, #000000);
+}
+
+.dark-theme,
+.dark-theme html,
+.dark-theme body,
+.dark-theme #root {
+  background-color: #000000 !important;
 }
 
 /* ─── Circular Theme View Transitions ─── */
@@ -154,12 +168,12 @@ section {
 }
 
 main {
-  padding-top: 96px;
+  padding-top: 0;
 }
 
 @media (max-width: 768px) {
   main {
-    padding-top: 88px;
+    padding-top: 0;
   }
 }
 
@@ -181,6 +195,53 @@ main {
 .dark-theme .navbar-custom.scrolled {
   background: rgba(7, 20, 33, 0.75);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Theme-based Aditya Logo visibility & color rules */
+body:not(.dark-theme) .logo-dark-only,
+body.light-theme .logo-dark-only,
+.light-theme .logo-dark-only {
+  display: none !important;
+}
+
+body:not(.dark-theme) .logo-light-only,
+body.light-theme .logo-light-only,
+.light-theme .logo-light-only {
+  display: block !important;
+}
+
+body.dark-theme .logo-dark-only,
+.dark-theme .logo-dark-only {
+  display: block !important;
+}
+
+body.dark-theme .logo-light-only,
+.dark-theme .logo-light-only {
+  display: none !important;
+}
+
+/* Enforce #be9337 gold fill color on GoldLogo in dark theme */
+.dark-theme .theme-dark-logo path,
+.dark-theme .logo-dark-only path,
+.dark-theme .sdg-gold-logo.logo-dark-only path {
+  fill: #be9337 !important;
+}
+
+/* Enforce authentic blue (#274191) and orange (#f1683b) fill colors on LightLogo in light theme */
+body:not(.dark-theme) .theme-light-logo path.st0,
+body:not(.dark-theme) .theme-light-logo path.st2,
+body:not(.dark-theme) .theme-light-logo path.st3,
+body:not(.dark-theme) .theme-light-logo path.st4,
+body:not(.dark-theme) .theme-light-logo path.st5,
+body:not(.dark-theme) .theme-light-logo path.st8,
+body:not(.dark-theme) .theme-light-logo path.st9,
+body:not(.dark-theme) .theme-light-logo path.st10,
+body:not(.dark-theme) .theme-light-logo path.st11 {
+  fill: #274191 !important;
+}
+
+body:not(.dark-theme) .theme-light-logo path.st7 {
+  fill: #f1683b !important;
 }
 
 .dark-theme .hero-tag {
@@ -397,7 +458,7 @@ main {
 .custom-cursor {
   width: 72px;
   height: 72px;
-  background-image: url('/src/assets/Cursor_A_Light.svg');
+  background-image: url('/Cursor_A_Light.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -415,7 +476,7 @@ main {
 .custom-cursor-follower {
   width: 72px;
   height: 72px;
-  background-image: url('/src/assets/Cursor_Sun_Light.svg');
+  background-image: url('/Cursor_Sun_Light.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -441,11 +502,11 @@ main {
 
 /* Dark theme overrides */
 .dark-theme .custom-cursor {
-  background-image: url('/src/assets/Cursor_A_Dark.svg');
+  background-image: url('/Cursor_A_Dark.svg');
 }
 
 .dark-theme .custom-cursor-follower {
-  background-image: url('/src/assets/Cursor_Sun_Dark.svg');
+  background-image: url('/Cursor_Sun_Dark.svg');
 }
 
 /* Hide on mobile/touch devices */
@@ -470,18 +531,31 @@ main {
   z-index: 9999;
   padding: 24px 0;
   transition: padding var(--transition-normal), background var(--transition-normal), border var(--transition-normal);
-  background: transparent;
-  border-bottom: 1px solid transparent;
+  background: transparent !important;
+  border-bottom: 1px solid transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Sticky/Scrolled State */
 .navbar-custom.scrolled {
   padding: 14px 0;
-  background: rgba(var(--bg-dark-rgb), 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--glass-border);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+.dark-theme .navbar-custom.scrolled {
+  background: rgba(7, 14, 23, 0.85) !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3) !important;
 }
 
 .nav-container {
@@ -517,10 +591,15 @@ main {
 
 .logo-text-aditya,
 .logo-text-uni {
+  color: #0f172a;
+  display: inline-block;
+}
+
+.dark-theme .logo-text-aditya,
+.dark-theme .logo-text-uni {
   background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  display: inline-block;
 }
 
 /* Nav Menu links */
@@ -534,10 +613,10 @@ main {
 }
 
 .nav-item-link {
-  color: rgba(1, 60, 110, 0.8);
+  color: #1e293b;
   text-decoration: none;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.02em;
   position: relative;
   padding: 6px 0;
@@ -545,22 +624,17 @@ main {
 }
 
 .dark-theme .nav-item-link {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .nav-item-link:hover,
-.nav-item-link.active {
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  opacity: 1;
-}
-
+.nav-item-link.active,
 .dark-theme .nav-item-link:hover,
 .dark-theme .nav-item-link.active {
   background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  opacity: 1;
 }
 
 .nav-item-link::after {
@@ -653,12 +727,26 @@ main {
 /* Mobile responsive navigation styles */
 @media (max-width: 991px) {
 
-  .navbar-custom,
-  .navbar-custom.scrolled {
+  .navbar-custom {
     padding: 12px 0;
-    background: rgba(var(--bg-dark-rgb), 0.85);
+    background: transparent !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: none !important;
+    box-shadow: none !important;
+  }
+
+  .navbar-custom.scrolled {
+    padding: 10px 0;
+    background: rgba(255, 255, 255, 0.85) !important;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
+    border-bottom: none !important;
+    box-shadow: none !important;
+  }
+
+  .dark-theme .navbar-custom.scrolled {
+    background: rgba(7, 14, 23, 0.75) !important;
     border-bottom: none !important;
     box-shadow: none !important;
   }
@@ -694,21 +782,53 @@ main {
   align-items: center;
   position: relative;
   overflow: hidden;
-  padding-top: 80px;
+  margin-top: -96px !important;
+  padding-top: 140px !important;
   background-color: var(--bg-dark);
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    margin-top: -88px !important;
+    padding-top: 110px !important;
+  }
+
+  .hero-bg-img {
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center 40% !important;
+    transform: none !important;
+    opacity: 0.95 !important;
+  }
+
+  .aurora-bg,
+  .aurora-blob,
+  .hero-spotlight {
+    display: none !important;
+  }
+
+  .veda-char,
+  .veda-title-container {
+    text-shadow: none !important;
+    filter: none !important;
+  }
 }
 
 .hero-bg-img {
   position: absolute;
-  top: 0;
+  top: -60px;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% + 60px);
   object-fit: cover;
-  object-position: right center;
+  object-position: right top;
+  transform: translateY(-30px);
   z-index: 1;
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.9;
   filter: invert(1);
   transition: filter var(--transition-normal);
 }
@@ -828,18 +948,19 @@ main {
 .hero-container-layout {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  text-align: center;
   width: 100%;
   z-index: 4;
   position: relative;
-  gap: 40px;
 }
 
 .hero-left-col {
-  width: 60%;
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+  text-align: center;
 }
 
 .hero-right-col {
@@ -849,10 +970,11 @@ main {
 .veda-title-container {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0.05em;
   position: relative;
   width: 100%;
+  text-align: center;
 }
 
 .veda-char {
@@ -863,10 +985,12 @@ main {
   will-change: transform, opacity;
   transform-origin: center center;
   text-shadow: 0 0 50px rgba(var(--primary-rgb), 0.15);
-  font-size: clamp(4rem, 9.5vw, 10.5rem);
+  font-size: clamp(5rem, 13.5vw, 13.5rem);
   font-weight: 900;
   line-height: 0.95;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  opacity: 0;
+  transform: scale(0);
 }
 
 @media (min-width: 992px) {
@@ -1598,67 +1722,39 @@ main {
   letter-spacing: -0.02em;
 }
 
-/* Immersive zoom container */
+/* Immersive poster container */
 .campus-zoom-container {
   position: relative;
   width: 100%;
-  height: 90vh;
+  min-height: 80vh;
+  padding: 1rem 1.5rem 3rem 1.5rem;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Base image inside container */
+/* Base poster image inside container */
 .campus-zoom-img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Will start scaled up slightly and zoom out/in during scroll */
-  transform: scale(1.3);
-  /* Clip-path will start inset and expand on scroll */
-  clip-path: inset(10% 12% 10% 12% round 30px);
+  max-width: 100%;
+  max-height: 85vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  transform: none;
+  clip-path: none;
 }
 
 /* Inner overlay overlaying the showcase */
 .campus-img-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to top, rgba(7, 20, 33, 0.95) 0%, rgba(7, 20, 33, 0.4) 50%, rgba(7, 20, 33, 0.8) 100%);
-  z-index: 2;
-  pointer-events: none;
+  display: none;
 }
 
 /* Detail overlay card at the bottom */
 .campus-overlay-card {
-  position: absolute;
-  bottom: 8%;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  z-index: 3;
-  width: 90%;
-  max-width: 800px;
-  padding: 30px;
-  background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  text-align: center;
-  opacity: 0;
-  box-shadow: var(--shadow-lg);
-  transition: opacity 0.5s ease;
-}
-
-.campus-overlay-card.visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  display: none !important;
 }
 
 .campus-overlay-title {
@@ -2470,28 +2566,13 @@ main {
 .admissions-section {
   position: relative;
   background-color: transparent;
-  padding: 120px 0;
+  padding: 2rem 0 5rem 0;
   overflow: hidden;
 }
 
 /* Morphing Blob Background */
 .admissions-blob-container {
-  position: absolute;
-  top: 50%;
-  left: 80%;
-  transform: translate(-50%, -50%);
-  width: 500px;
-  height: 500px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.admissions-blob {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.3) 0%, rgba(var(--secondary-rgb), 0.2) 100%);
-  filter: blur(50px);
-  animation: morphingBlob 12s ease-in-out infinite alternate;
+  display: none;
 }
 
 .admissions-content {
@@ -2721,12 +2802,36 @@ textarea.form-input-custom {
 .footer-custom {
   position: relative;
   background-color: var(--bg-dark);
-  /* Theme-aware background */
-  padding-top: 60px;
-  /* Reduced padding since wave curves are removed */
-  padding-bottom: 40px;
+  padding: 28px 0;
   overflow: hidden;
   border-top: 1px solid var(--glass-border);
+}
+
+.footer-accent-line {
+  width: 36px;
+  height: 3px;
+  background: var(--gradient-primary);
+  margin: 0 auto 10px auto;
+  border-radius: 99px;
+}
+
+.footer-dev-text {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+  font-weight: 400;
+}
+
+.footer-brand-highlight {
+  margin: 3px 0 0 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
 
 .footer-waves-container {
@@ -3231,14 +3336,20 @@ textarea.form-input-custom {
 }
 
 /* ── Card ── */
+.event-card,
+.event-card--modern,
+.research-glass-card,
+[class*="-card"] {
+  box-shadow: none !important;
+}
+
 .event-card {
   border-radius: 20px;
   overflow: hidden;
   background: var(--bg-card);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-md);
+  box-shadow: none !important;
   transition: transform 0.35s cubic-bezier(0.215, 0.61, 0.355, 1),
-    box-shadow 0.35s ease,
     border-color 0.35s ease;
   cursor: pointer;
   position: relative;
@@ -3590,8 +3701,8 @@ textarea.form-input-custom {
   flex-direction: column !important;
   position: relative !important;
   overflow: hidden !important;
-  box-shadow: var(--shadow-md) !important;
-  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease !important;
+  box-shadow: none !important;
+  transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease !important;
   min-height: 340px !important;
   width: 320px !important;
   max-width: 100% !important;
@@ -3603,7 +3714,7 @@ textarea.form-input-custom {
   background: radial-gradient(circle at 100% 0%,
       color-mix(in srgb, var(--event-accent) 25%, transparent) 0%,
       var(--bg-card) 100%) !important;
-  box-shadow: var(--shadow-lg), 0 0 20px color-mix(in srgb, var(--event-accent) 20%, transparent) !important;
+  box-shadow: none !important;
 }
 
 /* Dots decorative pattern in top right */
@@ -5597,4 +5708,493 @@ select:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px var(--bg-dark) inset !important;
   -webkit-text-fill-color: var(--text-light) !important;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ==========================================================================
+   Mobile Uniform Side-Gap & Padding Overrides (@media max-width 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .container-premium {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .container-premium>.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .container-premium>.row>[class*="col-"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Mobile Section Vertical Spacing & Card Gap Optimization */
+  section {
+    padding: 2.5rem 0 !important;
+  }
+
+  /* CRITICAL: overflow: visible enables CSS position: sticky for mobile card stacking */
+  .research-section,
+  section#research,
+  #research,
+  .research-timeline-wrap {
+    overflow: visible !important;
+  }
+
+  .research-section,
+  .sdgs-section,
+  .schools-section,
+  .events-section,
+  .admissions-section,
+  .campus-section {
+    padding: 2.5rem 0 !important;
+  }
+
+  .research-node:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  /* Mobile Scroll Stacking Animation for VEDA Road Map Cards */
+  .research-timeline-wrap {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding-bottom: 2rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  .research-node {
+    position: sticky !important;
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin-bottom: 2.5rem !important;
+    will-change: transform;
+  }
+
+  .research-node:nth-child(1) {
+    top: 90px;
+    z-index: 1;
+  }
+
+  .research-node:nth-child(2) {
+    top: 106px;
+    z-index: 2;
+  }
+
+  .research-node:nth-child(3) {
+    top: 122px;
+    z-index: 3;
+  }
+
+  .research-node:nth-child(4) {
+    top: 138px;
+    z-index: 4;
+  }
+
+  .research-node:nth-child(5) {
+    top: 154px;
+    z-index: 5;
+  }
+
+  .research-node:nth-child(6) {
+    top: 170px;
+    z-index: 6;
+  }
+
+  .research-node:nth-child(7) {
+    top: 186px;
+    z-index: 7;
+  }
+
+  .research-node:nth-child(8) {
+    top: 202px;
+    z-index: 8;
+  }
+
+  .research-glass-card {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    will-change: transform;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+  }
+
+  /* Events Page Mobile Sticky Scroll Stacking & Parallax Cards */
+  .events-section,
+  #events,
+  .events-grid {
+    overflow: visible !important;
+  }
+
+  .events-section {
+    padding: 2.5rem 0 !important;
+  }
+
+  .events-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    position: relative !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .event-card {
+    position: sticky !important;
+    width: 100% !important;
+    margin-bottom: 2.5rem !important;
+    will-change: transform;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+  }
+
+  .event-card:nth-child(1) {
+    top: 90px;
+    z-index: 1;
+  }
+
+  .event-card:nth-child(2) {
+    top: 106px;
+    z-index: 2;
+  }
+
+  .event-card:nth-child(3) {
+    top: 122px;
+    z-index: 3;
+  }
+
+  .event-card:nth-child(4) {
+    top: 138px;
+    z-index: 4;
+  }
+
+  .event-card:nth-child(5) {
+    top: 154px;
+    z-index: 5;
+  }
+
+  .event-card:nth-child(6) {
+    top: 170px;
+    z-index: 6;
+  }
+
+  .event-card:nth-child(7) {
+    top: 186px;
+    z-index: 7;
+  }
+
+  .event-card:nth-child(8) {
+    top: 202px;
+    z-index: 8;
+  }
+
+  /* Team Page Mobile Sticky Scroll Stacking */
+  .testimonials-section,
+  .team-page-container,
+  .premium-team-grid {
+    overflow: visible !important;
+  }
+
+  .team-page-container {
+    padding: 2.5rem 0 !important;
+  }
+
+  .premium-team-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    margin-top: 2rem !important;
+    width: 100% !important;
+    position: relative !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .premium-team-card {
+    position: sticky !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 2rem 1.25rem !important;
+    margin-bottom: 2.5rem !important;
+    box-sizing: border-box !important;
+    will-change: transform;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+  }
+
+  .premium-team-card:nth-child(1) {
+    top: 90px;
+    z-index: 1;
+  }
+
+  .premium-team-card:nth-child(2) {
+    top: 106px;
+    z-index: 2;
+  }
+
+  .premium-team-card:nth-child(3) {
+    top: 122px;
+    z-index: 3;
+  }
+
+  .premium-team-card:nth-child(4) {
+    top: 138px;
+    z-index: 4;
+  }
+
+  .premium-team-card:nth-child(5) {
+    top: 154px;
+    z-index: 5;
+  }
+
+  .premium-team-card:nth-child(6) {
+    top: 170px;
+    z-index: 6;
+  }
+
+  .premium-team-card:nth-child(7) {
+    top: 186px;
+    z-index: 7;
+  }
+
+  .premium-team-card:nth-child(8) {
+    top: 202px;
+    z-index: 8;
+  }
+
+  .premium-team-card:nth-child(9) {
+    top: 218px;
+    z-index: 9;
+  }
+
+  .premium-team-card:nth-child(10) {
+    top: 234px;
+    z-index: 10;
+  }
+
+  /* Poster Page Mobile Gap */
+  .campus-section {
+    padding: 2rem 0 !important;
+  }
+
+  .campus-title {
+    font-size: 2rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .campus-zoom-container {
+    padding: 0 !important;
+    min-height: auto !important;
+    width: 100% !important;
+  }
+
+  .campus-overlay-card {
+    width: 100% !important;
+    left: 0 !important;
+    transform: translateY(20px) !important;
+    padding: 20px 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  .campus-overlay-card.visible {
+    transform: translateY(0) !important;
+  }
+
+  /* Contact Page Mobile Gap */
+  .admissions-section {
+    padding: 2.5rem 0 !important;
+  }
+
+  .admissions-form-card {
+    padding: 24px 16px !important;
+    margin-top: 30px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .contact-info-left {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
+}
+
+/* ==========================================================================
+   Global Fluid & Device-Responsive Typography System
+   ========================================================================== */
+
+/* 1. Fluid Base Heading Classes Across Home, Events, Team, Poster, Contact, About */
+.events-title,
+.research-title,
+.testimonials-title,
+.campus-title,
+.admissions-title,
+.schools-title,
+.about-title,
+.about-page-title,
+.esingle-page-title,
+.event-detail-title,
+.hero-title,
+h1,
+.h1-fluid {
+  font-size: clamp(1.65rem, 3.8vw + 0.7rem, 2.75rem) !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.02em;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+h2,
+.h2-fluid {
+  font-size: clamp(1.4rem, 2.8vw + 0.6rem, 2.25rem) !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.01em;
+  word-wrap: break-word;
+}
+
+h3,
+.h3-fluid {
+  font-size: clamp(1.2rem, 2vw + 0.5rem, 1.75rem) !important;
+  line-height: 1.35 !important;
+}
+
+h4,
+.h4-fluid {
+  font-size: clamp(1.05rem, 1.4vw + 0.5rem, 1.35rem) !important;
+  line-height: 1.4 !important;
+}
+
+/* Eyebrow / Header tags */
+.events-header-tag,
+.research-header-tag,
+.testimonials-header-tag,
+.campus-header-tag,
+.admissions-header-tag,
+.schools-header-tag,
+.about-header-tag,
+.hero-tag {
+  font-size: clamp(0.75rem, 0.8vw + 0.4rem, 0.9rem) !important;
+  letter-spacing: 0.15em !important;
+}
+
+/* Subtitles & Descriptions */
+.events-subtitle,
+.research-card-desc,
+.campus-overlay-desc,
+.admissions-desc,
+.about-desc,
+.footer-text,
+.esingle-section-text {
+  font-size: clamp(0.875rem, 0.9vw + 0.45rem, 1rem) !important;
+  line-height: 1.6 !important;
+}
+
+/* 2. Responsive Breakpoint Specific Fine-Tuning */
+@media (max-width: 992px) {
+
+  .events-title,
+  .research-title,
+  .testimonials-title,
+  .campus-title,
+  .admissions-title,
+  .schools-title,
+  .about-title,
+  .about-page-title,
+  .esingle-page-title,
+  .event-detail-title {
+    font-size: clamp(1.55rem, 4.5vw, 2.35rem) !important;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .events-title,
+  .research-title,
+  .testimonials-title,
+  .campus-title,
+  .admissions-title,
+  .schools-title,
+  .about-title,
+  .about-page-title,
+  .esingle-page-title,
+  .event-detail-title {
+    font-size: clamp(1.45rem, 5.2vw, 2rem) !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .events-subtitle,
+  .research-card-desc,
+  .admissions-desc {
+    font-size: 0.9rem !important;
+    line-height: 1.55 !important;
+  }
+
+  .research-section {
+    padding-top: 1.25rem !important;
+    margin-top: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .events-title,
+  .research-title,
+  .testimonials-title,
+  .campus-title,
+  .admissions-title,
+  .schools-title,
+  .about-title,
+  .about-page-title,
+  .esingle-page-title,
+  .event-detail-title {
+    font-size: 1.38rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .events-header-tag,
+  .research-header-tag,
+  .testimonials-header-tag,
+  .campus-header-tag,
+  .admissions-header-tag {
+    font-size: 0.75rem !important;
+    letter-spacing: 0.12em !important;
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
+    padding-top: 0 !important;
+  }
+
+  .research-section {
+    padding-top: 1rem !important;
+    margin-top: 0 !important;
+  }
+
+  h3,
+  .h3-fluid {
+    font-size: 1.15rem !important;
+  }
+
+  h4,
+  .h4-fluid {
+    font-size: 1.05rem !important;
+  }
+
+  /* Footer Bottom Padding for Mobile Floating Nav */
+  .footer-custom {
+    padding-bottom: 100px !important;
+  }
 }

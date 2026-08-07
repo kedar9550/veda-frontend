@@ -13,7 +13,13 @@ gsap.registerPlugin(ScrollTrigger);
 export const applyMagneticEffect = (element, parent = null, strength = 0.35) => {
   if (!element) return;
 
+  if (typeof parent === 'number') {
+    strength = parent;
+    parent = null;
+  }
+
   const trigger = parent || element;
+  if (!trigger || typeof trigger.addEventListener !== 'function') return;
 
   const onMouseMove = (e) => {
     const rect = trigger.getBoundingClientRect();

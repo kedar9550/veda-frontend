@@ -77,7 +77,7 @@ export function useSubEvents(schoolId, groupId) {
           if (events.length > 0) {
             let regStatsMap = new Map();
             try {
-              const regRes = await fetch(`${API_URL}/api/payments/registrations`, {
+              const regRes = await fetch(`${API_URL}/api/razorpay/registrations`, {
                 headers: getAuthHeaders(),
                 credentials: 'include',
               });

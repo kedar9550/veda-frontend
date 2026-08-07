@@ -17,18 +17,19 @@
  */
 
 import { useState, useEffect } from 'react';
-import aimlMcaImg from '../../assets/event-thumbnails/AIML & MCA.png';
-import civilImg from '../../assets/event-thumbnails/Civil.png';
-import digiImg from '../../assets/event-thumbnails/DIGI.png';
-import eceImg from '../../assets/event-thumbnails/ECE.png';
-import eeeImg from '../../assets/event-thumbnails/EEE.png';
-import fsImg from '../../assets/event-thumbnails/FS.png';
-import krishiImg from '../../assets/event-thumbnails/Krishi.png';
-import kriyaImg from '../../assets/event-thumbnails/Kriya.png';
-import mechImg from '../../assets/event-thumbnails/Mech.png';
-import minEImg from '../../assets/event-thumbnails/Min.E.png';
-import ptImg from '../../assets/event-thumbnails/PT.png';
-import schoolOfBusinessImg from '../../assets/event-thumbnails/School of Business.png';
+
+const aimlMcaImg = '/events/AIML & MCA.png';
+const civilImg = '/events/Civil.png';
+const digiImg = '/events/DIGI.png';
+const eceImg = '/events/ECE.png';
+const eeeImg = '/events/EEE.png';
+const fsImg = '/events/FS.png';
+const krishiImg = '/events/Krishi.png';
+const kriyaImg = '/events/Kriya.png';
+const mechImg = '/events/Mech.png';
+const minEImg = '/events/Min.E.png';
+const ptImg = '/events/PT.png';
+const schoolOfBusinessImg = '/events/School of Business.png';
 
 const THUMBNAIL_MAP = {
   'aiml': aimlMcaImg,
@@ -350,7 +351,7 @@ export function useEvents() {
 
               let regStatsMap = new Map();
               try {
-                const regRes = await fetch(`${API_URL}/api/payments/registrations`, {
+                const regRes = await fetch(`${API_URL}/api/razorpay/registrations`, {
                   headers: getAuthHeaders(),
                   credentials: 'include',
                 });

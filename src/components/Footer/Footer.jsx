@@ -2,14 +2,16 @@ import React from 'react';
 
 export default function Footer() {
   return (
-    <footer className="footer-custom" style={{ paddingTop: '24px', paddingBottom: '24px' }}>
+    <footer className="footer-custom">
       <div className="container-premium">
-        <div className="footer-bottom" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>
-          <div className="text-center">
-            <p className="mb-0" style={{ fontSize: '0.9rem', letterSpacing: '0.5px' }}>
-              Designed and Developed by IT Application
-            </p>
-          </div>
+        <div className="footer-content-wrap text-center">
+          <div className="footer-accent-line" />
+          <p className="footer-dev-text">
+            Designed &amp; Developed by
+          </p>
+          <p className="footer-brand-highlight">
+            IT Applications
+          </p>
         </div>
       </div>
     </footer>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 import { useEvents } from './useEvents';
 import { useDepartments } from './useDepartments';
 
@@ -675,7 +676,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
             console.error('Payment verification failed', error);
             const message = error?.message || 'Unable to verify payment and save registration. Please try again.';
             setPaymentMessage(message);
-            window.alert(message);
+            toast.error(message);
           } finally {
             setIsProcessingPayment(false);
           }
@@ -688,7 +689,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       console.error('Razorpay payment failed', error);
       const message = error?.message || 'Unable to initialize Razorpay payment. Please try again.';
       setPaymentMessage(message);
-      window.alert(message);
+      toast.error(message);
       setIsProcessingPayment(false);
     }
   };

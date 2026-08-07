@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import useMouseSpotlight from '../hooks/useMouseSpotlight';
-import bgHero from '../../assets/bg-hero.png';
 import GoldLogo from '../SDGs/GoldLogo';
 import LightLogo from '../SDGs/LightLogo';
+const bgHero = '/bg-hero.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -52,7 +52,7 @@ const RESEARCH_DATA = [
   },
 ];
 
-export default function Home() {
+export default function Home({ loadingComplete = true }) {
   // A. Hero refs & logic
   const heroRef = useMouseSpotlight(true);
   const headingRef = useRef(null);
@@ -62,26 +62,80 @@ export default function Home() {
   const pathRef = useRef(null);
   const nodesRef = useRef([]);
 
-  // C. SDGs refs & logic
+  // C. SDGs / Highlights refs
   const sdgsSectionRef = useRef(null);
   const leftColRef = useRef(null);
   const rightColRef = useRef(null);
-  const logoContainerRef = useRef(null);
 
-  const [isDarkTheme, setIsDarkTheme] = useState(() => {
-    return document.body.classList.contains('dark-theme');
-  });
-
-  // Track dark theme changes reactively
+  // Mobile GPU-Accelerated Parallax Depth Effect for Road Map Cards (< 768px)
   useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDarkTheme(document.body.classList.contains('dark-theme'));
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile) return;
+
+    let ticking = false;
+    const activeCards = new Set();
+
+    const updateMobileParallax = () => {
+      const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+
+      activeCards.forEach((cardEl) => {
+        if (!cardEl) return;
+        const rect = cardEl.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        const normalizedScroll = (centerY - windowHeight / 2) / (windowHeight / 2);
+
+        // Clamp translation offset strictly between -12px and +12px (GPU accelerated 60 FPS)
+        const maxOffsetPx = 12;
+        const clampedOffset = Math.max(-maxOffsetPx, Math.min(maxOffsetPx, normalizedScroll * maxOffsetPx));
+
+        const innerCard = cardEl.querySelector('.research-glass-card');
+        if (innerCard) {
+          innerCard.style.transform = `translate3d(0, ${clampedOffset.toFixed(2)}px, 0)`;
+        }
+      });
+
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking && activeCards.size > 0) {
+        window.requestAnimationFrame(updateMobileParallax);
+        ticking = true;
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            activeCards.add(entry.target);
+          } else {
+            activeCards.delete(entry.target);
+            const innerCard = entry.target.querySelector('.research-glass-card');
+            if (innerCard) {
+              innerCard.style.transform = 'translate3d(0, 0, 0)';
+            }
+          }
+        });
+
+        if (activeCards.size > 0) {
+          updateMobileParallax();
+          window.addEventListener('scroll', handleScroll, { passive: true });
+        } else {
+          window.removeEventListener('scroll', handleScroll);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    nodesRef.current.forEach((node) => {
+      if (node) observer.observe(node);
     });
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-    return () => observer.disconnect();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   // Generate Hero dust particles
@@ -137,6 +191,8 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (!loadingComplete) return;
+
     let ctx;
     const timer = setTimeout(() => {
       ctx = gsap.context(() => {
@@ -148,8 +204,8 @@ export default function Home() {
           const containerCenterX = containerRect.left + containerRect.width / 2;
           const containerCenterY = containerRect.top + containerRect.height / 2;
 
-          const tl = gsap.timeline();
-          letters.forEach((char, index) => {
+          // Pre-set all letters centered, hidden and scaled to 0
+          letters.forEach((char) => {
             const charRect = char.getBoundingClientRect();
             const charCenterX = charRect.left + charRect.width / 2;
             const charCenterY = charRect.top + charRect.height / 2;
@@ -162,54 +218,63 @@ export default function Home() {
               scale: 0,
               opacity: 0,
             });
+          });
 
-            const scaleStartPos = index === 0 ? 0 : '-=0.35';
+          // Animate each character zooming up from center and aligning into position sequentially
+          const tl = gsap.timeline({ delay: 0.15 });
+          letters.forEach((char, index) => {
+            const pos = index === 0 ? 0 : '-=0.28';
             tl.to(char, {
-              scale: 1.3,
+              scale: 1.4,
               opacity: 1,
-              duration: 0.22,
-              ease: 'back.out(1.1)',
-            }, scaleStartPos)
+              duration: 0.3,
+              ease: 'back.out(1.4)',
+            }, pos)
             .to(char, {
               scale: 1,
               x: 0,
               y: 0,
-              duration: 0.35,
+              duration: 0.42,
               ease: 'power4.out',
             }, '+=0.02');
           });
         }
 
-        // 2. Research timeline scroll path animation
-        gsap.to(pathRef.current, {
-          strokeDashoffset: 0,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: researchContainerRef.current,
-            start: 'top 30%',
-            end: 'bottom 60%',
-            scrub: 1,
-          },
-        });
+        // 2. Research timeline scroll path & nodes (Desktop only)
+        const mm = gsap.matchMedia();
 
-        // 3. Research timeline nodes reveal
-        nodesRef.current.forEach((node) => {
-          if (!node) return;
-          gsap.fromTo(
-            node,
-            { opacity: 0, y: 55 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 1,
-              ease: 'power3.out',
+        mm.add('(min-width: 769px)', () => {
+          if (pathRef.current) {
+            gsap.to(pathRef.current, {
+              strokeDashoffset: 0,
+              ease: 'none',
               scrollTrigger: {
-                trigger: node,
-                start: 'top 80%',
-                toggleActions: 'play none none reverse',
+                trigger: researchContainerRef.current,
+                start: 'top 30%',
+                end: 'bottom 60%',
+                scrub: 1,
               },
-            }
-          );
+            });
+          }
+
+          nodesRef.current.forEach((node) => {
+            if (!node) return;
+            gsap.fromTo(
+              node,
+              { opacity: 0, y: 55 },
+              {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: node,
+                  start: 'top 80%',
+                  toggleActions: 'play none none reverse',
+                },
+              }
+            );
+          });
         });
 
         // 4. SDGs Section left detail reveal
@@ -253,13 +318,16 @@ export default function Home() {
       clearTimeout(timer);
       if (ctx) ctx.revert();
     };
-  }, []);
+  }, [loadingComplete]);
 
   return (
     <>
       {/* 1. HERO SECTION */}
       <section ref={heroRef} className="hero-section">
-        <img src={bgHero} className="hero-bg-img" alt="Engineering Day Background" />
+        <picture>
+          <source media="(max-width: 768px)" srcSet="/bg-hero-moble.png" />
+          <img src={bgHero} className="hero-bg-img" alt="Engineering Day Background" />
+        </picture>
         <div className="aurora-bg">
           <div className="aurora-blob aurora-blob-1"></div>
           <div className="aurora-blob aurora-blob-2"></div>
@@ -384,19 +452,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div
-              ref={rightColRef}
-              className="col-lg-6 sdg-interactive-wrap"
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-            >
+            <div ref={rightColRef} className="col-lg-6 sdg-interactive-wrap">
               <div className="sdg-center-glow"></div>
-              <div ref={logoContainerRef} className="sdg-svg-ring">
-                {isDarkTheme ? (
-                  <GoldLogo className="sdg-gold-logo" />
-                ) : (
-                  <LightLogo className="sdg-gold-logo" />
-                )}
+              <div className="sdg-svg-ring">
+                <GoldLogo className="sdg-gold-logo logo-dark-only" />
+                <LightLogo className="sdg-gold-logo logo-light-only" />
               </div>
             </div>
 

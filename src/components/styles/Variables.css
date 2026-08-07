@@ -17,7 +17,7 @@
   --bg-dark-rgb: 255, 255, 255;
   --bg-card: rgba(250, 250, 250, 0.85);
   --bg-card-rgb: 250, 250, 250;
-  
+
   --text-light: #000000;
   --text-muted: rgba(0, 0, 0, 0.6);
   --text-dark: #ffffff;
@@ -33,15 +33,15 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.08);
-  
+
   /* Fonts */
   --font-family: 'Stem', sans-serif;
-  
+
   /* Transitions */
   --transition-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
   --transition-normal: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   --transition-slow: 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
-  
+
   /* Ambient Studio Lighting (Light Mode) */
   --aurora-1: transparent;
   --aurora-2: transparent;
@@ -64,7 +64,7 @@
   --bg-dark-rgb: 0, 0, 0;
   --bg-card: rgba(10, 10, 10, 0.75);
   --bg-card-rgb: 10, 10, 10;
-  
+
   --text-light: #ffffff;
   --text-muted: rgba(255, 255, 255, 0.55);
   --text-dark: #000000;
@@ -80,7 +80,7 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.7);
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.8);
-  
+
   /* Ambient Studio Lighting (Dark Mode) */
   --aurora-1: transparent;
   --aurora-2: transparent;

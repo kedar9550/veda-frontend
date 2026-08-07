@@ -100,7 +100,7 @@
 }
 
 .dark-theme .mobile-nav-item.active .mobile-nav-icon-wrapper {
-  filter: drop-shadow(0 0 10px rgba(143, 112, 46, 0.4));
+  filter: none;
 }
 
 /* Active press animation */
@@ -115,9 +115,4 @@
   }
 }
 
-/* Add bottom padding on mobile (< 992px) so page contents aren't overlapped */
-@media (max-width: 991px) {
-  body {
-    padding-bottom: 75px;
-  }
-}
+

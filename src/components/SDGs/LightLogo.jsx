@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function LightLogo({ className }) {
   return (
-    <svg className={`theme-light-logo ${className || ''}`} version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+    <svg className={`theme-light-logo ${className || ''}`} version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 1920 1080" xmlSpace="preserve">
       
       <style type="text/css">
