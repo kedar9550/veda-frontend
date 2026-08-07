@@ -246,23 +246,27 @@ export default function Events() {
     if (loading || groups.length === 0) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        cardsRef.current.filter(Boolean),
-        { opacity: 0, y: 60, scale: 0.95 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.8,
-          stagger: 0.12,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 75%',
-            toggleActions: 'play none none none',
-          },
-        }
-      );
+      const mm = gsap.matchMedia();
+
+      mm.add('(min-width: 769px)', () => {
+        gsap.fromTo(
+          cardsRef.current.filter(Boolean),
+          { opacity: 0, y: 60, scale: 0.95 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.8,
+            stagger: 0.12,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 75%',
+              toggleActions: 'play none none none',
+            },
+          }
+        );
+      });
     }, sectionRef);
 
     // Mouse glow tracking
@@ -280,6 +284,71 @@ export default function Events() {
     return () => {
       ctx.revert();
       cleanups.forEach((c) => c && c());
+    };
+  }, [loading, groups]);
+
+  // Mobile GPU-Accelerated Parallax Depth Effect for Event Cards (< 768px)
+  useEffect(() => {
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile || loading || groups.length === 0) return;
+
+    let ticking = false;
+    const activeCards = new Set();
+
+    const updateMobileParallax = () => {
+      const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+
+      activeCards.forEach((cardEl) => {
+        if (!cardEl) return;
+        const rect = cardEl.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        const normalizedScroll = (centerY - windowHeight / 2) / (windowHeight / 2);
+
+        // Clamp translation offset strictly between -12px and +12px for 60 FPS performance
+        const maxOffsetPx = 12;
+        const clampedOffset = Math.max(-maxOffsetPx, Math.min(maxOffsetPx, normalizedScroll * maxOffsetPx));
+
+        cardEl.style.transform = `translate3d(0, ${clampedOffset.toFixed(2)}px, 0)`;
+      });
+
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking && activeCards.size > 0) {
+        window.requestAnimationFrame(updateMobileParallax);
+        ticking = true;
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            activeCards.add(entry.target);
+          } else {
+            activeCards.delete(entry.target);
+            entry.target.style.transform = 'translate3d(0, 0, 0)';
+          }
+        });
+
+        if (activeCards.size > 0) {
+          updateMobileParallax();
+          window.addEventListener('scroll', handleScroll, { passive: true });
+        } else {
+          window.removeEventListener('scroll', handleScroll);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    cardsRef.current.forEach((card) => {
+      if (card) observer.observe(card);
+    });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
     };
   }, [loading, groups]);
 

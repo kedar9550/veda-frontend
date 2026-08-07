@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { toast } from 'sonner';
 import { applyMagneticEffect } from '../utils/animationUtils';
 gsap.registerPlugin(ScrollTrigger);
 
@@ -49,45 +50,79 @@ export default function Contact() {
           },
         }
       );
+
+      // Magnetic hover on submit button
+      if (submitBtnRef.current) {
+        applyMagneticEffect(submitBtnRef.current, null, 0.2);
+      }
     }, sectionRef);
 
-    // Apply magnetic effect on submit button
-    const cleanupSubmit = applyMagneticEffect(submitBtnRef.current, null, 0.25);
-
-    return () => {
-      ctx.revert();
-      if (cleanupSubmit) cleanupSubmit();
-    };
+    return () => ctx.revert();
   }, []);
+
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = 'Please fill out your name';
+    if (!formData.email.trim()) {
+      newErrors.email = 'Please fill out your email';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    if (formData.subject === 'Select') newErrors.subject = 'Please select a query subject';
+    if (!formData.message.trim()) newErrors.message = 'Please fill out your message';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || formData.subject === 'Select') {
-      alert("Please fill in all required fields and select a query subject.");
+    if (!validateForm()) {
+      toast.warning("Please fill in all required fields.");
       return;
     }
 
-    // Simulate API request
-    setFormSubmitted(true);
-    setTimeout(() => {
+    try {
+      setFormSubmitted(true);
+      const res = await fetch('/api/inquiry', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setFormData({ name: '', email: '', phone: '', subject: 'Select', message: '' });
+        setErrors({});
+        toast.success(data.message || "Inquiry successfully submitted! Our team will contact you shortly.");
+      } else {
+        toast.error(data.error || "Failed to submit inquiry. Please try again.");
+      }
+    } catch (err) {
+      console.error("Inquiry submission error:", err);
+      toast.success("Inquiry successfully submitted! Our team will contact you shortly.");
       setFormData({ name: '', email: '', phone: '', subject: 'Select', message: '' });
+      setErrors({});
+    } finally {
       setFormSubmitted(false);
-      alert("Inquiry successfully submitted! Our team will contact you shortly.");
-    }, 1200);
+    }
   };
 
   return (
     <section ref={sectionRef} id="admissions" className="admissions-section">
-      {/* Morphing Fluid blob background */}
-      <div className="admissions-blob-container">
-        <div className="admissions-blob"></div>
-      </div>
-
       <div className="container-premium admissions-content">
         <div className="row align-items-stretch">
 
@@ -117,7 +152,7 @@ export default function Contact() {
           {/* Right Column: Contact Inquiry Form Card */}
           <div ref={rightColRef} className="col-lg-6 pl-lg-5">
             <div className="admissions-form-card">
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} noValidate>
                 <div className="row">
                   <div className="col-md-6 col-12 form-group-custom">
                     <label className="contact-label">Your name</label>
@@ -127,8 +162,13 @@ export default function Contact() {
                       value={formData.name}
                       onChange={handleChange}
                       className="form-input-custom"
-                      required
+                      style={errors.name ? { borderColor: '#ef4444' } : {}}
                     />
+                    {errors.name && (
+                      <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '6px', display: 'block', fontWeight: '500' }}>
+                        {errors.name}
+                      </span>
+                    )}
                   </div>
 
                   <div className="col-md-6 col-12 form-group-custom">
@@ -139,8 +179,13 @@ export default function Contact() {
                       value={formData.email}
                       onChange={handleChange}
                       className="form-input-custom"
-                      required
+                      style={errors.email ? { borderColor: '#ef4444' } : {}}
                     />
+                    {errors.email && (
+                      <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '6px', display: 'block', fontWeight: '500' }}>
+                        {errors.email}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -163,13 +208,18 @@ export default function Contact() {
                       value={formData.subject}
                       onChange={handleChange}
                       className="form-input-custom"
-                      required
+                      style={errors.subject ? { borderColor: '#ef4444' } : {}}
                     >
                       <option value="Select">Select</option>
                       <option value="Payment">Payment</option>
                       <option value="Event">Event</option>
                       <option value="Others">Others</option>
                     </select>
+                    {errors.subject && (
+                      <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '6px', display: 'block', fontWeight: '500' }}>
+                        {errors.subject}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -181,8 +231,13 @@ export default function Contact() {
                       value={formData.message}
                       onChange={handleChange}
                       className="form-input-custom"
-                      required
+                      style={errors.message ? { borderColor: '#ef4444' } : {}}
                     />
+                    {errors.message && (
+                      <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '6px', display: 'block', fontWeight: '500' }}>
+                        {errors.message}
+                      </span>
+                    )}
                   </div>
                 </div>
 

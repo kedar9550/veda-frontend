@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useDepartments } from './useDepartments';
 
 const colleges = ['Choose...', 'Aditya University', 'ACET', 'Other College'];
@@ -205,10 +206,11 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
       setIsLogin(true);
       setLoginForm({ email: form.email, password: '' });
       setErrors({ login: 'Registration successful! Please login with your password.' });
+      toast.success('Registration successful! Please login with your password.');
 
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -239,10 +241,11 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to login');
       }
+      toast.success('Logged in successfully!');
       onSuccess(data.student);
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

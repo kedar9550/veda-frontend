@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const colleges = ['Choose...', 'Aditya University', 'ACET', 'Other College'];
 const genders = ['Select', 'Male', 'Female', 'Other'];
@@ -230,9 +231,10 @@ export default function LoginPage() {
       setIsLogin(true);
       setLoginForm({ email: form.email, password: '' });
       setErrors({ login: 'Registration successful! Please login with your password.' });
+      toast.success('Registration successful! Please login with your password.');
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -259,6 +261,7 @@ export default function LoginPage() {
       // Save student
       localStorage.setItem('eventStudent', JSON.stringify(data.student));
       window.dispatchEvent(new Event('studentLoggedIn'));
+      toast.success('Logged in successfully!');
       
       // Handle redirect back if there was one
       const redirect = sessionStorage.getItem('authRedirect');
@@ -272,7 +275,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -317,7 +320,7 @@ export default function LoginPage() {
         </p>
 
         {isLogin ? (
-          <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <form onSubmit={handleLoginSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {errors.login && (
               <div style={{ 
                 color: errors.login.includes('successful') ? '#10b981' : '#dc3545', 
@@ -374,7 +377,7 @@ export default function LoginPage() {
             </div>
           </form>
         ) : (
-          <form onSubmit={handleRegisterSubmit} className="row g-4">
+          <form onSubmit={handleRegisterSubmit} noValidate className="row g-4">
             
             <div className="col-md-6 col-12 d-flex flex-column gap-2">
               <div className="d-flex justify-content-between align-items-center">

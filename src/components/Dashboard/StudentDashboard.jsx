@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 import StudentRegistrationPopup from '../Events/StudentRegistrationPopup';
 import Barcode from 'react-barcode';
-import GoldLogo from '../SDGs/GoldLogo';
 import './StudentDashboard.css';
 
 export default function StudentDashboard({ onNavigate }) {
@@ -10,23 +10,11 @@ export default function StudentDashboard({ onNavigate }) {
   const location = useLocation();
   const [student, setStudent] = useState(null);
 
-  // Helper to detect if the page was reloaded/refreshed
-  const isPageReload = () => {
-    try {
-      const navs = performance.getEntriesByType('navigation');
-      return navs && navs[0] && navs[0].type === 'reload';
-    } catch (e) {
-      return false;
-    }
-  };
-
   const [activeTab, setActiveTab] = useState(() => {
-    if (isPageReload()) return 'overview';
     return location.state?.activeTab || 'overview';
   });
 
   const [isEditingProfile, setIsEditingProfile] = useState(() => {
-    if (isPageReload()) return false;
     return !!location.state?.isEditingProfile;
   });
 
@@ -40,16 +28,22 @@ export default function StudentDashboard({ onNavigate }) {
     email: ''
   });
 
-  useEffect(() => {
-    const scrollToProfile = () => {
-      setTimeout(() => {
-        const el = document.getElementById('student-profile-section');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
-    };
+  const scrollToProfile = () => {
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      const el = document.getElementById('student-profile-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        clearInterval(interval);
+      } else if (attempts > 30) {
+        clearInterval(interval);
+      }
+    }, 50);
+  };
 
+  // Handle openProfileTab custom event listener
+  useEffect(() => {
     const handleOpenProfile = () => {
       setActiveTab('profile');
       setIsEditingProfile(true);
@@ -57,18 +51,24 @@ export default function StudentDashboard({ onNavigate }) {
     };
 
     window.addEventListener('openProfileTab', handleOpenProfile);
+    return () => {
+      window.removeEventListener('openProfileTab', handleOpenProfile);
+    };
+  }, []);
 
-    if (isPageReload()) {
-      setActiveTab('overview');
-      setIsEditingProfile(false);
-    } else if (location.state?.isEditingProfile || location.state?.activeTab === 'profile') {
+  // Sync state when location.state changes
+  useEffect(() => {
+    if (location.state?.activeTab === 'profile' || location.state?.isEditingProfile) {
       setActiveTab('profile');
       setIsEditingProfile(true);
       scrollToProfile();
     } else if (location.state?.activeTab) {
       setActiveTab(location.state.activeTab);
     }
+  }, [location.key, location.state]);
 
+  // Sync edit form when student data loads/changes
+  useEffect(() => {
     if (student) {
       setEditForm({
         name: student.name || '',
@@ -80,11 +80,7 @@ export default function StudentDashboard({ onNavigate }) {
         email: student.email || ''
       });
     }
-
-    return () => {
-      window.removeEventListener('openProfileTab', handleOpenProfile);
-    };
-  }, [location.key, location.state, student]);
+  }, [student]);
 
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -204,7 +200,7 @@ export default function StudentDashboard({ onNavigate }) {
 
   const handleSaveProfile = async () => {
     if (!editForm.name || !editForm.college || !editForm.roll || !editForm.gender || !editForm.mobile || !editForm.email) {
-      alert('Please fill in all required fields');
+      toast.warning('Please fill in all required fields');
       return;
     }
 
@@ -235,10 +231,10 @@ export default function StudentDashboard({ onNavigate }) {
       setIsEditingProfile(false);
       setActiveTab('overview');
       navigate('/dashboard', { state: { activeTab: 'overview', isEditingProfile: false }, replace: true });
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setSavingProfile(false);
     }
@@ -647,15 +643,14 @@ export default function StudentDashboard({ onNavigate }) {
           </div>
 
           {isEditingProfile ? (
-            <form onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }} className="profile-grid" style={{ marginTop: '1.5rem' }}>
+            <form onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }} noValidate className="profile-grid" style={{ marginTop: '1.5rem' }}>
               <div className="profile-field-group">
                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Full Name</label>
                 <input
                   type="text"
                   value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                  required
+                  disabled
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem', opacity: 0.6, cursor: 'not-allowed' }}
                 />
               </div>
 
@@ -664,9 +659,8 @@ export default function StudentDashboard({ onNavigate }) {
                 <input
                   type="text"
                   value={editForm.roll}
-                  onChange={(e) => setEditForm({ ...editForm, roll: e.target.value })}
-                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                  required
+                  disabled
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem', opacity: 0.6, cursor: 'not-allowed' }}
                 />
               </div>
 
@@ -674,9 +668,8 @@ export default function StudentDashboard({ onNavigate }) {
                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>College</label>
                 <select
                   value={editForm.college}
-                  onChange={(e) => setEditForm({ ...editForm, college: e.target.value })}
-                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                  required
+                  disabled
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem', opacity: 0.6, cursor: 'not-allowed' }}
                 >
                   <option value="Aditya University">Aditya University</option>
                   <option value="ACET">ACET</option>
@@ -690,9 +683,8 @@ export default function StudentDashboard({ onNavigate }) {
                   <input
                     type="text"
                     value={editForm.otherCollege}
-                    onChange={(e) => setEditForm({ ...editForm, otherCollege: e.target.value })}
-                    style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                    required
+                    disabled
+                    style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem', opacity: 0.6, cursor: 'not-allowed' }}
                   />
                 </div>
               )}
@@ -701,9 +693,8 @@ export default function StudentDashboard({ onNavigate }) {
                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>Gender</label>
                 <select
                   value={editForm.gender}
-                  onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
-                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
-                  required
+                  disabled
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem', opacity: 0.6, cursor: 'not-allowed' }}
                 >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>

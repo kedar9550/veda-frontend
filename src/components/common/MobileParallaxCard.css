@@ -1,0 +1,122 @@
+/* ==========================================================================
+   MobileParallaxCard.css - Lightweight GPU-Accelerated Mobile Depth Card
+   ========================================================================== */
+
+.mobile-parallax-card-wrap {
+  position: relative;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--bg-card, rgba(12, 16, 26, 0.8));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+  box-shadow: none !important;
+  isolation: isolate;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+/* Image container with overflow hidden to clip moving layer */
+.mobile-parallax-img-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  overflow: hidden;
+  transform: translateZ(0); /* Force GPU compositing layer */
+}
+
+/* Parallax Image element */
+.mobile-parallax-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: translate3d(0, 0, 0) scale(1.05);
+  will-change: transform;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Gradient Overlay for Text Readability */
+.mobile-parallax-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 10, 18, 0.2) 0%,
+    rgba(7, 10, 18, 0.65) 60%,
+    rgba(7, 10, 18, 0.92) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Card Content Overlay */
+.mobile-parallax-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 18px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-light, #ffffff);
+}
+
+/* Badge Tag */
+.mobile-parallax-badge {
+  align-self: flex-start;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+  background: var(--gradient-primary, linear-gradient(135deg, #7c3aed, #f1683b));
+  border-radius: 99px;
+  margin-bottom: 4px;
+}
+
+/* Subtitle / Meta */
+.mobile-parallax-subtitle {
+  font-size: 0.78rem;
+  color: var(--secondary, #f1683b);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Card Heading */
+.mobile-parallax-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #ffffff;
+}
+
+/* Body Description */
+.mobile-parallax-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted, rgba(255, 255, 255, 0.75));
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Desktop override: Keep image still, smooth hover effect */
+@media (min-width: 769px) {
+  .mobile-parallax-card-wrap:hover .mobile-parallax-img {
+    transform: scale(1.06) !important;
+  }
+}

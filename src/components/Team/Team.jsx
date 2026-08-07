@@ -41,6 +41,7 @@ export default function Team() {
   const [conveners, setConveners] = useState([]);
   const [coordinators, setCoordinators] = useState([]);
   const [loading, setLoading] = useState(true);
+  const cardsRef = React.useRef([]);
 
   useEffect(() => {
     const fetchTeamData = async () => {
@@ -96,6 +97,77 @@ export default function Team() {
     fetchTeamData();
   }, []);
 
+  // Mobile GPU-Accelerated Parallax Depth Effect (< 768px)
+  useEffect(() => {
+    if (loading) return;
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile) return;
+
+    let ticking = false;
+    const activeCards = new Set();
+
+    const updateMobileParallax = () => {
+      const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+
+      activeCards.forEach((cardEl) => {
+        if (!cardEl) return;
+        const rect = cardEl.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        const normalizedScroll = (centerY - windowHeight / 2) / (windowHeight / 2);
+
+        const maxOffsetPx = 10;
+        const clampedOffset = Math.max(-maxOffsetPx, Math.min(maxOffsetPx, normalizedScroll * maxOffsetPx));
+
+        const avatarInner = cardEl.querySelector('.avatar-ring-container');
+        if (avatarInner) {
+          avatarInner.style.transform = `translate3d(0, ${clampedOffset.toFixed(2)}px, 0)`;
+        }
+      });
+
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking && activeCards.size > 0) {
+        window.requestAnimationFrame(updateMobileParallax);
+        ticking = true;
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            activeCards.add(entry.target);
+          } else {
+            activeCards.delete(entry.target);
+            const avatarInner = entry.target.querySelector('.avatar-ring-container');
+            if (avatarInner) {
+              avatarInner.style.transform = 'translate3d(0, 0, 0)';
+            }
+          }
+        });
+
+        if (activeCards.size > 0) {
+          updateMobileParallax();
+          window.addEventListener('scroll', handleScroll, { passive: true });
+        } else {
+          window.removeEventListener('scroll', handleScroll);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    cardsRef.current.forEach((card) => {
+      if (card) observer.observe(card);
+    });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [loading, conveners, coordinators]);
+
   return (
     <section className="testimonials-section team-page-container">
       <div className="container-premium text-center" style={{ marginBottom: '4rem' }}>
@@ -110,9 +182,13 @@ export default function Team() {
           <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>No active conveners found.</div>
         ) : (
           <div className="premium-team-grid">
-            {conveners.map((member) => (
-              <div key={member._id} className="premium-team-card">
-                <div className="avatar-ring-container">
+            {conveners.map((member, idx) => (
+              <div
+                key={member._id}
+                ref={(el) => (cardsRef.current[idx] = el)}
+                className="premium-team-card"
+              >
+                <div className="avatar-ring-container" style={{ transition: 'transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1)', willChange: 'transform' }}>
                   <div className="avatar-inner">
                     <CoordinatorPhoto 
                       employeeCode={member.employee?.institutionId || member.employee?.employeeCode} 
@@ -148,9 +224,13 @@ export default function Team() {
           <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>No coordinators found.</div>
         ) : (
           <div className="premium-team-grid">
-            {coordinators.map((coord) => (
-              <div key={coord.id} className="premium-team-card">
-                <div className="avatar-ring-container">
+            {coordinators.map((coord, idx) => (
+              <div
+                key={coord.id}
+                ref={(el) => (cardsRef.current[conveners.length + idx] = el)}
+                className="premium-team-card"
+              >
+                <div className="avatar-ring-container" style={{ transition: 'transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1)', willChange: 'transform' }}>
                   <div className="avatar-inner">
                     <CoordinatorPhoto 
                       employeeCode={coord.id} 

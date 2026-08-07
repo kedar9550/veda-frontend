@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
 
+import { Toaster } from 'sonner';
 import Loader from './components/Loader/Loader';
 import Cursor from './components/Cursor/Cursor';
 import Navbar from './components/navbar/Navbar';
@@ -62,35 +63,34 @@ export default function App() {
 
   return (
     <>
+      <Toaster position="top-center" richColors />
       <div className="noise-overlay" />
       <Cursor />
 
+      {/* 1. Fixed Loader curtain on top */}
       {!loadingComplete && <Loader onComplete={() => setLoadingComplete(true)} />}
 
-      {loadingComplete && (
-        <div style={{ animation: 'fadeIn 0.8s ease' }}>
-          <Navbar activePage={activePage} onNavigate={navigateTo} />
-          <main style={{ minHeight: '80vh' }}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/team" element={<Team />} />
-              <Route path="/poster" element={<Poster />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/dashboard" element={<StudentDashboard />} />
-              <Route path="/register/:schoolId/:eventId" element={<RegisterFormWrapper />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/events/:schoolId" element={<EventDetailWrapper />} />
-              <Route path="/events/:schoolId/:eventId" element={<EventSingleDetailWrapper />} />
-              <Route path="*" element={<Contact />} />
-            </Routes>
-          </main>
-          <Footer onNavigate={navigateTo} />
-          <MobileNav activePage={activePage} onNavigate={navigateTo} />
-        </div>
-      )}
+      {/* 2. Main page content rendered in background */}
+      <Navbar activePage={activePage} onNavigate={navigateTo} />
+      <main style={{ minHeight: '80vh' }}>
+        <Routes>
+          <Route path="/" element={<Home loadingComplete={loadingComplete} />} />
+          <Route path="/home" element={<Home loadingComplete={loadingComplete} />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/poster" element={<Poster />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/dashboard" element={<StudentDashboard />} />
+          <Route path="/register/:schoolId/:eventId" element={<RegisterFormWrapper />} />
+          <Route path="/events" element={<Events />} />
+          <Route path="/events/:schoolId" element={<EventDetailWrapper />} />
+          <Route path="/events/:schoolId/:eventId" element={<EventSingleDetailWrapper />} />
+          <Route path="*" element={<Contact />} />
+        </Routes>
+      </main>
+      <Footer onNavigate={navigateTo} />
+      <MobileNav activePage={activePage} onNavigate={navigateTo} />
     </>
   );
 }
