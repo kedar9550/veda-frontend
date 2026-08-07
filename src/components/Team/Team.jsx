@@ -37,9 +37,26 @@ function CoordinatorPhoto({ employeeCode, name }) {
   return <img src={imgSrc} alt={name || 'Photo'} onError={handleError} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
 }
 
+function StudentPhoto({ rollNo, name }) {
+  const initials = (name || '').split(' ').filter(Boolean).slice(0, 2).map(n => n[0]).join('').toUpperCase() || 'SC';
+  const placeholderSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='100%' height='100%' fill='%231e40af'/><text x='50%' y='50%' dy='.35em' text-anchor='middle' font-family='Inter, Arial, Helvetica, sans-serif' font-size='46' fill='%23ffffff'>${initials}</text></svg>`;
+  const placeholderDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(placeholderSvg)}`;
+
+  return (
+    <img
+      src={rollNo ? `/api/proxy/student-photo/${rollNo}` : placeholderDataUrl}
+      alt={name || 'Photo'}
+      onError={(e) => { e.target.onerror = null; e.target.src = placeholderDataUrl; }}
+      loading="lazy"
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+    />
+  );
+}
+
 export default function Team() {
   const [conveners, setConveners] = useState([]);
   const [coordinators, setCoordinators] = useState([]);
+  const [studentCoordinators, setStudentCoordinators] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -62,9 +79,9 @@ export default function Team() {
         // Fetch Groups for Event Coordinators
         const groupsRes = await fetch('/api/groups');
         const groupsData = await groupsRes.json();
-        
+
         const coordsMap = new Map();
-        
+
         (groupsData?.groups || []).forEach(group => {
           if (group.eventCoordinator) {
             const c = group.eventCoordinator;
@@ -86,6 +103,13 @@ export default function Team() {
         });
 
         setCoordinators(Array.from(coordsMap.values()));
+
+        // Fetch Student Coordinators
+        const studentCoordsRes = await fetch('/api/organisation-committee?role=Student Coordinator');
+        const studentCoordsData = await studentCoordsRes.json();
+        setStudentCoordinators(
+          (studentCoordsData?.data || []).filter(item => item.status === 'Active')
+        );
       } catch (error) {
         console.error("Failed to fetch team data", error);
       } finally {
@@ -103,7 +127,7 @@ export default function Team() {
         <h2 className="testimonials-title text-gradient">
           VEDA Organizing Committee 2026
         </h2>
-        
+
         {loading ? (
           <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>Loading...</div>
         ) : conveners.length === 0 ? (
@@ -114,9 +138,9 @@ export default function Team() {
               <div key={member._id} className="premium-team-card">
                 <div className="avatar-ring-container">
                   <div className="avatar-inner">
-                    <CoordinatorPhoto 
-                      employeeCode={member.employee?.institutionId || member.employee?.employeeCode} 
-                      name={member.employee?.name || member.employee?.employeeName} 
+                    <CoordinatorPhoto
+                      employeeCode={member.employee?.institutionId || member.employee?.employeeCode}
+                      name={member.employee?.name || member.employee?.employeeName}
                     />
                   </div>
                 </div>
@@ -141,7 +165,7 @@ export default function Team() {
         <h2 className="testimonials-title text-gradient">
           VEDA Staff Co-Ordinators 2026
         </h2>
-        
+
         {loading ? (
           <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>Loading...</div>
         ) : coordinators.length === 0 ? (
@@ -152,9 +176,9 @@ export default function Team() {
               <div key={coord.id} className="premium-team-card">
                 <div className="avatar-ring-container">
                   <div className="avatar-inner">
-                    <CoordinatorPhoto 
-                      employeeCode={coord.id} 
-                      name={coord.name} 
+                    <CoordinatorPhoto
+                      employeeCode={coord.id}
+                      name={coord.name}
                     />
                   </div>
                 </div>
@@ -167,6 +191,41 @@ export default function Team() {
                 <div className="member-phone">
                   <i className="bi bi-telephone-fill" style={{ fontSize: '0.8rem', color: '#8b5cf6' }}></i>
                   {coord.phone}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="container-premium text-center" style={{ marginTop: '8rem', marginBottom: '4rem' }}>
+        <span className="testimonials-header-tag">Student Leads</span>
+        <h2 className="testimonials-title text-gradient">
+          VEDA Student Co-Ordinators 2026
+        </h2>
+
+        {loading ? (
+          <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>Loading...</div>
+        ) : studentCoordinators.length === 0 ? (
+          <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>No student coordinators found.</div>
+        ) : (
+          <div className="premium-team-grid">
+            {studentCoordinators.map((coord) => (
+              <div key={coord._id} className="premium-team-card">
+                <div className="avatar-ring-container">
+                  <div className="avatar-inner">
+                    <StudentPhoto
+                      rollNo={coord.rollNo}
+                      name={coord.studentName}
+                    />
+                  </div>
+                </div>
+                <h4 className="member-name">
+                  {coord.studentName || 'N/A'}
+                </h4>
+                <div className="member-phone">
+                  <i className="bi bi-telephone-fill" style={{ fontSize: '0.8rem', color: '#8b5cf6' }}></i>
+                  {coord.mobileNumber || 'N/A'}
                 </div>
               </div>
             ))}
