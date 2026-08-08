@@ -18,6 +18,7 @@ import Poster from './components/Poster/Poster';
 import StudentDashboard from './components/Dashboard/StudentDashboard';
 import Footer from './components/Footer/Footer';
 import LoginPage from './components/Login/LoginPage';
+import ChatbotWidget from './components/Chatbot/ChatbotWidget';
 
 function RegisterFormWrapper() {
   const { schoolId, eventId } = useParams();
@@ -91,6 +92,9 @@ export default function App() {
       </main>
       <Footer onNavigate={navigateTo} />
       <MobileNav activePage={activePage} onNavigate={navigateTo} />
+      
+      {/* Global Floating AI Chatbot */}
+      <ChatbotWidget />
     </>
   );
 }
