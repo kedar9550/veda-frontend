@@ -6,116 +6,7 @@ import { useEvents } from './useEvents';
 gsap.registerPlugin(ScrollTrigger);
 
 /* ─── Cards Extra Metadata Mapping ─── */
-const CARD_METADATA = {
-  'digi': {
-    description: 'Empowering innovators and developers to build smart solutions and shape the digital future.',
-    participants: '150+',
-    achievements: '25+',
-    techFocus: 'Innovation'
-  },
-  'kriya': {
-    description: 'Fostering next-generation intelligence, IoT ecosystems, and data-driven solutions.',
-    participants: '120+',
-    achievements: '15+',
-    techFocus: 'IoT & Data'
-  },
-  'krishi': {
-    description: 'Revolutionizing farming and agricultural practices with smart technology and automation.',
-    participants: '80+',
-    achievements: '10+',
-    techFocus: 'AgriTech'
-  },
-  'aiml': {
-    description: 'Exploring cognitive intelligence, machine learning models, and advanced computing paradigms.',
-    participants: '100+',
-    achievements: '12+',
-    techFocus: 'AI & ML'
-  },
-  'mca': {
-    description: 'Exploring cognitive intelligence, machine learning models, and advanced computing paradigms.',
-    participants: '100+',
-    achievements: '12+',
-    techFocus: 'AI & ML'
-  },
-  'aiml-mca': {
-    description: 'Exploring cognitive intelligence, machine learning models, and advanced computing paradigms.',
-    participants: '100+',
-    achievements: '12+',
-    techFocus: 'AI & ML'
-  },
-  'civil': {
-    description: 'Designing sustainable infrastructure, smart cities, and architectural marvels.',
-    participants: '90+',
-    achievements: '10+',
-    techFocus: 'Structural'
-  },
-  'ece': {
-    description: 'Connecting the world through smart communication systems, VLSI, and signal processing.',
-    participants: '130+',
-    achievements: '20+',
-    techFocus: 'VLSI'
-  },
-  'eee': {
-    description: 'Powering the future with renewable energy, smart grids, and electrical innovations.',
-    participants: '110+',
-    achievements: '18+',
-    techFocus: 'Power Systems'
-  },
-  'fs': {
-    description: 'Advancing food preservation, nutritional security, and processing technologies.',
-    participants: '70+',
-    achievements: '8+',
-    techFocus: 'Food Science'
-  },
-  'food-technology': {
-    description: 'Advancing food preservation, nutritional security, and processing technologies.',
-    participants: '70+',
-    achievements: '8+',
-    techFocus: 'Food Science'
-  },
-  'mech': {
-    description: 'Driving engineering excellence through robotics, automotive tech, and thermal systems.',
-    participants: '140+',
-    achievements: '22+',
-    techFocus: 'Robotics'
-  },
-  'min-e': {
-    description: 'Sustainable extraction technologies and geo-resource management for the industry.',
-    participants: '60+',
-    achievements: '6+',
-    techFocus: 'GeoTech'
-  },
-  'pt': {
-    description: 'Exploring clean energy solutions, reservoir optimization, and petroleum extraction.',
-    participants: '75+',
-    achievements: '9+',
-    techFocus: 'Petroleum'
-  },
-  'school-of-business': {
-    description: 'Molding future business leaders, financial strategists, and marketing disruptors.',
-    participants: '95+',
-    achievements: '14+',
-    techFocus: 'Management'
-  },
-  'business': {
-    description: 'Molding future business leaders, financial strategists, and marketing disruptors.',
-    participants: '95+',
-    achievements: '14+',
-    techFocus: 'Management'
-  },
-  'management': {
-    description: 'Molding future business leaders, financial strategists, and marketing disruptors.',
-    participants: '95+',
-    achievements: '14+',
-    techFocus: 'Management'
-  },
-  'entrix': {
-    description: 'Molding future business leaders, financial strategists, and marketing disruptors.',
-    participants: '95+',
-    achievements: '14+',
-    techFocus: 'Management'
-  }
-};
+const CARD_METADATA = {};
 
 /* ─── Loading skeleton card ─── */
 function EventCardSkeleton() {
@@ -192,7 +83,7 @@ function EventCard({ event, index, cardRef }) {
           </div>
           <span className="event-card__stat-label">Participants</span>
           <span className="event-card__stat-val">
-            {event.participantsCount > 0 ? `${event.participantsCount}+` : meta.participants}
+            {event.participantsCount > 0 ? `${event.participantsCount}+` : 0}
           </span>
         </div>
       </div>
