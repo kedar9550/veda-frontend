@@ -89,7 +89,9 @@ export default function ChatbotWidget() {
   const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length > 1) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
