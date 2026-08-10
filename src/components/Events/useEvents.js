@@ -225,48 +225,7 @@ function formatDepartment(entry) {
   return '';
 }
 
-const DEPT_META = {
-  krishi: {
-    tagline: 'Roots of Innovation',
-    image: '/events/krishi.png',
-    organizerIcon: 'bi-tree-fill',
-    accentColor: '#22c55e',
-    category: 'Agriculture',
-    likes: 3432
-  },
-  techno: {
-    tagline: 'Engineer the Future',
-    image: '/events/techno.png',
-    organizerIcon: 'bi-cpu-fill',
-    accentColor: '#3b82f6',
-    category: 'Technology',
-    likes: 5218
-  },
-  pharma: {
-    tagline: 'Molecules of Tomorrow',
-    image: '/events/pharma.png',
-    organizerIcon: 'bi-capsule',
-    accentColor: '#a855f7',
-    category: 'Pharmacy',
-    likes: 2187
-  },
-  scientia: {
-    tagline: 'Discover the Unknown',
-    image: '/events/scientia.png',
-    organizerIcon: 'bi-calculator-fill',
-    accentColor: '#f59e0b',
-    category: 'Science',
-    likes: 1893
-  },
-  entrix: {
-    tagline: 'Lead. Innovate. Succeed.',
-    image: '/events/entrix.png',
-    organizerIcon: 'bi-briefcase-fill',
-    accentColor: '#f97316',
-    category: 'Management',
-    likes: 4102
-  }
-};
+const DEPT_META = {};
 
 let globalEvents = null;
 let globalGroups = null;
@@ -543,12 +502,12 @@ export function useEvents() {
                   payments.forEach(payment => {
                     let groupSlug = getEventId(payment.schoolId || payment.category || '');
                     if (!groupMap.has(groupSlug)) {
-                        // Fallback mapping if schoolId/category doesn't exactly match
-                        // Try to find the group by matching eventName
-                        const matchedEvent = mappedEvents.find(e => e.id === getEventId(payment.eventName) || e.title === payment.eventName);
-                        if (matchedEvent && groupMap.has(matchedEvent.groupSlug)) {
-                            groupSlug = matchedEvent.groupSlug;
-                        }
+                      // Fallback mapping if schoolId/category doesn't exactly match
+                      // Try to find the group by matching eventName
+                      const matchedEvent = mappedEvents.find(e => e.id === getEventId(payment.eventName) || e.title === payment.eventName);
+                      if (matchedEvent && groupMap.has(matchedEvent.groupSlug)) {
+                        groupSlug = matchedEvent.groupSlug;
+                      }
                     }
                     if (groupMap.has(groupSlug) && Array.isArray(payment.participants)) {
                       groupMap.get(groupSlug).participantsCount += payment.participants.length;
