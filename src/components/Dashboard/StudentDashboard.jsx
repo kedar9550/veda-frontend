@@ -240,11 +240,13 @@ export default function StudentDashboard({ onNavigate }) {
               });
               setSelectedPass(null);
               setRegistrations(currentRegistrations);
-            } else if (isVerified) {
+            } else if (isVerified && !selectedPass.attended) {
               toast.success('pass verfied', {
                 style: { background: '#22c55e', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
               });
               setSelectedPass(null);
+              setRegistrations(currentRegistrations);
+            } else {
               setRegistrations(currentRegistrations);
             }
           }
@@ -531,9 +533,16 @@ export default function StudentDashboard({ onNavigate }) {
                                         <td>{p.college === 'Other College' ? p.otherCollege : (p.college || 'N/A')}</td>
                                         <td>
                                           {p.barcode ? (
-                                            <button className="btn-receipt" style={{ padding: '0.15rem 0.4rem', fontSize: '0.75rem' }} onClick={(e) => { e.stopPropagation(); setSelectedPass({ ...p, eventId: reg.eventId, eventName: reg.eventName, teamId: reg.teamId, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) }); }}>
-                                              <i className="bi bi-upc-scan"></i> Pass
-                                            </button>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                              <button className="btn-receipt" style={{ padding: '0.15rem 0.4rem', fontSize: '0.75rem' }} onClick={(e) => { e.stopPropagation(); setSelectedPass({ ...p, eventId: reg.eventId, eventName: reg.eventName, teamId: reg.teamId, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) }); }}>
+                                                <i className="bi bi-upc-scan"></i> Pass
+                                              </button>
+                                              {p.attended && (
+                                                <span style={{ color: '#22c55e', fontSize: '1rem' }} title="Verified">
+                                                  <i className="bi bi-check-circle-fill"></i>
+                                                </span>
+                                              )}
+                                            </div>
                                           ) : (
                                             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No Pass</span>
                                           )}
@@ -895,9 +904,16 @@ export default function StudentDashboard({ onNavigate }) {
                             <td>{p.accommodation || 'No'}</td>
                             <td>
                               {p.barcode ? (
-                                <button className="btn-receipt" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setSelectedPass({ ...p, eventId: reg.eventId, eventName: reg.eventName, teamId: reg.teamId, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) })}>
-                                  <i className="bi bi-upc-scan"></i> View Pass
-                                </button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <button className="btn-receipt" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setSelectedPass({ ...p, eventId: reg.eventId, eventName: reg.eventName, teamId: reg.teamId, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) })}>
+                                    <i className="bi bi-upc-scan"></i> View Pass
+                                  </button>
+                                  {p.attended && (
+                                    <span style={{ color: '#22c55e', fontSize: '1rem' }} title="Verified">
+                                      <i className="bi bi-check-circle-fill"></i>
+                                    </span>
+                                  )}
+                                </div>
                               ) : (
                                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No Pass</span>
                               )}
