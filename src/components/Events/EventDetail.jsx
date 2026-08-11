@@ -78,7 +78,7 @@ function SubEventCard({ event, cardRef, schoolId }) {
           <span className="sub-event-card__stat-val-modern">
             {event.realRegistrationsCount || event.registeredStudents || 0}
           </span>
-          <span className="sub-event-card__stat-label-modern">Students Registered</span>
+          <span className="sub-event-card__stat-label-modern">Teams Registered</span>
         </div>
 
         <div className="sub-event-card__stat-item-modern">

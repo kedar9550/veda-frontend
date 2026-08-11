@@ -32,7 +32,7 @@ function CoordinatorPhoto({ employeeCode, name, className }) {
   useEffect(() => {
     setAttemptIndex(0);
     setImgSrc(employeeCode ? `${CAMPUS_PHOTO_BASES[0]}/${employeeCode}.jpg` : placeholderDataUrl);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employeeCode]);
 
   const handleError = () => {
@@ -87,7 +87,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
     if (studentStr) {
       try {
         setStudent(JSON.parse(studentStr));
-      } catch (e) {}
+      } catch (e) { }
     }
   }, []);
 
@@ -101,16 +101,16 @@ export default function EventSingleDetail({ schoolId, eventId }) {
         const queryParams = new URLSearchParams();
         if (student.email) queryParams.append('email', student.email);
         if (student.roll) queryParams.append('roll', student.roll);
-        
+
         const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9022';
         const res = await fetch(`${baseUrl}/api/razorpay/registrations?${queryParams.toString()}`);
         if (res.ok) {
           const data = await res.json();
           const payments = data.payments || [];
           const eventCategory = (event.category || event.groupCategory || schoolId || '').toLowerCase();
-          const hasRegistered = payments.some(p => 
-            p.eventId === eventId && 
-            p.schoolId === schoolId && 
+          const hasRegistered = payments.some(p =>
+            p.eventId === eventId &&
+            p.schoolId === schoolId &&
             (p.category || '').toLowerCase() === eventCategory
           );
           setIsAlreadyRegistered(hasRegistered);
@@ -176,7 +176,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
         <div className="esingle-stats-bar__inner">
           <div className="esingle-stat">
             <span className="esingle-stat__number">{event.realRegistrationsCount || event.registeredStudents || 0}</span>
-            <span className="esingle-stat__label">Users Registered</span>
+            <span className="esingle-stat__label">Teams Registered</span>
           </div>
           <div className="esingle-stat">
             <span className="esingle-stat__number">{event.feeText || String(event.feeAmount)}</span>
@@ -288,10 +288,10 @@ export default function EventSingleDetail({ schoolId, eventId }) {
               <span>VENUE</span><span className="esingle-section-colon"> :</span>
             </h2>
             <p className="esingle-section-text">
-              {event.raw?.venueType === 'Indoor' && event.raw?.building && event.raw?.floor 
-                ? `${event.raw?.roomNo ? `Room No: ${event.raw.roomNo}, ` : ''}${event.raw.building.name || event.raw.building} - ${event.raw.floor.name || event.raw.floor}` 
-                : event.raw?.venueType === 'Outdoor' && event.raw?.ground 
-                  ? `${event.raw?.roomNo ? `Room No: ${event.raw.roomNo}, ` : ''}${event.raw.ground.name || event.raw.ground}` 
+              {event.raw?.venueType === 'Indoor' && event.raw?.building && event.raw?.floor
+                ? `${event.raw?.roomNo ? `Room No: ${event.raw.roomNo}, ` : ''}${event.raw.building.name || event.raw.building} - ${event.raw.floor.name || event.raw.floor}`
+                : event.raw?.venueType === 'Outdoor' && event.raw?.ground
+                  ? `${event.raw?.roomNo ? `Room No: ${event.raw.roomNo}, ` : ''}${event.raw.ground.name || event.raw.ground}`
                   : event.venue || 'N/A'}
             </p>
           </div>
@@ -301,9 +301,9 @@ export default function EventSingleDetail({ schoolId, eventId }) {
               Loading...
             </button>
           ) : isAlreadyRegistered ? (
-            <button 
-              type="button" 
-              className="esingle-register-btn esingle-register-btn--closed" 
+            <button
+              type="button"
+              className="esingle-register-btn esingle-register-btn--closed"
               style={{ background: '#28a745', color: '#fff', border: 'none', cursor: 'pointer' }}
               onClick={() => navigate('/dashboard', { state: { activeTab: 'events' } })}
             >

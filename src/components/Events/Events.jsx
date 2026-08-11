@@ -83,7 +83,7 @@ function EventCard({ event, index, cardRef }) {
           </div>
           <span className="event-card__stat-label">Participants</span>
           <span className="event-card__stat-val">
-            {event.participantsCount > 0 ? `${event.participantsCount}+` : 0}
+            {event.participantsCount || 0}
           </span>
         </div>
       </div>

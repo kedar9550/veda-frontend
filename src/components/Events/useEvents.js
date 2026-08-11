@@ -319,21 +319,30 @@ export function useEvents() {
                   const pList = regData.payments || [];
                   pList.forEach(p => {
                     if (p.paymentStatus && p.paymentStatus !== 'PAID') return;
-                    const eSlug = getEventId(p.eventId || p.eventName);
+                    const eNameSlug = getEventId(p.eventName);
+                    const eIdSlug = getEventId(p.eventId);
                     const sSlug = getEventId(p.schoolId || p.category);
-                    const count = (p.participants && p.participants.length) || Number(p.teamSize) || 1;
+                    const uniqueKey = sSlug && eNameSlug ? `${sSlug}-${eNameSlug}` : null;
+                    const count = Array.isArray(p.participants) ? p.participants.length : 0;
 
-                    if (eSlug) {
-                      const cur = regStatsMap.get(eSlug) || { regCount: 0, partCount: 0 };
+                    if (uniqueKey) {
+                      const cur = regStatsMap.get(uniqueKey) || { regCount: 0, partCount: 0 };
                       cur.regCount += 1;
                       cur.partCount += count;
-                      regStatsMap.set(eSlug, cur);
+                      regStatsMap.set(uniqueKey, cur);
                     }
-                    if (sSlug) {
-                      const curS = regStatsMap.get(sSlug) || { regCount: 0, partCount: 0 };
-                      curS.regCount += 1;
-                      curS.partCount += count;
-                      regStatsMap.set(sSlug, curS);
+                    if (eIdSlug) {
+                      const cur = regStatsMap.get(eIdSlug) || { regCount: 0, partCount: 0 };
+                      cur.regCount += 1;
+                      cur.partCount += count;
+                      regStatsMap.set(eIdSlug, cur);
+                    }
+                    // Keep eNameSlug fallback for legacy data, but we'll prioritize uniqueKey
+                    if (eNameSlug) {
+                      const cur = regStatsMap.get(eNameSlug) || { regCount: 0, partCount: 0 };
+                      cur.regCount += 1;
+                      cur.partCount += count;
+                      regStatsMap.set(eNameSlug, cur);
                     }
                   });
                 }
@@ -348,10 +357,12 @@ export function useEvents() {
                 const eventName = entry.eventName || entry.title || entry.name || 'Event';
                 const key = getEventId(eventName);
                 const entryIdSlug = getEventId(entry._id || entry.id);
+                const uniqueKey = `${groupSlug}-${key}`;
 
                 const matchedGroupData = groupsApiMap.get(String(groupId)) || groupsApiMap.get(groupSlug) || groupsApiMap.get(getEventId(entry.department)) || {};
 
-                const regStats = regStatsMap.get(key) || regStatsMap.get(entryIdSlug) || regStatsMap.get(groupSlug) || { regCount: 0, partCount: 0 };
+                // Priority: uniqueKey > entryIdSlug > key
+                const eventRegStats = regStatsMap.get(uniqueKey) || regStatsMap.get(entryIdSlug) || regStatsMap.get(key) || { regCount: 0, partCount: 0 };
 
                 const meta = DEPT_META[getEventId(groupName)] || {
                   tagline: entry.overview ? entry.overview.slice(0, 120) : 'Department Fest',
@@ -376,8 +387,9 @@ export function useEvents() {
                 const feeText = formatFeeValue(rawFee) || '';
                 const feeAmount = rawFee;
 
-                const realRegistrationsCount = entry.registeredStudents || entry.usersRegistered || regStats.regCount || 0;
-                const realParticipantsCount = entry.participants || entry.participation || regStats.partCount || 0;
+                // Use dynamic values explicitly
+                const realRegistrationsCount = eventRegStats.regCount || 0;
+                const realParticipantsCount = eventRegStats.partCount || 0;
 
                 const participants = realParticipantsCount;
                 const teamSize = normalizeTeamSize(entry);
@@ -487,45 +499,9 @@ export function useEvents() {
                 }
                 const group = groupMap.get(slug);
                 group.eventCount += 1;
+                group.participantsCount += (event.realParticipantsCount || 0);
                 group.likes = Math.max(group.likes, event.likes || 0);
               });
-
-              // Fetch dynamic registrations to get real participant counts
-              try {
-                const regRes = await fetch(`${API_URL}/api/razorpay/registrations`, {
-                  headers: getAuthHeaders(),
-                  credentials: 'include',
-                });
-                if (regRes.ok) {
-                  const regData = await regRes.json();
-                  const payments = regData.payments || [];
-                  payments.forEach(payment => {
-                    let groupSlug = getEventId(payment.schoolId || payment.category || '');
-                    if (!groupMap.has(groupSlug)) {
-                      // Fallback mapping if schoolId/category doesn't exactly match
-                      // Try to find the group by matching eventName
-                      const matchedEvent = mappedEvents.find(e => e.id === getEventId(payment.eventName) || e.title === payment.eventName);
-                      if (matchedEvent && groupMap.has(matchedEvent.groupSlug)) {
-                        groupSlug = matchedEvent.groupSlug;
-                      }
-                    }
-                    if (groupMap.has(groupSlug) && Array.isArray(payment.participants)) {
-                      groupMap.get(groupSlug).participantsCount += payment.participants.length;
-                    }
-
-                    // Also increment the specific event counts
-                    const exactEvent = mappedEvents.find(e => e.id === getEventId(payment.eventName) || e.title === payment.eventName);
-                    if (exactEvent && Array.isArray(payment.participants)) {
-                      if (exactEvent.realParticipantsCount === undefined) exactEvent.realParticipantsCount = 0;
-                      if (exactEvent.realRegistrationsCount === undefined) exactEvent.realRegistrationsCount = 0;
-                      exactEvent.realParticipantsCount += payment.participants.length;
-                      exactEvent.realRegistrationsCount += payment.participants.length;
-                    }
-                  });
-                }
-              } catch (regErr) {
-                console.warn('Failed to fetch registrations for participant counts', regErr);
-              }
 
               globalEvents = mappedEvents;
               globalGroups = Array.from(groupMap.values());
