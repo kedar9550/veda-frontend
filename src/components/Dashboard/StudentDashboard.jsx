@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import StudentRegistrationPopup from '../Events/StudentRegistrationPopup';
 import Barcode from 'react-barcode';
+import GoldLogo from '../SDGs/GoldLogo';
 import './StudentDashboard.css';
 
 export default function StudentDashboard({ onNavigate }) {
@@ -114,9 +115,16 @@ export default function StudentDashboard({ onNavigate }) {
             const venueMap = {};
             items.forEach(item => {
               const name = item.eventName || item.title || item.name || '';
-              const venue = item.venue || item.location || item.venueLocation || '';
-              if (name && venue) {
-                venueMap[name.toLowerCase().trim()] = venue;
+              let venueStr = item.venue || item.location || item.venueLocation || '';
+              if (!venueStr && item.building && item.roomNo) {
+                const floorName = item.floor && item.floor.name ? item.floor.name : '';
+                venueStr = `Room No: ${item.roomNo}, ${item.building.name || ''}${floorName ? ' - ' + floorName : ''}`;
+              }
+              if (name && venueStr) {
+                venueMap[name.toLowerCase().trim()] = venueStr;
+              }
+              if (item._id && venueStr) {
+                venueMap[item._id.toString()] = venueStr;
               }
             });
             setEventVenues(prev => ({ ...prev, ...venueMap }));
@@ -192,6 +200,66 @@ export default function StudentDashboard({ onNavigate }) {
     fetchRegistrations();
   }, [student]);
 
+  // Polling for pass verification when a pass is open
+  useEffect(() => {
+    let intervalId;
+
+    if (selectedPass && selectedPass.barcode && student) {
+      intervalId = setInterval(async () => {
+        try {
+          const queryParams = new URLSearchParams();
+          if (student.email) queryParams.append('email', student.email);
+          if (student.roll) queryParams.append('roll', student.roll);
+          queryParams.append('_t', Date.now()); // Prevent caching
+
+          const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+          const res = await fetch(`${baseUrl}/api/razorpay/registrations?${queryParams.toString()}`);
+          if (res.ok) {
+            const data = await res.json();
+            const currentRegistrations = data.payments || [];
+            
+            // Check if the current selected pass is still valid and if it's verified
+            let isVerified = false;
+            let isValid = false;
+            for (const reg of currentRegistrations) {
+              if (reg.participants) {
+                const participant = reg.participants.find(p => p.barcode === selectedPass.barcode);
+                if (participant) {
+                  isValid = true;
+                  if (participant.attended === true) {
+                    isVerified = true;
+                  }
+                  break;
+                }
+              }
+            }
+
+            if (!isValid) {
+              toast.error('invalid pass', {
+                style: { background: '#ef4444', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
+              });
+              setSelectedPass(null);
+              setRegistrations(currentRegistrations);
+            } else if (isVerified) {
+              toast.success('pass verfied', {
+                style: { background: '#22c55e', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
+              });
+              setSelectedPass(null);
+              setRegistrations(currentRegistrations);
+            }
+          }
+        } catch (err) {
+          console.error('Error polling pass status:', err);
+        }
+      }, 1000); // Poll every 1 second
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [selectedPass, student]);
 
   // Helper calculation for total amount paid
   const totalAmountPaid = registrations.reduce((sum, reg) => {
@@ -463,7 +531,7 @@ export default function StudentDashboard({ onNavigate }) {
                                         <td>{p.college === 'Other College' ? p.otherCollege : (p.college || 'N/A')}</td>
                                         <td>
                                           {p.barcode ? (
-                                            <button className="btn-receipt" style={{ padding: '0.15rem 0.4rem', fontSize: '0.75rem' }} onClick={(e) => { e.stopPropagation(); setSelectedPass({ ...p, eventName: reg.eventName, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) }); }}>
+                                            <button className="btn-receipt" style={{ padding: '0.15rem 0.4rem', fontSize: '0.75rem' }} onClick={(e) => { e.stopPropagation(); setSelectedPass({ ...p, eventId: reg.eventId, eventName: reg.eventName, teamId: reg.teamId, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) }); }}>
                                               <i className="bi bi-upc-scan"></i> Pass
                                             </button>
                                           ) : (
@@ -827,7 +895,7 @@ export default function StudentDashboard({ onNavigate }) {
                             <td>{p.accommodation || 'No'}</td>
                             <td>
                               {p.barcode ? (
-                                <button className="btn-receipt" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setSelectedPass({ ...p, eventName: reg.eventName, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) })}>
+                                <button className="btn-receipt" style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }} onClick={() => setSelectedPass({ ...p, eventId: reg.eventId, eventName: reg.eventName, teamId: reg.teamId, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) })}>
                                   <i className="bi bi-upc-scan"></i> View Pass
                                 </button>
                               ) : (
@@ -974,361 +1042,15 @@ export default function StudentDashboard({ onNavigate }) {
       {selectedPass && (
         <div className="modal-overlay" onClick={() => setSelectedPass(null)}>
           <div className="receipt-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '680px', textAlign: 'center', position: 'relative', padding: '1.5rem', background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1' }}>
-            <div className="receipt-header" style={{ borderBottom: 'none', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
-              <h2 style={{ fontSize: '1.3rem', margin: '0', fontWeight: '700', color: '#0f172a' }}>Event Pass Preview</h2>
-              <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>This pass is generated for your event entry.</p>
-            </div>
-
-            {/* The Pass Card container (5in x 2in) scaled up for display preview */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '1.5rem 0', height: '2.4in' }}>
-              <div
-                id="event-pass-card"
-                style={{
-                  width: '5in',
-                  height: '2in',
-                  transform: 'scale(1.3)',
-                  transformOrigin: 'center',
-                  color: '#1a202c',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'flex-start',
-                  padding: '0.1in 0.15in 0in 0.15in',
-                  boxSizing: 'border-box',
-                  fontFamily: "'Stem', sans-serif",
-                  position: 'relative',
-                  overflow: 'hidden',
-                  textAlign: 'left'
-                }}
-              >
-                {/* SVG Ticket Shape Background (White fill, Orange borders, transparent cutouts) */}
-                <svg
-                  width="100%"
-                  height="100%"
-                  viewBox="0 0 480 192"
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    zIndex: 0,
-                    pointerEvents: 'none'
-                  }}
-                >
-                  <defs>
-                    <clipPath id="ticket-clip">
-                      <path d="M 10 0 L 480 0 L 473 6 L 480 12 L 473 18 L 480 24 L 473 30 L 480 36 L 473 42 L 480 48 L 473 54 L 480 60 L 473 66 L 480 72 L 473 78 L 480 84 L 473 90 L 480 96 L 473 102 L 480 108 L 473 114 L 480 120 L 473 126 L 480 132 L 473 138 L 480 144 L 473 150 L 480 156 L 473 162 L 480 168 L 473 174 L 480 180 L 473 186 L 480 192 L 10 192 A 10 10 0 0 0 0 182 L 0 104 A 8 8 0 0 0 0 88 L 0 10 A 10 10 0 0 0 10 0 Z" />
-                    </clipPath>
-                  </defs>
-
-                  {/* White background shape */}
-                  <path
-                    d="M 10 0 L 480 0 L 473 6 L 480 12 L 473 18 L 480 24 L 473 30 L 480 36 L 473 42 L 480 48 L 473 54 L 480 60 L 473 66 L 480 72 L 473 78 L 480 84 L 473 90 L 480 96 L 473 102 L 480 108 L 473 114 L 480 120 L 473 126 L 480 132 L 473 138 L 480 144 L 473 150 L 480 156 L 473 162 L 480 168 L 473 174 L 480 180 L 473 186 L 480 192 L 10 192 A 10 10 0 0 0 0 182 L 0 104 A 8 8 0 0 0 0 88 L 0 10 A 10 10 0 0 0 10 0 Z"
-                    fill="#ffffff"
-                  />
-
-                  {/* Footer light-grey background shape, clipped to the ticket bounds */}
-                  <rect x="0" y="162" width="480" height="30" fill="#f8fafc" clipPath="url(#ticket-clip)" />
-                  <line x1="0" y1="162" x2="480" y2="162" stroke="#e2e8f0" strokeWidth="1" clipPath="url(#ticket-clip)" />
-
-                  {/* Orange border path outline */}
-                  <path
-                    d="M 10 0 L 480 0 L 473 6 L 480 12 L 473 18 L 480 24 L 473 30 L 480 36 L 473 42 L 480 48 L 473 54 L 480 60 L 473 66 L 480 72 L 473 78 L 480 84 L 473 90 L 480 96 L 473 102 L 480 108 L 473 114 L 480 120 L 473 126 L 480 132 L 473 138 L 480 144 L 473 150 L 480 156 L 473 162 L 480 168 L 473 174 L 480 180 L 473 186 L 480 192 L 10 192 A 10 10 0 0 0 0 182 L 0 104 A 8 8 0 0 0 0 88 L 0 10 A 10 10 0 0 0 10 0 Z"
-                    fill="none"
-                    stroke="#fd7e14"
-                    strokeWidth="1.5"
-                  />
-                </svg>
-
-                {/* Subtle tech grid/gradient overlay background */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'linear-gradient(135deg, rgba(253, 126, 20, 0.07) 0%, rgba(255, 255, 255, 0) 70%)',
-                  zIndex: 1,
-                  pointerEvents: 'none'
-                }} />
-
-                {/* Gold Logo Watermark centered and fitting pass height */}
-                <div style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '192px',
-                  height: '192px',
-                  opacity: 0.12,
-                  pointerEvents: 'none',
-                  zIndex: 1
-                }}>
-                  <GoldLogo />
-                </div>
-
-                {/* Row 1: Centered Event & Pass Header (Full Width) */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  width: '100%',
-                  position: 'relative',
-                  zIndex: 2
-                }}>
-                  <div style={{
-                    fontSize: '13px',
-                    fontWeight: '700',
-                    color: '#fd7e14',
-                    letterSpacing: '1px',
-                    textTransform: 'uppercase',
-                    lineHeight: '1.1'
-                  }}>
-                    VEDA 2026 EVENT PASS
-                  </div>
-                  <div style={{
-                    fontSize: '18px',
-                    fontWeight: '800',
-                    color: '#0f172a',
-                    marginTop: '1px',
-                    lineHeight: '1.1',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    maxWidth: '4.6in',
-                    textTransform: 'uppercase'
-                  }}>
-                    {selectedPass.eventName}
-                  </div>
-
-                  {/* Designer HR Line */}
-                  <div style={{
-                    width: '58%',
-                    height: '1px',
-                    background: 'linear-gradient(to right, rgba(253, 126, 20, 0) 0%, rgba(253, 126, 20, 0.4) 15%, rgba(253, 126, 20, 0.4) 85%, rgba(253, 126, 20, 0) 100%)',
-                    margin: '4px 0 2px 0',
-                    position: 'relative',
-                    zIndex: 2,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    alignSelf: 'flex-start'
-                  }}>
-                    <div style={{
-                      width: '4px',
-                      height: '4px',
-                      borderRadius: '50%',
-                      backgroundColor: '#fd7e14',
-                      position: 'absolute'
-                    }} />
-                  </div>
-                </div>
-
-                {/* Row 2: Bottom Details (60/40 Split with Vertical Separator) */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  width: '100%',
-                  position: 'relative',
-                  zIndex: 2,
-                  marginTop: 'auto',
-                  marginBottom: 'auto',
-                  boxSizing: 'border-box'
-                }}>
-                  {/* Left Side: Photo & Details (60% width) */}
-                  <div style={{
-                    width: '60%',
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    boxSizing: 'border-box',
-                    paddingRight: '4px'
-                  }}>
-                    {/* Profile Photo */}
-                    <div style={{ marginRight: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      {selectedPass.photoUrl ? (
-                        <img
-                          src={selectedPass.photoUrl}
-                          alt="Student"
-                          style={{
-                            width: '50px',
-                            height: '50px',
-                            borderRadius: '6px',
-                            objectFit: 'cover',
-                            border: '1px solid #cbd5e1',
-                            background: '#f8f9fa'
-                          }}
-                        />
-                      ) : (
-                        <div style={{
-                          width: '50px',
-                          height: '50px',
-                          borderRadius: '6px',
-                          background: '#f1f5f9',
-                          border: '1px solid #e2e8f0',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          boxSizing: 'border-box'
-                        }}>
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12Z" fill="#94a3b8" />
-                            <path d="M12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="#94a3b8" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Student Details Text */}
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'flex-start',
-                      textAlign: 'left',
-                      overflow: 'hidden'
-                    }}>
-                      <div style={{
-                        fontSize: '14px',
-                        fontWeight: '700',
-                        color: '#1e293b',
-                        lineHeight: '1.1',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        width: '100%'
-                      }}>
-                        {selectedPass.name}
-                      </div>
-                      <div style={{
-                        fontSize: '10px',
-                        color: '#475569',
-                        marginTop: '2px',
-                        lineHeight: '1.1',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        width: '100%'
-                      }}>
-                        Roll: {selectedPass.roll} | {selectedPass.college === 'Other College' ? selectedPass.otherCollege : selectedPass.college}
-                      </div>
-                      <div style={{
-                        fontSize: '10px',
-                        color: '#64748b',
-                        marginTop: '2px',
-                        lineHeight: '1.1',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        width: '100%'
-                      }}>
-                        Mobile: {selectedPass.mobile || 'N/A'}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Vertical Separator Line */}
-                  <div style={{
-                    width: '0px',
-                    height: '52px',
-                    borderLeft: '1.5px dashed #cbd5e1',
-                    margin: '0 8px',
-                    flexShrink: 0,
-                    zIndex: 2
-                  }} />
-
-                  {/* Right Side: Barcode (40% width, rotated vertically) */}
-                  <div style={{
-                    width: '40%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    boxSizing: 'border-box',
-                    paddingRight: '6px'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transform: 'rotate(-90deg)',
-                      transformOrigin: 'center',
-                      boxSizing: 'border-box',
-                      marginRight: '-32px'
-                    }}>
-                      <Barcode
-                        value={selectedPass.barcode}
-                        width={1.05}
-                        height={48}
-                        fontSize={8}
-                        margin={2}
-                        displayValue={true}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Row 3: Full Width Venue Details Footer */}
-                <div style={{
-                  position: 'relative',
-                  margin: '0 -0.15in 0 -0.15in',
-                  padding: '6px 0.15in',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 2,
-                  marginTop: 'auto',
-                  background: 'none',
-                  borderTop: 'none'
-                }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginRight: '6px', flexShrink: 0, marginTop: '1px', alignSelf: 'flex-start' }}>
-                    <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="#ef4444" />
-                  </svg>
-                  <span style={{
-                    fontSize: '9px',
-                    fontWeight: '700',
-                    color: '#334155',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    textAlign: 'center',
-                    lineHeight: '1.2',
-                    maxWidth: '4.4in',
-                    wordBreak: 'break-word'
-                  }}>
-                    Venue: {
-                      (() => {
-                        const lookupKey = (selectedPass.eventName || '').toLowerCase().trim();
-                        const SUB_EVENT_VENUES_FALLBACK = {
-                          'agro innovate': 'Room 202, R&C LAB, Second Floor, Bill Gates Bhavan',
-                          'smart farm hackathon': 'Innovation Hub, Ground Floor, Main Block',
-                          'soil analysis challenge': 'Soil Science Lab, Block B, Agriculture Building',
-                          'agri exhibit': 'Online + Exhibition Hall, Admin Block',
-                          'drone sprint': 'University Grounds, Open Area near Sports Complex',
-                          'agri design': 'Open Air Theatre (OAT), Central Ground',
-                          'cultivators': 'AC Seminar Hall, Cotton Bhavan',
-                          'pharma quest': 'Advanced Research Lab, Pharmacy Block',
-                          'scitech model': 'Ramanujan Hall, Science Block',
-                          'biz pitch': 'MBA Seminar Hall, Newton Bhavan'
-                        };
-                        return selectedPass.venue || eventVenues[lookupKey] || SUB_EVENT_VENUES_FALLBACK[lookupKey] || 'Main Campus Blocks';
-                      })()
-                    }
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="receipt-actions" style={{ justifyContent: 'center', gap: '1rem', marginTop: '1.5rem' }}>
-              <button
-                className="btn-receipt"
-                style={{ background: '#28a745', color: '#ffffff', border: 'none', flex: 1, padding: '0.6rem 1rem', borderRadius: '8px', fontWeight: '600' }}
+            <div style={{ position: 'absolute', top: '16px', right: '16px', display: 'flex', gap: '12px' }}>
+              <button 
                 onClick={async () => {
                   const passElement = document.getElementById('event-pass-card');
                   if (passElement) {
                     try {
                       const html2canvas = (await import('html2canvas')).default;
                       const canvas = await html2canvas(passElement, {
-                        scale: 3, // High scale for crisp text and scannable barcode
+                        scale: 3,
                         useCORS: true,
                         backgroundColor: null,
                         onclone: (clonedDoc) => {
@@ -1348,17 +1070,196 @@ export default function StudentDashboard({ onNavigate }) {
                     }
                   }
                 }}
+                style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2563eb', transition: 'all 0.2s' }}
+                title="Download Pass"
               >
-                <i className="bi bi-download"></i> Download
+                <i className="bi bi-download"></i>
               </button>
-              <button
-                className="btn-receipt"
-                style={{ background: '#007bff', color: '#ffffff', border: 'none', flex: 1, padding: '0.6rem 1rem', borderRadius: '8px', fontWeight: '600' }}
+              <button 
                 onClick={() => setSelectedPass(null)}
+                style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#ef4444', transition: 'all 0.2s' }}
+                title="Close Pass"
               >
-                Close Pass
+                <i className="bi bi-x-lg"></i>
               </button>
             </div>
+            
+            <div className="receipt-header" style={{ borderBottom: 'none', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.3rem', margin: '0', fontWeight: '700', color: '#0f172a' }}>Event Pass Preview</h2>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>This pass is generated for your event entry.</p>
+            </div>
+
+            {/* The Pass Card container (5in x 2in) scaled up for display preview */}
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '1.5rem 0' }}>
+              <div
+                id="event-pass-card"
+                style={{
+                  width: '520px',
+                  background: '#ffffff',
+                  border: '2px solid #2563eb',
+                  borderRadius: '12px',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  fontFamily: "'Inter', sans-serif",
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '0'
+                }}
+              >
+                {/* Background Watermark */}
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '250px',
+                  opacity: 0.05,
+                  pointerEvents: 'none',
+                  zIndex: 0
+                }}>
+                  <GoldLogo />
+                </div>
+
+                {/* Header Area */}
+                <div style={{ position: 'relative', zIndex: 1, padding: '16px 20px 8px 20px' }}>
+                  {/* Team ID Pill */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '20px',
+                    left: '20px',
+                    border: '1px solid #2563eb',
+                    borderRadius: '6px',
+                    padding: '4px 8px',
+                    color: '#2563eb',
+                    fontSize: '11px',
+                    fontWeight: '600'
+                  }}>
+                    Team ID: {selectedPass.teamId || `VD26-${Math.floor(Math.random()*1000000000)}`}
+                  </div>
+
+                  {/* Title & Event Pass */}
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ color: '#2563eb', fontSize: '26px', fontWeight: '800', lineHeight: '1.2' }}>
+                      VEDA 2K26
+                    </div>
+                    <div style={{ color: '#000000', fontSize: '13px', fontWeight: '700', letterSpacing: '4px', marginTop: '4px' }}>
+                      EVENT PASS
+                    </div>
+                  </div>
+
+                  {/* Event Name Pill */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px' }}>
+                    <div style={{
+                      background: '#2563eb',
+                      color: '#ffffff',
+                      padding: '6px 20px',
+                      borderRadius: '20px',
+                      fontSize: '12px',
+                      fontWeight: '700'
+                    }}>
+                      {selectedPass.eventName}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Body Area */}
+                <div style={{ position: 'relative', zIndex: 1, display: 'flex', padding: '16px 24px', gap: '16px' }}>
+                  {/* Left List */}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {[
+                      { icon: 'person-fill', label: 'Name', value: selectedPass.name, border: true },
+                      { icon: 'person-vcard-fill', label: 'Roll', value: selectedPass.roll, border: true },
+                      { icon: 'mortarboard-fill', label: 'College', value: selectedPass.college === 'Other College' ? selectedPass.otherCollege : selectedPass.college, border: true },
+                      { icon: 'telephone-fill', label: 'Phone', value: selectedPass.mobile || 'N/A', border: true },
+                      { icon: 'geo-alt-fill', label: 'Venue', value: (() => {
+                        const lookupKey = (selectedPass.eventName || '').toLowerCase().trim();
+                        const eventIdKey = (selectedPass.eventId || '').toString();
+                        const SUB_EVENT_VENUES_FALLBACK = {
+                          'agro innovate': 'Room 202, R&C LAB, Second Floor, Bill Gates Bhavan',
+                          'smart farm hackathon': 'Innovation Hub, Ground Floor, Main Block',
+                          'soil analysis challenge': 'Soil Science Lab, Block B, Agriculture Building',
+                          'agri exhibit': 'Online + Exhibition Hall, Admin Block',
+                          'drone sprint': 'University Grounds, Open Area near Sports Complex',
+                          'agri design': 'Open Air Theatre (OAT), Central Ground',
+                          'cultivators': 'AC Seminar Hall, Cotton Bhavan',
+                          'pharma quest': 'Advanced Research Lab, Pharmacy Block',
+                          'scitech model': 'Ramanujan Hall, Science Block',
+                          'biz pitch': 'MBA Seminar Hall, Newton Bhavan'
+                        };
+                        return selectedPass.venue || eventVenues[eventIdKey] || eventVenues[lookupKey] || SUB_EVENT_VENUES_FALLBACK[lookupKey] || 'Main Campus Blocks';
+                      })(), isRed: true, border: false }
+                    ].map((item, i) => (
+                      <div key={i} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        paddingBottom: '8px',
+                        borderBottom: item.border ? '1px solid #e2e8f0' : 'none'
+                      }}>
+                        <div style={{ width: '24px', display: 'flex', justifyContent: 'center', color: '#2563eb', marginRight: '8px' }}>
+                          <i className={`bi bi-${item.icon}`} style={{ fontSize: '16px' }}></i>
+                        </div>
+                        <div style={{ width: '50px', color: '#2563eb', fontWeight: '700' }}>{item.label}</div>
+                        <div style={{ color: item.isRed ? '#b91c1c' : '#000000', flex: 1, paddingLeft: '4px', wordBreak: 'break-word', lineHeight: '1.3' }}>
+                          : {item.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Right Photo */}
+                  <div style={{ width: '110px', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{
+                      width: '100px',
+                      height: '130px',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      background: '#f8fafc',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '4px'
+                    }}>
+                      {selectedPass.photoUrl ? (
+                        <img src={selectedPass.photoUrl} alt="Student" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
+                      ) : (
+                        <div style={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '4px',
+                          background: '#e2e8f0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <i className="bi bi-person-fill" style={{ fontSize: '48px', color: '#94a3b8' }}></i>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Barcode Section */}
+                <div style={{ borderTop: '2px solid #2563eb', padding: '16px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#ffffff', zIndex: 1 }}>
+                  <Barcode
+                    value={selectedPass.barcode || '128B237E'}
+                    width={2}
+                    height={60}
+                    fontSize={14}
+                    margin={0}
+                    displayValue={true}
+                    background="#ffffff"
+                    lineColor="#000000"
+                  />
+                </div>
+
+              </div>
+            </div>
+
+
           </div>
         </div>
       )}
