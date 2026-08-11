@@ -1,19 +1,24 @@
 import React, { useEffect, useState, useRef } from 'react';
 import gsap from 'gsap';
-const WORDS = ["INNOVATE", "EXCEL", "LEAD", "RESEARCH", "INNOVATE",
-  "PIONEER",
-  "DISCOVER",
-  "CREATE",
-  "IGNITE",
-  "TRANSFORM",
-  "CATALYZE",
-  "BREAKTHROUGH",
-  "FUTURE",
-  "IMPACT", "ADITYA UNIVERSITY", "VEDA"];
+const DEFAULT_WORDS = [];
+
+import { useEvents } from '../Events/useEvents';
 
 export default function Loader({ onComplete }) {
   const [progress, setProgress] = useState(0);
   const [currentWord, setCurrentWord] = useState('');
+  const { groups } = useEvents();
+  const [words, setWords] = useState(DEFAULT_WORDS);
+
+  useEffect(() => {
+    if (groups && groups.length > 0) {
+      const groupNames = groups.map(g => (g.title || g.name || '').toUpperCase()).filter(Boolean);
+      if (groupNames.length > 0) {
+        setWords([...groupNames, "ADITYA UNIVERSITY", "VEDA"]);
+      }
+    }
+  }, [groups]);
+
   const containerRef = useRef(null);
   const textRef = useRef(null);
   const circleRef = useRef(null);
@@ -66,13 +71,13 @@ export default function Loader({ onComplete }) {
     } else if (progress >= 70) {
       targetWord = 'ADITYA UNIVERSITY';
     } else {
-      // For progress 0 to 69, map to index 0 to 13 of the first 14 words
-      const subWords = WORDS.slice(0, 14);
+      // For progress 0 to 69, map to indices of words (excluding last two)
+      const subWords = words.length > 2 ? words.slice(0, words.length - 2) : DEFAULT_WORDS.slice(0, 14);
       const index = Math.min(
         Math.floor((progress / 70) * subWords.length),
-        subWords.length - 1
+        Math.max(0, subWords.length - 1)
       );
-      targetWord = subWords[index];
+      targetWord = subWords[index] || '';
     }
 
     if (targetWord !== activeWordRef.current) {
@@ -102,13 +107,13 @@ export default function Loader({ onComplete }) {
         if (iteration >= targetWord.length) {
           clearInterval(scrambleTimerRef.current);
         }
-        
+
         // Make longer words resolve faster so they are readable sooner
         const step = targetWord.length > 10 ? 0.8 : 0.4;
         iteration += step;
       }, 30);
     }
-  }, [progress]);
+  }, [progress, words]);
 
   // Clean up timers on unmount
   useEffect(() => {

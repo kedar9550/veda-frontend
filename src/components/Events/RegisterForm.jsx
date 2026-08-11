@@ -106,6 +106,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Computation for amount based on extra team
   const computedTotalAmountInPaisa = useMemo(() => {
@@ -461,6 +462,11 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
   const completeRegistration = (paymentDetails = {}) => {
     setPaymentMessage('');
+    setShowSuccessModal(true);
+  };
+
+  const handleSuccessClose = () => {
+    setShowSuccessModal(false);
     navigate('/dashboard');
   };
 
@@ -947,6 +953,46 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                 Proceed to Payment
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showSuccessModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'var(--card-bg, #1a1a1a)',
+            border: '1px solid var(--border-color, #333)',
+            borderRadius: '12px',
+            padding: '2.5rem 2rem',
+            width: '90%', maxWidth: '400px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+            color: '#fff',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.2)',
+              color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '2rem', margin: '0 auto 1.5rem'
+            }}>
+              ✓
+            </div>
+            <h3 style={{ marginTop: 0, color: '#fff', marginBottom: '1rem', fontSize: '1.5rem' }}>Payment Successful!</h3>
+            <p style={{ marginBottom: '2rem', lineHeight: 1.5, color: '#e0e0e0' }}>
+              Your payment has been successfully processed and your registration is complete.
+            </p>
+            <button 
+              type="button" 
+              onClick={handleSuccessClose}
+              className="esingle-cta"
+              style={{ padding: '0.75rem 2rem', width: '100%' }}
+            >
+              Continue to Dashboard
+            </button>
           </div>
         </div>
       )}
