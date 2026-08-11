@@ -1132,128 +1132,101 @@ export default function StudentDashboard({ onNavigate }) {
               <div
                 id="event-pass-card"
                 style={{
-                  width: '520px',
+                  width: '720px',
+                  height: '460px',
                   background: '#ffffff',
-                  border: '2px solid #2563eb',
-                  borderRadius: '12px',
+                  borderRadius: '16px',
                   position: 'relative',
                   overflow: 'hidden',
                   fontFamily: "'Inter', sans-serif",
                   boxSizing: 'border-box',
                   display: 'flex',
-                  flexDirection: 'column',
-                  padding: '0'
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
                 }}
               >
-                {/* Background Watermark */}
+                {/* Background Details (Right Side) */}
+                <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(circle at 100% 0%, rgba(25, 59, 104, 0.05) 0%, transparent 40%), radial-gradient(circle at 100% 100%, rgba(25, 59, 104, 0.08) 0%, transparent 30%)' }}></div>
+                <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '220px', height: '220px', background: '#0a1931', transform: 'rotate(45deg)', zIndex: 0 }}></div>
+                <div style={{ position: 'absolute', bottom: '-60px', right: '-60px', width: '280px', height: '280px', background: '#0a1931', transform: 'rotate(45deg)', zIndex: 0 }}></div>
+                <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '220px', height: '220px', border: '2px solid #cfa144', transform: 'rotate(45deg)', zIndex: 1 }}></div>
+
+                {/* Left Side (Dark Blue) */}
                 <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '250px',
-                  opacity: 0.05,
-                  pointerEvents: 'none',
-                  zIndex: 0
+                  position: 'relative',
+                  width: '260px',
+                  height: '100%',
+                  background: '#0a1931',
+                  clipPath: 'polygon(0 0, 100% 0, 85% 100%, 0 100%)',
+                  zIndex: 2,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '24px 20px',
+                  boxSizing: 'border-box',
+                  color: 'white'
                 }}>
-                  <GoldLogo />
-                </div>
-
-                {/* Header Area */}
-                <div style={{ position: 'relative', zIndex: 1, padding: '16px 20px 8px 20px' }}>
-                  {/* Team ID Pill */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '20px',
-                    left: '20px',
-                    border: '1px solid #2563eb',
-                    borderRadius: '6px',
-                    padding: '4px 8px',
-                    color: '#2563eb',
-                    fontSize: '11px',
-                    fontWeight: '600'
-                  }}>
-                    Team ID: {selectedPass.teamId || `VD26-${Math.floor(Math.random()*1000000000)}`}
-                  </div>
-
-                  {/* Title & Event Pass */}
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ color: '#2563eb', fontSize: '26px', fontWeight: '800', lineHeight: '1.2' }}>
-                      VEDA 2K26
-                    </div>
-                    <div style={{ color: '#000000', fontSize: '13px', fontWeight: '700', letterSpacing: '4px', marginTop: '4px' }}>
-                      EVENT PASS
+                  {/* Logo Area */}
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px', gap: '8px' }}>
+                    <div style={{ width: '50px', height: '50px', background: 'transparent' }}><GoldLogo /></div>
+                    <div style={{ lineHeight: '1.2' }}>
+                      <div style={{ color: '#cfa144', fontSize: '18px', fontWeight: '800', letterSpacing: '1px' }}>ADITYA</div>
+                      <div style={{ color: 'white', fontSize: '13px', fontWeight: '600', letterSpacing: '0.5px' }}>UNIVERSITY</div>
                     </div>
                   </div>
 
-                  {/* Event Name Pill */}
-                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px' }}>
-                    <div style={{
-                      background: '#2563eb',
-                      color: '#ffffff',
-                      padding: '6px 20px',
-                      borderRadius: '20px',
-                      fontSize: '12px',
-                      fontWeight: '700'
-                    }}>
-                      {selectedPass.eventName}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Body Area */}
-                <div style={{ position: 'relative', zIndex: 1, display: 'flex', padding: '16px 24px', gap: '16px' }}>
-                  {/* Left List */}
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {[
-                      { icon: 'person-fill', label: 'Name', value: selectedPass.name, border: true },
-                      { icon: 'person-vcard-fill', label: 'Roll', value: selectedPass.roll, border: true },
-                      { icon: 'mortarboard-fill', label: 'College', value: selectedPass.college === 'Other College' ? selectedPass.otherCollege : selectedPass.college, border: true },
-                      { icon: 'telephone-fill', label: 'Phone', value: selectedPass.mobile || 'N/A', border: true },
-                      { icon: 'geo-alt-fill', label: 'Venue', value: (() => {
-                        const lookupKey = (selectedPass.eventName || '').toLowerCase().trim();
-                        const eventIdKey = (selectedPass.eventId || '').toString();
-                        const SUB_EVENT_VENUES_FALLBACK = {
-                          'agro innovate': 'Room 202, R&C LAB, Second Floor, Bill Gates Bhavan',
-                          'smart farm hackathon': 'Innovation Hub, Ground Floor, Main Block',
-                          'soil analysis challenge': 'Soil Science Lab, Block B, Agriculture Building',
-                          'agri exhibit': 'Online + Exhibition Hall, Admin Block',
-                          'drone sprint': 'University Grounds, Open Area near Sports Complex',
-                          'agri design': 'Open Air Theatre (OAT), Central Ground',
-                          'cultivators': 'AC Seminar Hall, Cotton Bhavan',
-                          'pharma quest': 'Advanced Research Lab, Pharmacy Block',
-                          'scitech model': 'Ramanujan Hall, Science Block',
-                          'biz pitch': 'MBA Seminar Hall, Newton Bhavan'
-                        };
-                        return selectedPass.venue || eventVenues[eventIdKey] || eventVenues[lookupKey] || SUB_EVENT_VENUES_FALLBACK[lookupKey] || 'Main Campus Blocks';
-                      })(), isRed: true, border: false }
-                    ].map((item, i) => (
-                      <div key={i} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        paddingBottom: '8px',
-                        borderBottom: item.border ? '1px solid #e2e8f0' : 'none'
-                      }}>
-                        <div style={{ width: '24px', display: 'flex', justifyContent: 'center', color: '#2563eb', marginRight: '8px' }}>
-                          <i className={`bi bi-${item.icon}`} style={{ fontSize: '16px' }}></i>
-                        </div>
-                        <div style={{ width: '50px', color: '#2563eb', fontWeight: '700' }}>{item.label}</div>
-                        <div style={{ color: item.isRed ? '#b91c1c' : '#000000', flex: 1, paddingLeft: '4px', wordBreak: 'break-word', lineHeight: '1.3' }}>
-                          : {item.value}
-                        </div>
+                  {/* Info Cards */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, paddingRight: '20px' }}>
+                    <div style={{ border: '1px solid #cfa144', borderRadius: '8px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '12px', background: '#0a1931' }}>
+                      <div style={{ color: '#cfa144', fontSize: '20px' }}><i className="bi bi-people-fill"></i></div>
+                      <div>
+                        <div style={{ fontSize: '10px', color: '#cbd5e1', fontWeight: '600', letterSpacing: '1px' }}>TEAM ID</div>
+                        <div style={{ fontSize: '12px', color: '#cfa144', fontWeight: '700', marginTop: '2px' }}>{selectedPass.teamId || `VD26-${Math.floor(Math.random()*1000000000)}`}</div>
                       </div>
-                    ))}
+                    </div>
+
+                    <div style={{ borderBottom: '1px dashed rgba(255,255,255,0.2)', paddingBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                         <div style={{ color: '#cfa144', fontSize: '18px', border: '1px solid #cfa144', borderRadius: '6px', padding: '6px' }}><i className="bi bi-calendar-event"></i></div>
+                         <div>
+                           <div style={{ fontSize: '10px', color: '#cbd5e1', fontWeight: '600', letterSpacing: '1px' }}>EVENT DATE</div>
+                           <div style={{ fontSize: '14px', color: '#cfa144', fontWeight: '700', marginTop: '2px' }}>SEP 15, 2026</div>
+                         </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                       <div style={{ color: '#cfa144', fontSize: '18px', border: '1px solid #cfa144', borderRadius: '6px', padding: '6px', height: 'max-content' }}><i className="bi bi-geo-alt-fill"></i></div>
+                       <div>
+                         <div style={{ fontSize: '10px', color: '#cbd5e1', fontWeight: '600', letterSpacing: '1px' }}>VENUE</div>
+                         <div style={{ fontSize: '11px', color: '#cfa144', fontWeight: '600', lineHeight: '1.4', marginTop: '4px' }}>
+                           {(() => {
+                              const lookupKey = (selectedPass.eventName || '').toLowerCase().trim();
+                              const eventIdKey = (selectedPass.eventId || '').toString();
+                              const SUB_EVENT_VENUES_FALLBACK = {
+                                'agro innovate': 'Room 202, R&C LAB, Second Floor, Bill Gates Bhavan',
+                                'smart farm hackathon': 'Innovation Hub, Ground Floor, Main Block',
+                                'soil analysis challenge': 'Soil Science Lab, Block B, Agriculture Building',
+                                'agri exhibit': 'Online + Exhibition Hall, Admin Block',
+                                'drone sprint': 'University Grounds, Open Area near Sports Complex',
+                                'agri design': 'Open Air Theatre (OAT), Central Ground',
+                                'cultivators': 'AC Seminar Hall, Cotton Bhavan',
+                                'pharma quest': 'Advanced Research Lab, Pharmacy Block',
+                                'scitech model': 'Ramanujan Hall, Science Block',
+                                'biz pitch': 'MBA Seminar Hall, Newton Bhavan'
+                              };
+                              return selectedPass.venue || eventVenues[eventIdKey] || eventVenues[lookupKey] || SUB_EVENT_VENUES_FALLBACK[lookupKey] || 'Room No: 021, Bill Gates Bhavan - GROUND FLOOR';
+                            })()}
+                         </div>
+                       </div>
+                    </div>
                   </div>
 
-                  {/* Right Photo */}
-                  <div style={{ width: '110px', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  {/* Photo */}
+                  <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'center', paddingRight: '20px' }}>
                     <div style={{
-                      width: '100px',
-                      height: '130px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
+                      width: '110px',
+                      height: '140px',
+                      border: '3px solid #cfa144',
+                      borderRadius: '12px',
                       overflow: 'hidden',
                       background: '#f8fafc',
                       display: 'flex',
@@ -1262,12 +1235,12 @@ export default function StudentDashboard({ onNavigate }) {
                       padding: '4px'
                     }}>
                       {selectedPass.photoUrl ? (
-                        <img src={selectedPass.photoUrl} alt="Student" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
+                        <img src={selectedPass.photoUrl} alt="Student" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} />
                       ) : (
                         <div style={{
                           width: '100%',
                           height: '100%',
-                          borderRadius: '4px',
+                          borderRadius: '6px',
                           background: '#e2e8f0',
                           display: 'flex',
                           alignItems: 'center',
@@ -1280,18 +1253,103 @@ export default function StudentDashboard({ onNavigate }) {
                   </div>
                 </div>
 
-                {/* Bottom Barcode Section */}
-                <div style={{ borderTop: '2px solid #2563eb', padding: '16px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#ffffff', zIndex: 1 }}>
-                  <Barcode
-                    value={selectedPass.barcode || '128B237E'}
-                    width={2}
-                    height={60}
-                    fontSize={14}
-                    margin={0}
-                    displayValue={true}
-                    background="#ffffff"
-                    lineColor="#000000"
-                  />
+                {/* Gold Separator Line */}
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  height: '100%',
+                  width: '264px',
+                  background: '#cfa144',
+                  clipPath: 'polygon(0 0, 100% 0, 85% 100%, 0 100%)',
+                  zIndex: 1
+                }}></div>
+
+                {/* Right Side (White Content) */}
+                <div style={{
+                  flex: 1,
+                  padding: '30px 40px 30px 20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  position: 'relative',
+                  zIndex: 2,
+                  boxSizing: 'border-box'
+                }}>
+                  {/* Header */}
+                  <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                    <div style={{ color: '#0a1931', fontSize: '42px', fontWeight: '800', lineHeight: '1', display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
+                      VEDA <span style={{ color: '#cfa144' }}>2K26</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginTop: '12px' }}>
+                      <div style={{ height: '1px', background: '#cfa144', width: '80px' }}></div>
+                      <div style={{ color: '#0a1931', fontSize: '15px', fontWeight: '700', letterSpacing: '4px' }}>EVENT PASS</div>
+                      <div style={{ height: '1px', background: '#cfa144', width: '80px' }}></div>
+                    </div>
+                  </div>
+
+                  {/* Badge */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px', alignItems: 'center' }}>
+                    <div style={{ height: '2px', background: '#cfa144', width: '50px' }}></div>
+                    <div style={{
+                      background: '#0a1931',
+                      color: '#ffffff',
+                      padding: '10px 36px',
+                      fontSize: '20px',
+                      fontWeight: '700',
+                      clipPath: 'polygon(15px 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0 50%)',
+                      margin: '0 12px'
+                    }}>
+                      {selectedPass.eventName}
+                    </div>
+                    <div style={{ height: '2px', background: '#cfa144', width: '50px' }}></div>
+                  </div>
+
+                  {/* Details List */}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', paddingLeft: '10px', paddingRight: '10px' }}>
+                    {[
+                      { icon: 'person-fill', label: 'Name', value: selectedPass.name },
+                      { icon: 'person-vcard-fill', label: 'Roll', value: selectedPass.roll },
+                      { icon: 'mortarboard-fill', label: 'College', value: selectedPass.college === 'Other College' ? selectedPass.otherCollege : selectedPass.college },
+                      { icon: 'telephone-fill', label: 'Phone', value: selectedPass.mobile || 'N/A' }
+                    ].map((item, i) => (
+                      <div key={i} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        fontSize: '16px',
+                        paddingBottom: '12px',
+                        borderBottom: '1px dashed #cbd5e1'
+                      }}>
+                        <div style={{ 
+                          width: '36px', height: '36px', 
+                          background: '#0a1931', color: 'white', 
+                          borderRadius: '8px', 
+                          display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                          marginRight: '20px' 
+                        }}>
+                          <i className={`bi bi-${item.icon}`} style={{ fontSize: '18px' }}></i>
+                        </div>
+                        <div style={{ width: '80px', color: '#0a1931', fontWeight: '700', fontSize: '18px' }}>{item.label}</div>
+                        <div style={{ color: '#cfa144', fontWeight: '400', marginRight: '20px', fontSize: '20px' }}>|</div>
+                        <div style={{ color: '#0f172a', fontWeight: '700', flex: 1, fontSize: '17px' }}>{item.value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Barcode */}
+                  <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ background: '#ffffff', padding: '12px 24px', borderRadius: '12px', border: '1px solid #cfa144' }}>
+                      <Barcode
+                        value={selectedPass.barcode || '128B237E'}
+                        width={2.5}
+                        height={55}
+                        fontSize={16}
+                        margin={0}
+                        displayValue={true}
+                        background="#ffffff"
+                        lineColor="#000000"
+                      />
+                    </div>
+                  </div>
                 </div>
 
               </div>
