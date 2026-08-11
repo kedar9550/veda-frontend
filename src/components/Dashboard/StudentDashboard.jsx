@@ -243,21 +243,15 @@ export default function StudentDashboard({ onNavigate }) {
               setSelectedPass(null);
               setRegistrations(currentRegistrations);
             } else if (isVerified) {
-              const prevScanCount = selectedPass.scanCount || 0;
-              const currScanCount = dbParticipant.scanCount || 0;
+              const prevScanAttempt = selectedPass.lastScanAttempt || 0;
+              const currScanAttempt = dbParticipant.lastScanAttempt || 0;
 
-              if (currScanCount > prevScanCount) {
+              if (currScanAttempt > prevScanAttempt) {
                 if (selectedPass.attended) {
-                  setTimeout(() => {
-                    alert('already verified');
-                  }, 300);
                   toast.error('already verified', {
                     style: { background: '#f59e0b', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
                   });
                 } else {
-                  setTimeout(() => {
-                    alert('pass verfied');
-                  }, 300);
                   toast.success('pass verfied', {
                     style: { background: '#22c55e', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
                   });
@@ -265,10 +259,7 @@ export default function StudentDashboard({ onNavigate }) {
                 setSelectedPass(null);
                 setRegistrations(currentRegistrations);
               } else if (!selectedPass.attended) {
-                // Fallback for old data where scanCount isn't incrementing
-                setTimeout(() => {
-                  alert('pass verfied');
-                }, 300);
+                // Fallback for old data where lastScanAttempt isn't updating
                 toast.success('pass verfied', {
                   style: { background: '#22c55e', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
                 });
