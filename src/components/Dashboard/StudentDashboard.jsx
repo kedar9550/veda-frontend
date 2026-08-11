@@ -221,12 +221,14 @@ export default function StudentDashboard({ onNavigate }) {
             // Check if the current selected pass is still valid and if it's verified
             let isVerified = false;
             let isValid = false;
+            let dbParticipant = null;
             for (const reg of currentRegistrations) {
               if (reg.participants) {
-                const participant = reg.participants.find(p => p.barcode === selectedPass.barcode);
-                if (participant) {
+                const p = reg.participants.find(p => p.barcode === selectedPass.barcode);
+                if (p) {
                   isValid = true;
-                  if (participant.attended === true) {
+                  dbParticipant = p;
+                  if (p.attended === true) {
                     isVerified = true;
                   }
                   break;
@@ -240,12 +242,32 @@ export default function StudentDashboard({ onNavigate }) {
               });
               setSelectedPass(null);
               setRegistrations(currentRegistrations);
-            } else if (isVerified && !selectedPass.attended) {
-              toast.success('pass verfied', {
-                style: { background: '#22c55e', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
-              });
-              setSelectedPass(null);
-              setRegistrations(currentRegistrations);
+            } else if (isVerified) {
+              const prevScanCount = selectedPass.scanCount || (selectedPass.attended ? 1 : 0);
+              const currScanCount = dbParticipant.scanCount || (dbParticipant.attended ? 1 : 0);
+
+              if (currScanCount > prevScanCount) {
+                if (selectedPass.attended) {
+                  toast.error('already verified', {
+                    style: { background: '#f59e0b', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
+                  });
+                } else {
+                  toast.success('pass verfied', {
+                    style: { background: '#22c55e', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
+                  });
+                }
+                setSelectedPass(null);
+                setRegistrations(currentRegistrations);
+              } else if (!selectedPass.attended) {
+                // Fallback for old data where scanCount isn't incrementing
+                toast.success('pass verfied', {
+                  style: { background: '#22c55e', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
+                });
+                setSelectedPass(null);
+                setRegistrations(currentRegistrations);
+              } else {
+                setRegistrations(currentRegistrations);
+              }
             } else {
               setRegistrations(currentRegistrations);
             }
