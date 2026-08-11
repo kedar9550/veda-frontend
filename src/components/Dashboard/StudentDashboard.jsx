@@ -243,8 +243,8 @@ export default function StudentDashboard({ onNavigate }) {
               setSelectedPass(null);
               setRegistrations(currentRegistrations);
             } else if (isVerified) {
-              const prevScanCount = selectedPass.scanCount || (selectedPass.attended ? 1 : 0);
-              const currScanCount = dbParticipant.scanCount || (dbParticipant.attended ? 1 : 0);
+              const prevScanCount = selectedPass.scanCount || 0;
+              const currScanCount = dbParticipant.scanCount || 0;
 
               if (currScanCount > prevScanCount) {
                 if (selectedPass.attended) {
