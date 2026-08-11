@@ -248,10 +248,16 @@ export default function StudentDashboard({ onNavigate }) {
 
               if (currScanCount > prevScanCount) {
                 if (selectedPass.attended) {
+                  setTimeout(() => {
+                    alert('already verified');
+                  }, 300);
                   toast.error('already verified', {
                     style: { background: '#f59e0b', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
                   });
                 } else {
+                  setTimeout(() => {
+                    alert('pass verfied');
+                  }, 300);
                   toast.success('pass verfied', {
                     style: { background: '#22c55e', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
                   });
@@ -260,6 +266,9 @@ export default function StudentDashboard({ onNavigate }) {
                 setRegistrations(currentRegistrations);
               } else if (!selectedPass.attended) {
                 // Fallback for old data where scanCount isn't incrementing
+                setTimeout(() => {
+                  alert('pass verfied');
+                }, 300);
                 toast.success('pass verfied', {
                   style: { background: '#22c55e', color: '#fff', border: 'none', padding: '16px', fontSize: '1.1rem', fontWeight: 'bold' }
                 });
