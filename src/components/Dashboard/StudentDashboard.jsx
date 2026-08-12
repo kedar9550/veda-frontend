@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import StudentRegistrationPopup from '../Events/StudentRegistrationPopup';
 import Barcode from 'react-barcode';
 import GoldLogo from '../SDGs/GoldLogo';
+import adityaLogo from '../../assets/Aditya University Gold Logo.png';
 import './StudentDashboard.css';
 
 export default function StudentDashboard({ onNavigate }) {
@@ -1078,283 +1079,260 @@ export default function StudentDashboard({ onNavigate }) {
 
       {/* Participant Pass Modal */}
       {selectedPass && (
-        <div className="modal-overlay" onClick={() => setSelectedPass(null)}>
-          <div className="receipt-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '680px', textAlign: 'center', position: 'relative', padding: '1.5rem', background: '#ffffff', color: '#1e293b', border: '1px solid #cbd5e1' }}>
-            <div style={{ position: 'absolute', top: '16px', right: '16px', display: 'flex', gap: '12px' }}>
-              <button 
-                onClick={async () => {
-                  const passElement = document.getElementById('event-pass-card');
-                  if (passElement) {
-                    try {
-                      const html2canvas = (await import('html2canvas')).default;
-                      const canvas = await html2canvas(passElement, {
-                        scale: 3,
-                        useCORS: true,
-                        backgroundColor: null,
-                        onclone: (clonedDoc) => {
-                          const clonedCard = clonedDoc.getElementById('event-pass-card');
-                          if (clonedCard) {
-                            clonedCard.style.transform = 'none';
-                          }
-                        }
-                      });
-                      const dataUrl = canvas.toDataURL('image/png');
-                      const link = document.createElement('a');
-                      link.download = `${selectedPass.eventName}_Pass_${selectedPass.roll}.png`;
-                      link.href = dataUrl;
-                      link.click();
-                    } catch (err) {
-                      console.error('Failed to download pass:', err);
-                    }
-                  }
-                }}
-                style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2563eb', transition: 'all 0.2s' }}
-                title="Download Pass"
-              >
-                <i className="bi bi-download"></i>
-              </button>
-              <button 
-                onClick={() => setSelectedPass(null)}
-                style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#ef4444', transition: 'all 0.2s' }}
-                title="Close Pass"
-              >
-                <i className="bi bi-x-lg"></i>
-              </button>
-            </div>
+        <div className="modal-overlay" onClick={() => setSelectedPass(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)' }}>
+          <div className="receipt-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '850px', width: '100%', position: 'relative', padding: '0', background: '#f8fafc', border: 'none', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
             
-            <div className="receipt-header" style={{ borderBottom: 'none', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
-              <h2 style={{ fontSize: '1.3rem', margin: '0', fontWeight: '700', color: '#0f172a' }}>Event Pass Preview</h2>
-              <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.2rem 0 0 0' }}>This pass is generated for your event entry.</p>
+            {/* Modal Header */}
+            <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <i className="bi bi-person-vcard-fill" style={{ color: '#38bdf8', fontSize: '24px' }}></i>
+                <h2 style={{ fontSize: '1.25rem', margin: '0', fontWeight: '800', color: '#fff' }}>Event Pass</h2>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  onClick={async () => {
+                    const passElement = document.getElementById('event-pass-card');
+                    if (passElement) {
+                      try {
+                        const html2canvas = (await import('html2canvas')).default;
+                        const html2pdf = (await import('html2pdf.js')).default;
+                        const opt = {
+                          margin: 0,
+                          filename: `${selectedPass.eventName}_Pass_${selectedPass.roll}.pdf`,
+                          image: { type: 'jpeg', quality: 0.98 },
+                          html2canvas: { scale: 2, useCORS: true, logging: false },
+                          jsPDF: { unit: 'px', format: [750, 480], orientation: 'landscape' }
+                        };
+                        
+                        // Temporarily remove transform on the parent wrapper to prevent text overlapping/kerning bugs in html2canvas
+                        const parentWrapper = passElement.parentElement;
+                        const originalTransform = parentWrapper.style.transform;
+                        parentWrapper.style.transform = 'none';
+                        
+                        await html2pdf().set(opt).from(passElement).save();
+                        
+                        // Restore transform
+                        parentWrapper.style.transform = originalTransform;
+                      } catch (err) {
+                        console.error('Failed to download pass:', err);
+                      }
+                    }
+                  }}
+                  style={{ background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#cbd5e1', transition: 'all 0.2s', padding: '4px' }}
+                  title="Download Pass"
+                >
+                  <i className="bi bi-download" style={{ fontSize: '1.2rem' }}></i>
+                </button>
+                <button 
+                  onClick={() => setSelectedPass(null)}
+                  style={{ background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#cbd5e1', transition: 'all 0.2s', padding: '4px' }}
+                  title="Close Pass"
+                >
+                  <i className="bi bi-x-lg" style={{ fontSize: '1.2rem' }}></i>
+                </button>
+              </div>
             </div>
 
-            {/* The Pass Card container (5in x 2in) scaled up for display preview */}
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '1.5rem 0' }}>
-              <div
-                id="event-pass-card"
-                style={{
-                  width: '720px',
-                  height: '460px',
-                  background: '#ffffff',
-                  borderRadius: '16px',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  fontFamily: "'Inter', sans-serif",
-                  boxSizing: 'border-box',
-                  display: 'flex',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-                }}
-              >
-                {/* Background Details (Right Side) */}
-                <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(circle at 100% 0%, rgba(25, 59, 104, 0.05) 0%, transparent 40%), radial-gradient(circle at 100% 100%, rgba(25, 59, 104, 0.08) 0%, transparent 30%)' }}></div>
-                <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '220px', height: '220px', background: '#0a1931', transform: 'rotate(45deg)', zIndex: 0 }}></div>
-                <div style={{ position: 'absolute', bottom: '-60px', right: '-60px', width: '280px', height: '280px', background: '#0a1931', transform: 'rotate(45deg)', zIndex: 0 }}></div>
-                <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '220px', height: '220px', border: '2px solid #cfa144', transform: 'rotate(45deg)', zIndex: 1 }}></div>
-
-                {/* Left Side (Dark Blue) */}
-                <div style={{
-                  position: 'relative',
-                  width: '260px',
-                  height: '100%',
-                  background: '#0a1931',
-                  clipPath: 'polygon(0 0, 100% 0, 85% 100%, 0 100%)',
-                  zIndex: 2,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  padding: '24px 20px',
-                  boxSizing: 'border-box',
-                  color: 'white'
-                }}>
-                  {/* Logo Area */}
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px', gap: '8px' }}>
-                    <div style={{ width: '50px', height: '50px', background: 'transparent' }}><GoldLogo /></div>
-                    <div style={{ lineHeight: '1.2' }}>
-                      <div style={{ color: '#cfa144', fontSize: '18px', fontWeight: '800', letterSpacing: '1px' }}>ADITYA</div>
-                      <div style={{ color: 'white', fontSize: '13px', fontWeight: '600', letterSpacing: '0.5px' }}>UNIVERSITY</div>
-                    </div>
-                  </div>
-
-                  {/* Info Cards */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, paddingRight: '20px' }}>
-                    <div style={{ border: '1px solid #cfa144', borderRadius: '8px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '12px', background: '#0a1931' }}>
-                      <div style={{ color: '#cfa144', fontSize: '20px' }}><i className="bi bi-people-fill"></i></div>
-                      <div>
-                        <div style={{ fontSize: '10px', color: '#cbd5e1', fontWeight: '600', letterSpacing: '1px' }}>TEAM ID</div>
-                        <div style={{ fontSize: '12px', color: '#cfa144', fontWeight: '700', marginTop: '2px' }}>{selectedPass.teamId || `VD26-${Math.floor(Math.random()*1000000000)}`}</div>
-                      </div>
-                    </div>
-
-                    <div style={{ borderBottom: '1px dashed rgba(255,255,255,0.2)', paddingBottom: '16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                         <div style={{ color: '#cfa144', fontSize: '18px', border: '1px solid #cfa144', borderRadius: '6px', padding: '6px' }}><i className="bi bi-calendar-event"></i></div>
-                         <div>
-                           <div style={{ fontSize: '10px', color: '#cbd5e1', fontWeight: '600', letterSpacing: '1px' }}>EVENT DATE</div>
-                           <div style={{ fontSize: '14px', color: '#cfa144', fontWeight: '700', marginTop: '2px' }}>SEP 15, 2026</div>
-                         </div>
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '12px' }}>
-                       <div style={{ color: '#cfa144', fontSize: '18px', border: '1px solid #cfa144', borderRadius: '6px', padding: '6px', height: 'max-content' }}><i className="bi bi-geo-alt-fill"></i></div>
-                       <div>
-                         <div style={{ fontSize: '10px', color: '#cbd5e1', fontWeight: '600', letterSpacing: '1px' }}>VENUE</div>
-                         <div style={{ fontSize: '11px', color: '#cfa144', fontWeight: '600', lineHeight: '1.4', marginTop: '4px' }}>
-                           {(() => {
-                              const lookupKey = (selectedPass.eventName || '').toLowerCase().trim();
-                              const eventIdKey = (selectedPass.eventId || '').toString();
-                              const SUB_EVENT_VENUES_FALLBACK = {
-                                'agro innovate': 'Room 202, R&C LAB, Second Floor, Bill Gates Bhavan',
-                                'smart farm hackathon': 'Innovation Hub, Ground Floor, Main Block',
-                                'soil analysis challenge': 'Soil Science Lab, Block B, Agriculture Building',
-                                'agri exhibit': 'Online + Exhibition Hall, Admin Block',
-                                'drone sprint': 'University Grounds, Open Area near Sports Complex',
-                                'agri design': 'Open Air Theatre (OAT), Central Ground',
-                                'cultivators': 'AC Seminar Hall, Cotton Bhavan',
-                                'pharma quest': 'Advanced Research Lab, Pharmacy Block',
-                                'scitech model': 'Ramanujan Hall, Science Block',
-                                'biz pitch': 'MBA Seminar Hall, Newton Bhavan'
-                              };
-                              return selectedPass.venue || eventVenues[eventIdKey] || eventVenues[lookupKey] || SUB_EVENT_VENUES_FALLBACK[lookupKey] || 'Room No: 021, Bill Gates Bhavan - GROUND FLOOR';
-                            })()}
-                         </div>
-                       </div>
-                    </div>
-                  </div>
-
-                  {/* Photo */}
-                  <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'center', paddingRight: '20px' }}>
-                    <div style={{
-                      width: '110px',
-                      height: '140px',
-                      border: '3px solid #cfa144',
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      background: '#f8fafc',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '4px'
-                    }}>
+            {/* Modal Body with Pass */}
+            <div style={{ padding: '32px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflowX: 'auto' }}>
+              <div style={{ transform: 'scale(0.85)', transformOrigin: 'top center', marginBottom: '-70px' }}>
+                <div
+                  id="event-pass-card"
+                  style={{
+                    boxSizing: 'border-box',
+                    width: '750px',
+                    height: '480px',
+                    minWidth: '750px',
+                    minHeight: '480px',
+                    flexShrink: 0,
+                    margin: '0 auto',
+                    backgroundColor: '#fff',
+                    borderRadius: '16px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                    border: '1.5px solid #061638',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    fontFamily: "'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
+                <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
+                  {/* Photo Top Right */}
+                  <div style={{ position: 'absolute', top: 15, right: 20, zIndex: 10 }}>
+                    <div style={{ width: 100, height: 125, borderRadius: '8px', border: '2px solid #c69a37', overflow: 'hidden', backgroundColor: '#f1f5f9', boxShadow: '0 4px 10px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {selectedPass.photoUrl ? (
-                        <img src={selectedPass.photoUrl} alt="Student" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} />
+                        <img src={selectedPass.photoUrl} alt="Student" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'relative', zIndex: 1 }} />
                       ) : (
-                        <div style={{
-                          width: '100%',
-                          height: '100%',
-                          borderRadius: '6px',
-                          background: '#e2e8f0',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
-                          <i className="bi bi-person-fill" style={{ fontSize: '48px', color: '#94a3b8' }}></i>
+                        <div style={{ width: '100%', height: '100%', backgroundColor: selectedPass.gender?.toLowerCase() === 'female' ? '#fdf2f8' : '#eff6ff', color: selectedPass.gender?.toLowerCase() === 'female' ? '#db2777' : '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <i className="bi bi-person-fill" style={{ fontSize: '50px' }}></i>
                         </div>
                       )}
                     </div>
                   </div>
-                </div>
 
-                {/* Gold Separator Line */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  height: '100%',
-                  width: '264px',
-                  background: '#cfa144',
-                  clipPath: 'polygon(0 0, 100% 0, 85% 100%, 0 100%)',
-                  zIndex: 1
-                }}></div>
-
-                {/* Right Side (White Content) */}
-                <div style={{
-                  flex: 1,
-                  padding: '30px 40px 30px 20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  position: 'relative',
-                  zIndex: 2,
-                  boxSizing: 'border-box'
-                }}>
-                  {/* Header */}
-                  <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                    <div style={{ color: '#0a1931', fontSize: '42px', fontWeight: '800', lineHeight: '1', display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px' }}>
-                      VEDA <span style={{ color: '#cfa144' }}>2K26</span>
+                  {/* LEFT SIDEBAR */}
+                  <div style={{ width: '260px', backgroundColor: '#061638', height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 2 }}>
+                    {/* Top Right Geometric Cut */}
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: '80px', height: '150px', zIndex: 1, pointerEvents: 'none' }}>
+                      <svg viewBox="0 0 100 150" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+                        <polygon points="50,0 100,0 100,150" fill="#fff" />
+                        <polygon points="35,0 50,0 100,150 85,150" fill="#c69a37" />
+                      </svg>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginTop: '12px' }}>
-                      <div style={{ height: '1px', background: '#cfa144', width: '80px' }}></div>
-                      <div style={{ color: '#0a1931', fontSize: '15px', fontWeight: '700', letterSpacing: '4px' }}>EVENT PASS</div>
-                      <div style={{ height: '1px', background: '#cfa144', width: '80px' }}></div>
-                    </div>
-                  </div>
 
-                  {/* Badge */}
-                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px', alignItems: 'center' }}>
-                    <div style={{ height: '2px', background: '#cfa144', width: '50px' }}></div>
-                    <div style={{
-                      background: '#0a1931',
-                      color: '#ffffff',
-                      padding: '10px 36px',
-                      fontSize: '20px',
-                      fontWeight: '700',
-                      clipPath: 'polygon(15px 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0 50%)',
-                      margin: '0 12px'
-                    }}>
-                      {selectedPass.eventName}
-                    </div>
-                    <div style={{ height: '2px', background: '#cfa144', width: '50px' }}></div>
-                  </div>
+                    {/* Top Left Dots */}
+                    <div style={{ backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.25) 1.5px, transparent 1.5px)', backgroundSize: '10px 10px', position: 'absolute', top: 0, left: 0, width: '120px', height: '120px', maskImage: 'radial-gradient(circle at top left, black, transparent 70%)', WebkitMaskImage: 'radial-gradient(circle at top left, black, transparent 70%)', zIndex: 0 }} />
+                    
+                    {/* Bottom Left Dots */}
+                    <div style={{ backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.25) 1.5px, transparent 1.5px)', backgroundSize: '10px 10px', position: 'absolute', bottom: 0, left: 0, width: '180px', height: '150px', maskImage: 'linear-gradient(to top right, black, transparent 60%)', WebkitMaskImage: 'linear-gradient(to top right, black, transparent 60%)', zIndex: 0 }} />
 
-                  {/* Details List */}
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', paddingLeft: '10px', paddingRight: '10px' }}>
-                    {[
-                      { icon: 'person-fill', label: 'Name', value: selectedPass.name },
-                      { icon: 'person-vcard-fill', label: 'Roll', value: selectedPass.roll },
-                      { icon: 'mortarboard-fill', label: 'College', value: selectedPass.college === 'Other College' ? selectedPass.otherCollege : selectedPass.college },
-                      { icon: 'telephone-fill', label: 'Phone', value: selectedPass.mobile || 'N/A' }
-                    ].map((item, i) => (
-                      <div key={i} style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        fontSize: '16px',
-                        paddingBottom: '12px',
-                        borderBottom: '1px dashed #cbd5e1'
-                      }}>
-                        <div style={{ 
-                          width: '36px', height: '36px', 
-                          background: '#0a1931', color: 'white', 
-                          borderRadius: '8px', 
-                          display: 'flex', justifyContent: 'center', alignItems: 'center', 
-                          marginRight: '20px' 
-                        }}>
-                          <i className={`bi bi-${item.icon}`} style={{ fontSize: '18px' }}></i>
-                        </div>
-                        <div style={{ width: '80px', color: '#0a1931', fontWeight: '700', fontSize: '18px' }}>{item.label}</div>
-                        <div style={{ color: '#cfa144', fontWeight: '400', marginRight: '20px', fontSize: '20px' }}>|</div>
-                        <div style={{ color: '#0f172a', fontWeight: '700', flex: 1, fontSize: '17px' }}>{item.value}</div>
+                    {/* Background Wave Accent */}
+                    <div style={{ position: 'absolute', bottom: 20, left: -20, zIndex: 0, opacity: 0.5 }}>
+                      <svg viewBox="0 0 240 80" style={{ width: '100%', height: '80px' }}>
+                        <path d="M 0 80 C 50 20 150 80 240 0" fill="none" stroke="#ffffff1a" strokeWidth="2" />
+                        <path d="M 0 60 C 80 0 180 60 260 -20" fill="none" stroke="#ffffff1a" strokeWidth="2" />
+                      </svg>
+                    </div>
+
+                    <div style={{ padding: '32px 24px 24px', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', flex: 1, boxSizing: 'border-box' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '32px', marginRight: '16px' }}>
+                        <img src={adityaLogo} alt="Aditya Logo" style={{ width: '180px' }} />
                       </div>
-                    ))}
+
+                      <div style={{ width: '100%', paddingLeft: '8px' }}>
+                        {selectedPass.teamId && (
+                          <>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                              <div style={{ backgroundColor: 'rgba(198, 154, 55, 0.25)', borderRadius: '50%', width: '36px', height: '36px', minWidth: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px' }}>
+                                <i className="bi bi-people-fill" style={{ color: '#c69a37', fontSize: '20px', lineHeight: 1 }}></i>
+                              </div>
+                              <div>
+                                <div style={{ color: '#fff', fontSize: '10px', fontWeight: 700, letterSpacing: '1px', lineHeight: 1.2 }}>TEAM ID</div>
+                                <div style={{ color: '#c69a37', fontSize: '12px', fontWeight: 800, lineHeight: 1.2, wordBreak: 'break-all' }}>{selectedPass.teamId}</div>
+                              </div>
+                            </div>
+                            <div style={{ width: '85%', height: '1px', backgroundColor: 'rgba(198, 154, 55, 0.3)', margin: '12px 0' }} />
+                          </>
+                        )}
+
+                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                          <div style={{ backgroundColor: 'rgba(198, 154, 55, 0.25)', borderRadius: '50%', width: '36px', height: '36px', minWidth: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px' }}>
+                            <i className="bi bi-calendar-event" style={{ color: '#c69a37', fontSize: '20px', lineHeight: 1 }}></i>
+                          </div>
+                          <div>
+                            <div style={{ color: '#fff', fontSize: '10px', fontWeight: 700, letterSpacing: '1px', lineHeight: 1.2 }}>EVENT DATE</div>
+                            <div style={{ color: '#c69a37', fontSize: '12px', fontWeight: 800, lineHeight: 1.2 }}>SEP 15, 2026</div>
+                          </div>
+                        </div>
+
+                        <div style={{ width: '85%', height: '1px', backgroundColor: 'rgba(198, 154, 55, 0.3)', margin: '12px 0' }} />
+
+                        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                          <div style={{ backgroundColor: 'rgba(198, 154, 55, 0.25)', borderRadius: '50%', width: '36px', height: '36px', minWidth: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px', marginTop: '4px' }}>
+                            <i className="bi bi-geo-alt-fill" style={{ color: '#c69a37', fontSize: '20px', lineHeight: 1 }}></i>
+                          </div>
+                          <div style={{ marginTop: '4px' }}>
+                            <div style={{ color: '#fff', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', lineHeight: 1.2 }}>VENUE</div>
+                            <div style={{ color: '#c69a37', fontSize: '13px', fontWeight: 800, lineHeight: 1.3, whiteSpace: 'pre-line' }}>
+                              {(() => {
+                                const lookupKey = (selectedPass.eventName || '').toLowerCase().trim();
+                                const eventIdKey = (selectedPass.eventId || '').toString();
+                                const SUB_EVENT_VENUES_FALLBACK = {
+                                  'agro innovate': 'Room 202, R&C LAB, Second Floor, Bill Gates Bhavan',
+                                  'smart farm hackathon': 'Innovation Hub, Ground Floor, Main Block',
+                                  'soil analysis challenge': 'Soil Science Lab, Block B, Agriculture Building',
+                                  'agri exhibit': 'Online + Exhibition Hall, Admin Block',
+                                  'drone sprint': 'University Grounds, Open Area near Sports Complex',
+                                  'agri design': 'Open Air Theatre (OAT), Central Ground',
+                                  'cultivators': 'AC Seminar Hall, Cotton Bhavan',
+                                  'pharma quest': 'Advanced Research Lab, Pharmacy Block',
+                                  'scitech model': 'Ramanujan Hall, Science Block',
+                                  'biz pitch': 'MBA Seminar Hall, Newton Bhavan'
+                                };
+                                return selectedPass.venue || eventVenues[eventIdKey] || eventVenues[lookupKey] || SUB_EVENT_VENUES_FALLBACK[lookupKey] || 'Room No: 021, Bill Gates Bhavan - GROUND FLOOR';
+                              })()}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Barcode */}
-                  <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
-                    <div style={{ background: '#ffffff', padding: '12px 24px', borderRadius: '12px', border: '1px solid #cfa144' }}>
-                      <Barcode
-                        value={selectedPass.barcode || '128B237E'}
-                        width={2.5}
-                        height={55}
-                        fontSize={16}
-                        margin={0}
-                        displayValue={true}
-                        background="#ffffff"
-                        lineColor="#000000"
-                      />
+                  {/* RIGHT CONTENT */}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', zIndex: 1, position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: '55%', left: '42%', transform: 'translate(-50%, -50%)', width: '380px', opacity: 0.04, zIndex: 0, pointerEvents: 'none', filter: 'grayscale(100%)' }}>
+                      <GoldLogo />
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '20px', paddingBottom: '8px', paddingRight: '112px', boxSizing: 'border-box' }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                        <div style={{ color: '#061638', fontSize: '48px', fontWeight: 900, lineHeight: 1 }}>VEDA</div>
+                        <div style={{ color: '#c69a37', fontSize: '42px', fontWeight: 800, lineHeight: 1 }}>2K26</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginTop: '8px', width: '80%', justifyContent: 'center' }}>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: '#c69a37' }} />
+                        <div style={{ color: '#000', fontSize: '16px', fontWeight: 600, letterSpacing: '6px' }}>EVENT PASS</div>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: '#c69a37' }} />
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', marginTop: '16px', position: 'relative', width: '250px', height: '38px', justifyContent: 'center' }}>
+                        <svg viewBox="0 0 250 38" preserveAspectRatio="none" style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 0 }}>
+                          <polygon points="14,0 236,0 250,19 236,38 14,38 0,19" fill="#061638" />
+                          <line x1="14" y1="0" x2="236" y2="0" stroke="#c69a37" strokeWidth="4" />
+                          <line x1="14" y1="38" x2="236" y2="38" stroke="#c69a37" strokeWidth="4" />
+                        </svg>
+                        <div style={{ color: '#fff', fontSize: '18px', fontWeight: 700, lineHeight: 1, zIndex: 1, position: 'relative' }}>
+                          {selectedPass.eventName || 'Code Reto'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', padding: '12px 48px', flex: 1 }}>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', justifyContent: 'center' }}>
+                        {[
+                          { icon: 'person-fill', label: 'Name', value: selectedPass.name ? selectedPass.name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : selectedPass.name },
+                          { icon: 'person-vcard-fill', label: 'Roll', value: selectedPass.roll },
+                          { icon: 'mortarboard-fill', label: 'College', value: selectedPass.college === 'Other College' ? selectedPass.otherCollege : selectedPass.college },
+                          { icon: 'telephone-fill', label: 'Phone', value: selectedPass.mobile }
+                        ].map((item, idx) => (
+                          <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', position: 'relative' }}>
+                            <div style={{ backgroundColor: '#061638', color: '#fff', borderRadius: '50%', width: '32px', height: '32px', minWidth: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '16px', boxSizing: 'border-box' }}>
+                              <i className={`bi bi-${item.icon}`} style={{ fontSize: '18px', lineHeight: 1 }}></i>
+                            </div>
+                            <div style={{ color: '#061638', fontWeight: 700, fontSize: '20px', width: '100px', flexShrink: 0 }}>{item.label}</div>
+                            <div style={{ color: '#061638', fontWeight: 700, fontSize: '20px', marginRight: '8px' }}>:</div>
+                            <div style={{ color: '#000', fontWeight: 700, fontSize: '20px', flex: 1, lineHeight: 1.3 }}>{item.value || '-'}</div>
+                            {idx < 3 && <div style={{ position: 'absolute', bottom: -10, left: 40, right: 0, height: '1px', backgroundColor: 'rgba(0,0,0,0.08)' }} />}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
 
+                {/* BOTTOM BARCODE SECTION */}
+                <div className="barcode-container" style={{ boxSizing: 'border-box', height: '120px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: '16px', paddingBottom: '8px', zIndex: 2, width: '100%', backgroundColor: '#fff', borderTop: '1.5px solid #061638' }}>
+                  <style>{`
+                    .barcode-container svg {
+                      width: 95% !important;
+                      height: 70px !important;
+                      object-fit: contain !important;
+                    }
+                  `}</style>
+                  {selectedPass.barcode ? (
+                    <>
+                      <Barcode value={selectedPass.barcode} width={6.2} height={90} displayValue={false} background="transparent" lineColor="#000" margin={0} />
+                      <div style={{ color: '#000', fontWeight: 700, fontSize: '14px', marginTop: '4px', letterSpacing: '8px' }}>{selectedPass.barcode}</div>
+                    </>
+                  ) : (
+                    <div style={{ fontSize: '12px', color: '#6c757d' }}>No Barcode</div>
+                  )}
+                </div>
+                </div>
               </div>
             </div>
-
 
           </div>
         </div>
