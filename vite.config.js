@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:9022',
+        target: 'https://backend.digitalservices.adityauniversity.in',
         changeOrigin: true,
         secure: false,
       },
