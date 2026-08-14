@@ -1,13 +1,14 @@
 {
-  "name": "aditya-premium",
+  "name": "Veda",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://veda.adityauniversity.in",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host --port 2000",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview --port 9008"
   },
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
