@@ -8,7 +8,7 @@
     "dev": "vite --host --port 2000",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview --port 9008"
+    "preview": "vite preview --port 2000"
   },
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
