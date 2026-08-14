@@ -5,6 +5,7 @@ import StudentRegistrationPopup from '../Events/StudentRegistrationPopup';
 import Barcode from 'react-barcode';
 import GoldLogo from '../SDGs/GoldLogo';
 import adityaLogo from '../../assets/Aditya University Gold Logo.png';
+import adityaCircleLogo from '../../assets/Circle_Gold.svg';
 import './StudentDashboard.css';
 
 export default function StudentDashboard({ onNavigate }) {
@@ -89,6 +90,7 @@ export default function StudentDashboard({ onNavigate }) {
   const [error, setError] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [selectedPass, setSelectedPass] = useState(null);
+  const [zoomedPhoto, setZoomedPhoto] = useState(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [expandedEvents, setExpandedEvents] = useState({});
   const [paymentsExpanded, setPaymentsExpanded] = useState(false);
@@ -540,6 +542,7 @@ export default function StudentDashboard({ onNavigate }) {
                                 <thead>
                                   <tr>
                                     <th>#</th>
+                                    <th>Photo</th>
                                     <th>Name</th>
                                     <th>Roll No</th>
                                     <th>College</th>
@@ -551,6 +554,38 @@ export default function StudentDashboard({ onNavigate }) {
                                     reg.participants.map((p, pIdx) => (
                                       <tr key={pIdx}>
                                         <td>{pIdx + 1}</td>
+                                        <td>
+                                          {(() => {
+                                            let computedUrl = p.photoUrl;
+                                            if (computedUrl && computedUrl.includes('localhost:9022')) {
+                                              computedUrl = computedUrl.replace('localhost:9022', 'localhost:4000');
+                                            } else if (!computedUrl && p.college === 'Other College' && p.roll) {
+                                              computedUrl = `http://localhost:4000/othercollegephotos/${p.roll}.jpg`;
+                                            } else if (!computedUrl && p.roll) {
+                                              computedUrl = `https://info.aec.edu.in/aec/employeephotos/${p.roll}.jpg`;
+                                            }
+                                            return (
+                                              <div 
+                                                style={{ position: 'relative', width: '36px', height: '36px', cursor: computedUrl ? 'pointer' : 'default' }}
+                                                onClick={() => {
+                                                  if (computedUrl) setZoomedPhoto(computedUrl);
+                                                }}
+                                              >
+                                                <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: p.gender?.toLowerCase() === 'female' ? 'rgba(219, 39, 119, 0.1)' : 'rgba(37, 99, 235, 0.1)', color: p.gender?.toLowerCase() === 'female' ? '#db2777' : '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                                  <i className="bi bi-person-fill" style={{ fontSize: '18px' }}></i>
+                                                </div>
+                                                {computedUrl && (
+                                                  <img 
+                                                    src={computedUrl} 
+                                                    alt={p.name || 'Participant'} 
+                                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
+                                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                                  />
+                                                )}
+                                              </div>
+                                            );
+                                          })()}
+                                        </td>
                                         <td style={{ fontWeight: '600' }}>{p.name || 'N/A'}</td>
                                         <td>{p.roll || 'N/A'}</td>
                                         <td>{p.college === 'Other College' ? p.otherCollege : (p.college || 'N/A')}</td>
@@ -1105,15 +1140,21 @@ export default function StudentDashboard({ onNavigate }) {
                           jsPDF: { unit: 'px', format: [750, 480], orientation: 'landscape' }
                         };
                         
-                        // Temporarily remove transform on the parent wrapper to prevent text overlapping/kerning bugs in html2canvas
-                        const parentWrapper = passElement.parentElement;
-                        const originalTransform = parentWrapper.style.transform;
-                        parentWrapper.style.transform = 'none';
+                        // Clone the pass element to prevent visual shaking in the UI
+                        const clone = passElement.cloneNode(true);
+                        const wrapper = document.createElement('div');
+                        wrapper.style.position = 'absolute';
+                        wrapper.style.left = '-9999px';
+                        wrapper.style.top = '-9999px';
+                        // Ensure clone does not inherit any scale transformations
+                        clone.style.transform = 'none';
+                        wrapper.appendChild(clone);
+                        document.body.appendChild(wrapper);
                         
-                        await html2pdf().set(opt).from(passElement).save();
+                        await html2pdf().set(opt).from(clone).save();
                         
-                        // Restore transform
-                        parentWrapper.style.transform = originalTransform;
+                        // Cleanup
+                        document.body.removeChild(wrapper);
                       } catch (err) {
                         console.error('Failed to download pass:', err);
                       }
@@ -1158,179 +1199,275 @@ export default function StudentDashboard({ onNavigate }) {
                     flexDirection: 'column'
                   }}
                 >
-                  
-                  {/* TOP SECTION (Left Blue, Right White) */}
-                  <div style={{ display: 'flex', flex: 1, position: 'relative', height: '360px' }}>
-                    
-                    {/* LEFT BLUE SIDEBAR */}
-                    <div style={{ width: '270px', backgroundColor: '#061638', position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
-                      
-                      {/* Curve Protruding Right (Using Border Radius for perfect smooth curve) */}
-                      <div style={{ 
-                        position: 'absolute', 
-                        top: '-20px', 
-                        bottom: '-20px', 
-                        right: '-70px', 
-                        width: '140px', 
-                        backgroundColor: '#061638',
-                        borderRadius: '50%',
-                        border: '5px solid #c69a37',
-                        borderLeft: 'none',
-                        borderTop: 'none',
-                        borderBottom: 'none',
-                        zIndex: 1,
-                        pointerEvents: 'none'
-                      }}></div>
+                          {/* SVG Base L-Shape Background */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+                    <svg width="100%" height="100%" preserveAspectRatio="none">
+                      {/* Top right subtle dot pattern in white area */}
+                      <pattern id="dots" x="0" y="0" width="15" height="15" patternUnits="userSpaceOnUse">
+                        <circle fill="rgba(6, 22, 56, 0.1)" cx="2" cy="2" r="2"></circle>
+                      </pattern>
+                      <rect x="0" y="0" width="750" height="480" fill="url(#dots)" />
 
-                      {/* Watermark Logo */}
-                      <div style={{ position: 'absolute', top: '50%', left: '45%', transform: 'translate(-50%, -50%)', opacity: 0.1, zIndex: 1, pointerEvents: 'none' }}>
-                        <i className="bi bi-sun-fill" style={{ fontSize: '130px', color: '#fff' }}></i>
-                      </div>
+                      {/* Main Dark Blue L-Shape */}
+                      <path d="M 0 0 L 250 0 C 180 30, 160 80, 160 160 L 160 380 L 750 380 L 750 480 L 0 480 Z" fill="#061638" />
 
-                      <div style={{ position: 'relative', zIndex: 3, display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between', padding: '40px 24px' }}>
-                        
-                        {/* TEAM ID */}
-                        <div>
-                          <div style={{ color: '#fff', fontSize: '12px', fontWeight: 700, letterSpacing: '1px', marginBottom: '4px' }}>TEAM ID</div>
-                          <div style={{ color: '#c69a37', fontSize: '15px', fontWeight: 800 }}>{selectedPass.teamId || 'VD26-1785474567189'}</div>
-                        </div>
+                      {/* Thick Gold Accent Curve on the outside */}
+                      <path d="M 250 0 C 180 30, 160 80, 160 160 L 172 160 C 172 85, 190 35, 262 0 Z" fill="#c69a37" />
 
-                        {/* EVENT DATE */}
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <div style={{ color: '#fff', fontSize: '26px', marginRight: '12px' }}>
-                            <i className="bi bi-calendar-event"></i>
-                          </div>
-                          <div>
-                            <div style={{ color: '#fff', fontSize: '12px', fontWeight: 700, letterSpacing: '1px', marginBottom: '4px' }}>EVENT DATE</div>
-                            <div style={{ color: '#fff', fontSize: '15px', fontWeight: 800 }}>SEP. 2026</div>
-                          </div>
-                        </div>
+                      {/* Subtle background waves in the blue area */}
+                      <path d="M -50 50 Q 50 100, 100 200 T 50 400" stroke="rgba(255,255,255,0.05)" strokeWidth="40" fill="none" />
+                      <path d="M -20 20 Q 80 70, 130 170 T 80 370" stroke="rgba(255,255,255,0.05)" strokeWidth="30" fill="none" />
 
+                      {/* Bottom left sweeping gold line */}
+                      <path d="M -20 400 Q 80 430, 155 365" stroke="#c69a37" strokeWidth="2.5" fill="none" />
+                    </svg>
+                  </div>
+
+                  {/* Center Watermark inside Left Sidebar */}
+                  <div style={{ position: 'absolute', top: 120, left: -20, width: '200px', opacity: 0.15, pointerEvents: 'none', filter: 'grayscale(100%)', zIndex: 1 }}>
+                    <img src={adityaCircleLogo} alt="Watermark" style={{ width: '200px', height: '200px' }} />
+                  </div>
+
+                  {/* Right Side Watermark */}
+                  <div style={{ position: 'absolute', top: 100, right: -40, width: '350px', opacity: 0.05, pointerEvents: 'none', filter: 'grayscale(100%)', zIndex: 1 }}>
+                    <img src={adityaCircleLogo} alt="Watermark Right" style={{ width: '350px', height: '350px' }} />
+                  </div>
+
+                  {/* --- FOREGROUND CONTENT --- */}
+
+                  {/* Top Right Logo */}
+                  <div style={{ position: 'absolute', top: 30, right: 30, zIndex: 2, backgroundColor: '#fff', padding: '4px', borderRadius: '8px' }}>
+                    <img src={adityaLogo} alt="Aditya Logo" style={{ width: '150px' }} />
+                  </div>
+
+                  {/* Top Left Team ID */}
+                  <div style={{ position: 'absolute', top: 25, left: 30, zIndex: 2, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ color: '#fff', fontSize: '15px', fontWeight: 800, letterSpacing: '0.5px', lineHeight: 1.2 }}>TEAM ID</div>
+                    <div style={{ color: '#c69a37', fontSize: '15px', fontWeight: 700, lineHeight: 1.2, marginTop: '2px' }}>{selectedPass.teamId || 'VD26-1785574579911'}</div>
+                  </div>
+
+                  {/* Left Sidebar Bottom Details */}
+                  <div style={{ position: 'absolute', top: 190, left: 15, zIndex: 2, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                      <i className="bi bi-calendar-month-fill" style={{ color: '#fff', fontSize: 28, marginRight: '8px' }}></i>
+                      <div>
+                        <div style={{ color: '#fff', fontSize: '14px', fontWeight: 700, letterSpacing: '0.5px', lineHeight: 1.2 }}>EVENT DATE</div>
+                        <div style={{ color: '#c69a37', fontSize: '15px', fontWeight: 800, lineHeight: 1.2, marginTop: '2.4px' }}>SEP. 2026</div>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Center Header (VEDA, EVENT PASS, Code Reto) */}
+                  <div style={{ position: 'absolute', top: 20, left: 180, right: 180, display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                      <div style={{ color: '#061638', fontSize: '48px', fontWeight: 900, lineHeight: 1 }}>VEDA</div>
+                      <div style={{ color: '#c69a37', fontSize: '42px', fontWeight: 800, lineHeight: 1 }}>2K26</div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', marginBottom: '8px' }}>
+                      <div style={{ width: '40px', height: '1.5px', backgroundColor: '#000' }} />
+                      <div style={{ color: '#000', fontSize: '14px', fontWeight: 700, letterSpacing: '4px' }}>EVENT PASS</div>
+                      <div style={{ width: '40px', height: '1.5px', backgroundColor: '#000' }} />
+                    </div>
+                    <div style={{ backgroundColor: '#061638', borderRadius: '20px', padding: '3px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', minWidth: '160px', width: 'max-content' }}>
+                      <div style={{ position: 'absolute', left: -5, width: '8px', height: '8px', backgroundColor: '#c69a37', transform: 'rotate(45deg)' }} />
+                      <div style={{ color: '#fff', fontSize: '16px', fontWeight: 700, whiteSpace: 'nowrap' }}>{selectedPass.eventName || 'Code Reto'}</div>
+                      <div style={{ position: 'absolute', right: -5, width: '8px', height: '8px', backgroundColor: '#c69a37', transform: 'rotate(45deg)' }} />
+                    </div>
+                  </div>
+
+                  {/* Central Details & Photo area */}
+                  <div style={{ position: 'absolute', top: 140, left: 190, right: 35, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2 }}>
                     
-                    {/* RIGHT WHITE AREA */}
-                    <div style={{ flex: 1, backgroundColor: '#fff', position: 'relative', zIndex: 1, padding: '24px 32px 24px 50px', display: 'flex', flexDirection: 'column' }}>
-                      
-                      {/* Top Row: VEDA Header & Aditya Logo */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
-                        
-                        {/* Main Headers */}
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingLeft: '20px' }}>
-                          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                            <div style={{ color: '#061638', fontSize: '46px', fontWeight: 900, lineHeight: 1 }}>VEDA</div>
-                            <div style={{ color: '#c69a37', fontSize: '38px', fontWeight: 800, lineHeight: 1 }}>2K26</div>
+                    {/* Details List */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '16px' }}>
+                      {[
+                        { icon: 'person-fill', label: 'Name', value: selectedPass.name ? selectedPass.name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ') : selectedPass.name },
+                        { icon: 'person-vcard-fill', label: 'Roll', value: selectedPass.roll },
+                        { icon: 'mortarboard-fill', label: 'College', value: selectedPass.college === 'Other College' ? selectedPass.otherCollege : selectedPass.college },
+                        { icon: 'telephone-fill', label: 'Phone', value: selectedPass.mobile },
+                      ].map((item, idx) => (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', position: 'relative', paddingBottom: '8px' }}>
+                          <div style={{
+                            backgroundColor: '#061638',
+                            color: '#fff',
+                            borderRadius: '50%',
+                            padding: '4.8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginRight: '16px',
+                            width: '32px',
+                            height: '32px'
+                          }}>
+                            <i className={`bi bi-${item.icon}`} style={{ fontSize: '18px' }}></i>
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '220px', marginTop: '6px' }}>
-                            <div style={{ flex: 1, height: '1px', backgroundColor: '#000' }} />
-                            <div style={{ color: '#000', fontSize: '12px', fontWeight: 700, letterSpacing: '3px' }}>EVENT PASS</div>
-                            <div style={{ flex: 1, height: '1px', backgroundColor: '#000' }} />
+                          <div style={{ color: '#061638', fontWeight: 800, fontSize: '18px', width: '95px', flexShrink: 0 }}>
+                            {item.label}
                           </div>
-
-                          {/* Event Name Hexagon */}
-                          <div style={{ marginTop: '16px', position: 'relative', width: '250px', height: '34px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <svg viewBox="0 0 250 34" preserveAspectRatio="none" style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 0 }}>
-                              <polygon points="17,1 233,1 249,17 233,33 17,33 1,17" fill="#061638" stroke="#c69a37" strokeWidth="2" />
-                            </svg>
-                            <div style={{ color: '#fff', fontSize: '15px', fontWeight: 700, zIndex: 1 }}>
-                              {selectedPass.eventName || 'Code Reto'}
-                            </div>
+                          <div style={{ color: '#061638', fontWeight: 800, fontSize: '18px', marginRight: '12px' }}>:</div>
+                          <div style={{
+                            color: '#000',
+                            fontWeight: 800,
+                            fontSize: '18px',
+                            flex: 1,
+                            lineHeight: 1.3,
+                            paddingTop: '1.6px',
+                            whiteSpace: 'pre-line'
+                          }}>
+                            {item.value || '-'}
                           </div>
-                        </div>
-
-                        {/* Aditya Logo */}
-                        <div style={{ width: '120px', flexShrink: 0 }}>
-                          <img src={adityaLogo} alt="Aditya Logo" style={{ width: '100%', objectFit: 'contain' }} />
-                        </div>
-                      </div>
-
-                      {/* Student Details and Photo */}
-                      <div style={{ display: 'flex', marginTop: 'auto', marginBottom: '20px', justifyContent: 'space-between', alignItems: 'center' }}>
-                        
-                        {/* Details List */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
-                          {[
-                            { icon: 'person-fill', label: 'Name', value: selectedPass.name ? selectedPass.name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : selectedPass.name },
-                            { icon: 'person-vcard-fill', label: 'Roll', value: selectedPass.roll },
-                            { icon: 'mortarboard-fill', label: 'College', value: selectedPass.college === 'Other College' ? selectedPass.otherCollege : selectedPass.college },
-                            { icon: 'telephone-fill', label: 'Phone', value: selectedPass.mobile }
-                          ].map((item, idx) => (
-                            <div key={idx} style={{ display: 'flex', alignItems: 'center' }}>
-                              <div style={{ backgroundColor: '#061638', color: '#fff', borderRadius: '50%', width: '26px', height: '26px', minWidth: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px' }}>
-                                <i className={`bi bi-${item.icon}`} style={{ fontSize: '13px' }}></i>
-                              </div>
-                              <div style={{ color: '#061638', fontWeight: 700, fontSize: '14px', width: '55px', flexShrink: 0 }}>{item.label}</div>
-                              <div style={{ color: '#061638', fontWeight: 700, fontSize: '14px', marginRight: '8px' }}>:</div>
-                              <div style={{ color: '#000', fontWeight: 700, fontSize: '14px', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.value || '-'}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Photo */}
-                        <div style={{ width: '100px', height: '130px', borderRadius: '8px', border: '1px solid #cbd5e1', overflow: 'hidden', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: '16px' }}>
-                          {selectedPass.photoUrl ? (
-                            <img src={selectedPass.photoUrl} alt="Student" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          ) : (
-                            <div style={{ width: '100%', height: '100%', backgroundColor: selectedPass.gender?.toLowerCase() === 'female' ? '#fdf2f8' : '#eff6ff', color: selectedPass.gender?.toLowerCase() === 'female' ? '#db2777' : '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <i className="bi bi-person-fill" style={{ fontSize: '60px' }}></i>
-                            </div>
+                          {/* Divider */}
+                          {idx < 3 && (
+                            <div style={{ position: 'absolute', bottom: -4, left: 45, right: 0, borderBottom: '1px solid rgba(0,0,0,0.15)' }} />
                           )}
                         </div>
-                      </div>
+                      ))}
+                    </div>
 
+                    {/* Photo Container */}
+                    <div style={{
+                      width: 140,
+                      height: 175,
+                      borderRadius: '12px',
+                      border: `2px solid #061638`,
+                      overflow: 'hidden',
+                      backgroundColor: '#f1f5f9',
+                      flexShrink: 0,
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                      marginTop: '16px',
+                      position: 'relative'
+                    }}>
+                      {(() => {
+                        let computedUrl = selectedPass.photoUrl;
+                        if (computedUrl && computedUrl.includes('localhost:9022')) {
+                          computedUrl = computedUrl.replace('localhost:9022', 'localhost:4000');
+                        } else if (!computedUrl && selectedPass.college === 'Other College' && selectedPass.roll) {
+                          computedUrl = `http://localhost:4000/othercollegephotos/${selectedPass.roll}.jpg`;
+                        } else if (!computedUrl && selectedPass.roll) {
+                          computedUrl = `https://info.aec.edu.in/aec/employeephotos/${selectedPass.roll}.jpg`;
+                        }
+                        return (
+                          <>
+                            <div style={{
+                              width: '100%',
+                              height: '100%',
+                              backgroundColor: selectedPass.gender?.toLowerCase() === 'female' ? '#fdf2f8' : '#eff6ff',
+                              color: selectedPass.gender?.toLowerCase() === 'female' ? '#db2777' : '#2563eb',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <i className="bi bi-person-fill" style={{ fontSize: '70px' }}></i>
+                            </div>
+                            {computedUrl && (
+                              <img 
+                                src={computedUrl} 
+                                alt={selectedPass.name} 
+                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                              />
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
 
-                  {/* BOTTOM BARCODE & VENUE SECTION (Full width white) */}
-                  <div style={{ height: '120px', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 3 }}>
-                    <div style={{ width: '100%', height: '2px', position: 'absolute', top: 0, left: 0, backgroundImage: 'linear-gradient(to right, transparent 50%, #94a3b8 50%)', backgroundSize: '16px 2px', opacity: 0.5 }}></div>
-                    <style>{`
-                      .barcode-wrapper svg {
-                        width: 100% !important;
-                        height: 65px !important;
-                        object-fit: contain !important;
-                      }
-                    `}</style>
-                    <div className="barcode-wrapper" style={{ width: '65%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '12px' }}>
-                      {selectedPass.barcode ? (
-                        <>
-                          <Barcode value={selectedPass.barcode} width={3} height={65} displayValue={false} background="transparent" lineColor="#000" margin={0} />
-                          <div style={{ color: '#000', fontWeight: 800, fontSize: '15px', marginTop: '4px', letterSpacing: '8px' }}>{selectedPass.barcode}</div>
-                        </>
-                      ) : (
-                        <div style={{ fontSize: '12px', color: '#6c757d' }}>No Barcode</div>
-                      )}
-                    </div>
-
-                    {/* VENUE */}
-                    <div style={{ marginTop: '6px', fontSize: '13px', fontWeight: 800 }}>
-                      <span style={{ color: '#000' }}>VENUE: </span>
-                      <span style={{ color: '#c69a37' }}>
-                        {(() => {
-                          const lookupKey = (selectedPass.eventName || '').toLowerCase().trim();
-                          const eventIdKey = (selectedPass.eventId || '').toString();
-                          const SUB_EVENT_VENUES_FALLBACK = {
-                            'agro innovate': 'Room 202, R&C LAB, Second Floor, Bill Gates Bhavan',
-                            'smart farm hackathon': 'Innovation Hub, Ground Floor, Main Block',
-                            'soil analysis challenge': 'Soil Science Lab, Block B, Agriculture Building',
-                            'agri exhibit': 'Online + Exhibition Hall, Admin Block',
-                            'drone sprint': 'University Grounds, Open Area near Sports Complex',
-                            'agri design': 'Open Air Theatre (OAT), Central Ground',
-                            'cultivators': 'AC Seminar Hall, Cotton Bhavan',
-                            'pharma quest': 'Advanced Research Lab, Pharmacy Block',
-                            'scitech model': 'Ramanujan Hall, Science Block',
-                            'biz pitch': 'MBA Seminar Hall, Newton Bhavan'
-                          };
-                          return selectedPass.venue || eventVenues[eventIdKey] || eventVenues[lookupKey] || SUB_EVENT_VENUES_FALLBACK[lookupKey] || 'Room No: 021, Bill Gates Bhavan - GROUND FLOOR';
-                        })()}
-                      </span>
-                    </div>
+                  {/* Full Width Barcode Section */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    width: '100%',
+                    backgroundColor: '#fff',
+                    padding: '8px 0',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    boxShadow: '0 -4px 15px rgba(0,0,0,0.1)',
+                    zIndex: 10,
+                    borderTop: `2px solid #061638`
+                  }}>
+                    {selectedPass.barcode ? (
+                      <>
+                        <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                          <style>{`
+                            .barcode-wrapper svg {
+                              width: 60% !important;
+                              height: 60px !important;
+                              display: block !important;
+                            }
+                          `}</style>
+                          <div className="barcode-wrapper" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                            <Barcode
+                              value={selectedPass.barcode}
+                              width={4}
+                              height={60}
+                              displayValue={false}
+                              background="transparent"
+                              lineColor="#000"
+                              margin={0}
+                            />
+                          </div>
+                        </div>
+                        <div style={{ color: '#000', fontWeight: 800, fontSize: '16px', marginTop: '4px', letterSpacing: '8px' }}>
+                          {selectedPass.barcode}
+                        </div>
+                        <div style={{ fontSize: '16px', fontWeight: 800, marginTop: '6.4px', textAlign: 'center' }}>
+                          <span style={{ color: '#000' }}>VENUE: </span>
+                          <span style={{ color: '#c69a37' }}>
+                            {(() => {
+                              const lookupKey = (selectedPass.eventName || '').toLowerCase().trim();
+                              const eventIdKey = (selectedPass.eventId || '').toString();
+                              const SUB_EVENT_VENUES_FALLBACK = {
+                                'agro innovate': 'Room 202, R&C LAB, Second Floor, Bill Gates Bhavan',
+                                'smart farm hackathon': 'Innovation Hub, Ground Floor, Main Block',
+                                'soil analysis challenge': 'Soil Science Lab, Block B, Agriculture Building',
+                                'agri exhibit': 'Online + Exhibition Hall, Admin Block',
+                                'drone sprint': 'University Grounds, Open Area near Sports Complex',
+                                'agri design': 'Open Air Theatre (OAT), Central Ground',
+                                'cultivators': 'AC Seminar Hall, Cotton Bhavan',
+                                'pharma quest': 'Advanced Research Lab, Pharmacy Block',
+                                'scitech model': 'Ramanujan Hall, Science Block',
+                                'biz pitch': 'MBA Seminar Hall, Newton Bhavan'
+                              };
+                              return selectedPass.venue || eventVenues[eventIdKey] || eventVenues[lookupKey] || SUB_EVENT_VENUES_FALLBACK[lookupKey] || 'Room No: 021, Bill Gates Bhavan - GROUND FLOOR';
+                            })()}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ fontSize: '12px', color: '#6c757d' }}>No Barcode</div>
+                    )}
                   </div>
-
                 </div>
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Zoomed Photo Modal */}
+      {zoomedPhoto && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }} onClick={() => setZoomedPhoto(null)}>
+          <div style={{ position: 'relative', padding: '1rem', backgroundColor: '#1e293b', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '95vw', maxHeight: '95vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setZoomedPhoto(null)}
+              style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}
+            >
+              <i className="bi bi-x-lg"></i>
+            </button>
+            <img 
+              src={zoomedPhoto} 
+              alt="Zoomed Participant" 
+              style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: '8px' }} 
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
           </div>
         </div>
       )}

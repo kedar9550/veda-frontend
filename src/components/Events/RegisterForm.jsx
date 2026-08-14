@@ -76,7 +76,9 @@ const defaultParticipant = () => ({
   year: '',
   accommodation: '',
   department: '',
-  location: ''
+  location: '',
+  photo: null,
+  photoUrl: null
 });
 
 function createParticipants(count, existing = []) {
@@ -251,6 +253,35 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       }));
     }
 
+    if (type === 'roll' && value && form.participants[index].college === 'Other College') {
+      try {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9022';
+        const res = await fetch(`${baseUrl}/api/razorpay/registrations/photo/${encodeURIComponent(value)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.exists) {
+            setForm(prev => {
+              const newParticipants = [...prev.participants];
+              if (newParticipants[index]) {
+                newParticipants[index] = { ...newParticipants[index], photoUrl: baseUrl + data.url };
+              }
+              return { ...prev, participants: newParticipants };
+            });
+          } else {
+             setForm(prev => {
+              const newParticipants = [...prev.participants];
+              if (newParticipants[index]) {
+                newParticipants[index] = { ...newParticipants[index], photoUrl: null };
+              }
+              return { ...prev, participants: newParticipants };
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Error checking photo existence:', err);
+      }
+    }
+
     if (type === 'roll' && value.length >= 5) {
       try {
         const cleanRoll = value.trim().toUpperCase();
@@ -361,6 +392,21 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     });
   };
 
+  const handlePhotoChange = (index, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setForm((prev) => {
+        const participants = [...prev.participants];
+        participants[index] = {
+          ...participants[index],
+          photo: file,
+          photoUrl: URL.createObjectURL(file)
+        };
+        return { ...prev, participants };
+      });
+    }
+  };
+
   const removeParticipant = (index) => {
     setForm((prev) => {
       const participants = prev.participants.filter((_, i) => i !== index);
@@ -442,6 +488,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       }
 
       if (participant.college === 'Other College' && !participant.otherCollege) pErr.otherCollege = 'Please provide the other college name.';
+      if (participant.college === 'Other College' && !participant.photo && !participant.photoUrl) pErr.photo = 'Please upload a photo.';
       if (!participant.year || participant.year === 'Select') pErr.year = 'Please select a valid Year.';
       if (!participant.accommodation || participant.accommodation === 'Select') pErr.accommodation = 'Please select a valid Accomodation.';
       if (!participant.department || participant.department === 'Select') pErr.department = 'Please select a valid Department.';
@@ -634,6 +681,40 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
         }
       }
 
+      // 3. Upload pending photos for Other College participants
+      const photoUploadBaseUrl = 'http://localhost:4000';
+      for (let i = 0; i < form.participants.length; i++) {
+        const p = form.participants[i];
+        if (p.college === 'Other College' && p.photo) {
+          const formData = new FormData();
+          formData.append('rollnumber', p.roll); // Appended before photo so multer can read it first
+          formData.append('photo', p.photo);
+          try {
+            const uploadRes = await fetch(`${photoUploadBaseUrl}/api/razorpay/registrations/photo`, {
+              method: 'POST',
+              body: formData
+            });
+            if (!uploadRes.ok) {
+              throw new Error('Failed to upload photo for ' + p.name);
+            }
+            const uploadData = await uploadRes.json();
+            // Optional: update the participant state to reflect uploaded URL
+            setForm(prev => {
+              const newParticipants = [...prev.participants];
+              if (newParticipants[i]) {
+                newParticipants[i] = { ...newParticipants[i], photoUrl: photoUploadBaseUrl + '/othercollegephotos/' + uploadData.filename, photo: null };
+              }
+              return { ...prev, participants: newParticipants };
+            });
+          } catch (err) {
+            console.error('Error uploading photo:', err);
+            setPaymentMessage(`Error uploading photo for participant ${i + 1}. Please try again.`);
+            setIsProcessingPayment(false);
+            return;
+          }
+        }
+      }
+
       const razorpayKeyId = getRazorpayKeyId();
       if (!razorpayKeyId) {
         throw new Error('Razorpay key is missing. Set VITE_RAZORPAY_KEY_ID in your environment.');
@@ -786,11 +867,38 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                 </div>
 
                 {participant.college === 'Other College' && (
-                  <div>
-                    <label>Other College Name</label>
-                    <input name="otherCollege" value={participant.otherCollege} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0} />
-                    {errors.participants?.[index]?.otherCollege && <div className="field-error">{errors.participants[index].otherCollege}</div>}
-                  </div>
+                  <>
+                    <div>
+                      <label>Other College Name</label>
+                      <input name="otherCollege" value={participant.otherCollege} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0} />
+                      {errors.participants?.[index]?.otherCollege && <div className="field-error">{errors.participants[index].otherCollege}</div>}
+                    </div>
+                    <div>
+                      <label>Participant Photo</label>
+                      {participant.photoUrl ? (
+                        <div style={{ marginBottom: '10px' }}>
+                          <img src={participant.photoUrl} alt="Participant" style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #444' }} />
+                          {participant.photoUrl.startsWith('blob:') ? (
+                            <button type="button" onClick={() => {
+                              setForm(prev => {
+                                const newP = [...prev.participants];
+                                newP[index].photo = null;
+                                newP[index].photoUrl = null;
+                                return { ...prev, participants: newP };
+                              });
+                            }} style={{ display: 'block', marginTop: '5px', fontSize: '0.8rem', color: '#ff6b6b', background: 'transparent', border: 'none', cursor: 'pointer' }}>Remove</button>
+                          ) : (
+                            <div style={{ fontSize: '0.8rem', color: '#22c55e', marginTop: '5px' }}>Already uploaded</div>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <input type="file" accept="image/*" onChange={(e) => handlePhotoChange(index, e)} />
+                        </div>
+                      )}
+                      {errors.participants?.[index]?.photo && <div className="field-error">{errors.participants[index].photo}</div>}
+                    </div>
+                  </>
                 )}
 
                 <div>
