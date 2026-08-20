@@ -9,7 +9,7 @@ const faqData = {
     },
     {
       question: "When and where is the event taking place?",
-      answer: "The event will be held on September 15, 2024, at the Aditya University from 10 AM to 5 PM."
+      answer: "The event will be held on September 11, 2026, at the Aditya University from 10 AM to 5 PM."
     },
     {
       question: "Can I participate if I am not a student at this university/college?",
@@ -94,8 +94,8 @@ const FAQ = () => {
 
       <div className="faq-questions">
         {faqData[activeCategory].map((faq, index) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className={`faq-item ${openQuestionIndex === index ? 'open' : ''}`}
             onClick={() => toggleQuestion(index)}
           >

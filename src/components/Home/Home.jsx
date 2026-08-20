@@ -13,7 +13,7 @@ const RESEARCH_DATA = [
   {
     id: 1,
     side: 'left',
-    year: 'September 15, 2026',
+    year: 'September 11, 2026',
     title: '',
     icon: 'bi-calendar3',
     desc: 'Veda 2026 is the annual National Technological and Entrepreneurial Festival organized by the Aditya University, Surampalem. Celebrating innovation, creativity, and technical excellence, Veda serves as a confluence of ideas, where young engineers, tech enthusiasts, and entrepreneurs come together to showcase their skills, exchange knowledge, and collaborate on groundbreaking projects.',
@@ -21,7 +21,7 @@ const RESEARCH_DATA = [
   {
     id: 2,
     side: 'right',
-    year: 'September 15, 2026',
+    year: 'September 11, 2026',
     title: '',
     icon: 'bi-cpu',
     desc: 'Veda 2026 brings together a diverse range of department-specific events, each designed to challenge, inspire, and foster innovation among students from various engineering and technology disciplines. These events provide a platform for students to apply their theoretical knowledge, collaborate on projects, and gain hands-on experience in their respective fields.',
@@ -29,7 +29,7 @@ const RESEARCH_DATA = [
   {
     id: 3,
     side: 'left',
-    year: 'September 15, 2026',
+    year: 'September 11, 2026',
     title: '',
     icon: 'bi-trophy',
     desc: 'Participants can choose from a wide variety of events based on their interests and expertise. Whether you are looking to test your technical knowledge or showcase your artistic talents, Veda Fest has something for you. Browse through the event list, read the rules, and pick the events that excite you the most. Some events are team-based, so gather your friends and colleagues to compete for glory. Donot forget to check the prerequisites and materials needed for each event before making your selection.',
@@ -37,7 +37,7 @@ const RESEARCH_DATA = [
   {
     id: 4,
     side: 'right',
-    year: 'September 16, 2026',
+    year: 'September 11, 2026',
     title: '',
     icon: 'bi-pencil-square',
     desc: 'To participate in any of the events at Veda Fest, you\'ll need to complete the online registration form. The form is simple and user-friendly, requiring basic details like your name, department, and the events you wish to join. Make sure to provide accurate information, as it will be used for all communications and certificates. Early registration is recommended, as some events have limited slots. Keep an eye on the deadlines to ensure your spot in the fest.',
@@ -45,7 +45,7 @@ const RESEARCH_DATA = [
   {
     id: 5,
     side: 'left',
-    year: 'September 16, 2026',
+    year: 'September 11, 2026',
     title: '',
     icon: 'bi-credit-card-2-front',
     desc: 'Once you have selected your events, the final step is to complete the payment through our secure online gateway. The fee covers participation in multiple events, access to workshops, and other fest amenities. We accept all major credit/debit cards, UPI, and net banking options. Our payment gateway is designed to provide a safe and seamless transaction experience. All transactions are protected with SSL encryption, ensuring that your payment information remains confidential and secure.',
@@ -230,13 +230,13 @@ export default function Home({ loadingComplete = true }) {
               duration: 0.3,
               ease: 'back.out(1.4)',
             }, pos)
-            .to(char, {
-              scale: 1,
-              x: 0,
-              y: 0,
-              duration: 0.42,
-              ease: 'power4.out',
-            }, '+=0.02');
+              .to(char, {
+                scale: 1,
+                x: 0,
+                y: 0,
+                duration: 0.42,
+                ease: 'power4.out',
+              }, '+=0.02');
           });
         }
 
@@ -400,16 +400,16 @@ export default function Home({ loadingComplete = true }) {
       <section ref={sdgsSectionRef} className="sdgs-section">
         <div className="container-premium">
           <div className="row align-items-center">
-            
+
             <div ref={leftColRef} className="col-lg-6">
               <span className="sdgs-header-tag">Event Highlights</span>
               <h2 className="sdgs-title text-gradient">
                 Experience Engineering Across Every Discipline
               </h2>
               <p className="sdgs-desc">
-                VEDA brings together students from diverse engineering and science disciplines 
-                through technical symposiums, project showcases, paper presentations, and 
-                innovation-driven competitions. Every department hosts its own flagship event, 
+                VEDA brings together students from diverse engineering and science disciplines
+                through technical symposiums, project showcases, paper presentations, and
+                innovation-driven competitions. Every department hosts its own flagship event,
                 providing a platform to demonstrate technical skills, creativity, and research excellence.
               </p>
 

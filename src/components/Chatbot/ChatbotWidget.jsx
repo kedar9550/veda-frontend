@@ -9,7 +9,7 @@ const faqData = {
     },
     {
       question: "When and where is the event taking place?",
-      answer: "The event will be held on September 15, 2024, at the Aditya University from 10 AM to 5 PM."
+      answer: "The event will be held on September 11, 2026, at the Aditya University from 10 AM to 5 PM."
     },
     {
       question: "Can I participate if I am not a student at this university/college?",
@@ -69,8 +69,8 @@ const mainOptions = [
 export default function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { 
-      type: 'bot', 
+    {
+      type: 'bot',
       text: (
         <div style={{ lineHeight: '1.6', padding: '4px' }}>
           <strong style={{ fontSize: '1.1em', color: '#a855f7', display: 'block', marginBottom: '8px' }}>👋 Welcome to VEDA 2026!</strong>
@@ -85,7 +85,7 @@ export default function ChatbotWidget() {
   const [inputText, setInputText] = useState('');
   const [allEvents, setAllEvents] = useState([]);
   const messagesEndRef = useRef(null);
-  
+
   const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
 
   const scrollToBottom = () => {
@@ -97,7 +97,7 @@ export default function ChatbotWidget() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isOpen]);
-  
+
   // Pre-fetch events for quick matching
   useEffect(() => {
     fetch(`${baseUrl}/api/events`)
@@ -114,7 +114,7 @@ export default function ChatbotWidget() {
 
   const findBestAnswer = (query) => {
     const q = query.toLowerCase();
-    
+
     let bestMatch = null;
     let maxMatches = 0;
 
@@ -146,35 +146,35 @@ export default function ChatbotWidget() {
     const userMsg = inputText.trim();
     setMessages(prev => [...prev, { type: 'user', text: userMsg }]);
     setInputText('');
-    
+
     // Add a typing indicator
     const typingId = Date.now();
     setMessages(prev => [...prev, { id: typingId, type: 'bot', text: "Thinking..." }]);
-    
+
     const removeTyping = () => {
       setMessages(prev => prev.filter(m => m.id !== typingId));
     };
 
     try {
       const msgLower = userMsg.toLowerCase();
-      
+
       // 1. Team ID Check (starts with VEDA-, VD26-, or contains team)
       const teamMatch = userMsg.match(/(VEDA-[A-Za-z0-9-]+|VD[0-9]{2}-[A-Za-z0-9-]+)/i);
       if (teamMatch || msgLower.includes("team id")) {
         let teamId = teamMatch ? teamMatch[0] : userMsg.trim();
         const res = await fetch(`${baseUrl}/api/razorpay/registrations?teamId=${encodeURIComponent(teamId)}`);
         const data = await res.json();
-        
+
         removeTyping();
         if (data.payments && data.payments.length > 0) {
           setMessages(prev => [...prev, { type: 'bot-team-card', data: data.payments[0], options: ["Main Menu"], optionType: 'menu' }]);
           return;
         } else if (teamMatch) {
-           setMessages(prev => [...prev, { type: 'bot', text: `Sorry, I couldn't find any team with ID ${teamId}.`, options: ["Main Menu"], optionType: 'menu' }]);
-           return;
+          setMessages(prev => [...prev, { type: 'bot', text: `Sorry, I couldn't find any team with ID ${teamId}.`, options: ["Main Menu"], optionType: 'menu' }]);
+          return;
         }
       }
-      
+
       // 2. Roll Number / Pass check
       // A roll number/ID should be 6-25 characters, alphanumeric with optional hyphens, and MUST contain at least one digit
       const rollMatch = userMsg.match(/\b(?=.*\d)([a-zA-Z0-9\-]{6,25})\b/);
@@ -184,7 +184,7 @@ export default function ChatbotWidget() {
         if (rollNo && rollNo.length >= 6) {
           const res = await fetch(`${baseUrl}/api/razorpay/registrations?roll=${encodeURIComponent(rollNo)}`);
           const data = await res.json();
-          
+
           removeTyping();
           if (data.payments && data.payments.length > 0) {
             setMessages(prev => [...prev, { type: 'bot-pass-card', data: data.payments[0], rollNo, options: ["Main Menu"], optionType: 'menu' }]);
@@ -195,7 +195,7 @@ export default function ChatbotWidget() {
           }
         }
       }
-      
+
       // 3. Event Query check
       if (allEvents.length > 0) {
         // Sort by length descending to avoid partial matches
@@ -204,7 +204,7 @@ export default function ChatbotWidget() {
           const lenB = b.eventName ? b.eventName.length : 0;
           return lenB - lenA;
         });
-        
+
         const levenshtein = (a, b) => {
           if (a.length === 0) return b.length;
           if (b.length === 0) return a.length;
@@ -231,7 +231,7 @@ export default function ChatbotWidget() {
           if (!ev.eventName) return false;
           const evName = ev.eventName.toLowerCase().trim();
           if (msgLower.includes(evName)) return true;
-          
+
           const evWords = evName.split(/[\s,.-]+/);
           let matchedAll = true;
           for (const ew of evWords) {
@@ -239,40 +239,40 @@ export default function ChatbotWidget() {
             for (const mw of msgWords) {
               if (ew === mw) { wordMatched = true; break; }
               if (ew.length >= 4 && mw.length >= 4 && Math.abs(ew.length - mw.length) <= 1) {
-                 const d = levenshtein(ew, mw);
-                 if (d <= 1 || (ew.length >= 6 && d <= 2)) {
-                     wordMatched = true; break;
-                 }
+                const d = levenshtein(ew, mw);
+                if (d <= 1 || (ew.length >= 6 && d <= 2)) {
+                  wordMatched = true; break;
+                }
               }
             }
             if (!wordMatched) { matchedAll = false; break; }
           }
           return matchedAll;
         });
-        
+
         if (matchedEvent) {
           removeTyping();
           if (msgLower.includes("venue") || msgLower.includes("where")) {
-            setMessages(prev => [...prev, { 
-              type: 'bot', 
+            setMessages(prev => [...prev, {
+              type: 'bot',
               text: `The venue for **${matchedEvent.eventName}** is **${matchedEvent.venue || "Main Campus"}**.`,
               options: ["Main Menu"],
               optionType: 'menu'
             }]);
             return;
           } else {
-             setMessages(prev => [...prev, { type: 'bot-event-card', data: matchedEvent, options: ["Main Menu"], optionType: 'menu' }]);
-             return;
+            setMessages(prev => [...prev, { type: 'bot-event-card', data: matchedEvent, options: ["Main Menu"], optionType: 'menu' }]);
+            return;
           }
         }
       }
-      
+
       // 4. Fallback to FAQ
       removeTyping();
       setTimeout(() => {
         const answer = findBestAnswer(userMsg);
-        setMessages(prev => [...prev, { 
-          type: 'bot', 
+        setMessages(prev => [...prev, {
+          type: 'bot',
           text: answer,
           options: ["Main Menu"],
           optionType: 'menu'
@@ -289,7 +289,7 @@ export default function ChatbotWidget() {
   const handleOptionClick = (option, type, originalMessageIndex) => {
     // Add user message
     setMessages(prev => [...prev, { type: 'user', text: option }]);
-    
+
     // Remove options from the original message so they aren't clickable twice
     setMessages(prev => {
       const newMsgs = [...prev];
@@ -310,30 +310,30 @@ export default function ChatbotWidget() {
         }
       } else if (type === 'category') {
         const questions = faqData[option].map(item => item.question);
-        setMessages(prev => [...prev, { 
-          type: 'bot', 
+        setMessages(prev => [...prev, {
+          type: 'bot',
           text: `Here are some questions about ${option}:`,
-          options: [...questions, "Back to Categories"],
+          options: [...questions, "Main Menu"],
           optionType: 'question'
         }]);
-      } else if (type === 'question' && option === "Back to Categories") {
-        setMessages(prev => [...prev, { 
-          type: 'bot', 
+      } else if (type === 'question' && option === "Main Menu") {
+        setMessages(prev => [...prev, {
+          type: 'bot',
           text: "Which topic do you have questions about?",
           options: mainOptions,
           optionType: 'mixed'
         }]);
       } else if (type === 'menu' && option === "Main Menu") {
-        setMessages(prev => [...prev, { 
-          type: 'bot', 
+        setMessages(prev => [...prev, {
+          type: 'bot',
           text: "Which topic do you have questions about?",
           options: mainOptions,
           optionType: 'mixed'
         }]);
       } else if (type === 'question') {
         const found = flatFaqData.find(q => q.question === option);
-        setMessages(prev => [...prev, { 
-          type: 'bot', 
+        setMessages(prev => [...prev, {
+          type: 'bot',
           text: found ? found.answer : "Sorry, I couldn't find that.",
           options: ["Main Menu"],
           optionType: 'menu'
@@ -341,23 +341,23 @@ export default function ChatbotWidget() {
       }
     }, 600);
   };
-  
+
   // Custom Renderers for dynamic cards
   const renderPassCard = (msg) => {
     const p = msg.data;
     const participant = p.participants.find(pt => pt.roll?.toLowerCase() === msg.rollNo?.toLowerCase()) || p.participants[0];
-    
+
     return (
       <div className="dynamic-bot-card pass-card">
         <div className="pass-header">
-           <i className="bi bi-ticket-detailed-fill"></i> Event Pass
+          <i className="bi bi-ticket-detailed-fill"></i> Event Pass
         </div>
         <div className="pass-body">
-           <h4>{p.eventName}</h4>
-           <div className="pass-detail"><strong>Name:</strong> {participant?.name || 'N/A'}</div>
-           <div className="pass-detail"><strong>Roll No:</strong> {participant?.roll?.toUpperCase() || 'N/A'}</div>
-           <div className="pass-detail"><strong>Team ID:</strong> {p.teamId}</div>
-           <div className="pass-detail"><strong>Payment:</strong> {p.paymentStatus}</div>
+          <h4>{p.eventName}</h4>
+          <div className="pass-detail"><strong>Name:</strong> {participant?.name || 'N/A'}</div>
+          <div className="pass-detail"><strong>Roll No:</strong> {participant?.roll?.toUpperCase() || 'N/A'}</div>
+          <div className="pass-detail"><strong>Team ID:</strong> {p.teamId}</div>
+          <div className="pass-detail"><strong>Payment:</strong> {p.paymentStatus}</div>
         </div>
       </div>
     );
@@ -368,21 +368,21 @@ export default function ChatbotWidget() {
     return (
       <div className="dynamic-bot-card team-card">
         <div className="team-header">
-           <i className="bi bi-people-fill"></i> Team Details
+          <i className="bi bi-people-fill"></i> Team Details
         </div>
         <div className="team-body">
-           <h4>Event: {p.eventName}</h4>
-           <div className="team-meta"><strong>Team ID:</strong> <span className="highlight-id">{p.teamId}</span></div>
-           <div className="team-meta"><strong>Status:</strong> {p.paymentStatus}</div>
-           <h5>Participants:</h5>
-           <ul className="participant-list">
-             {p.participants && p.participants.map((pt, idx) => (
-                <li key={idx}>
-                  <div className="pt-name">{pt.name}</div>
-                  <div className="pt-roll">{pt.roll}</div>
-                </li>
-             ))}
-           </ul>
+          <h4>Event: {p.eventName}</h4>
+          <div className="team-meta"><strong>Team ID:</strong> <span className="highlight-id">{p.teamId}</span></div>
+          <div className="team-meta"><strong>Status:</strong> {p.paymentStatus}</div>
+          <h5>Participants:</h5>
+          <ul className="participant-list">
+            {p.participants && p.participants.map((pt, idx) => (
+              <li key={idx}>
+                <div className="pt-name">{pt.name}</div>
+                <div className="pt-roll">{pt.roll}</div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     );
@@ -390,7 +390,7 @@ export default function ChatbotWidget() {
 
   const renderEventCard = (msg) => {
     const ev = msg.data;
-    
+
     // Parse Venue
     let venueStr = 'Main Campus';
     if (ev.venueType === 'Indoor' && (ev.building || ev.floor)) {
@@ -400,60 +400,60 @@ export default function ChatbotWidget() {
     } else if (ev.venue) {
       venueStr = ev.venue;
     }
-    
+
     // Parse Faculty Coordinators
-    const coordinators = ev.facultyCoordinators && ev.facultyCoordinators.length > 0 
-      ? ev.facultyCoordinators 
+    const coordinators = ev.facultyCoordinators && ev.facultyCoordinators.length > 0
+      ? ev.facultyCoordinators
       : (ev.facultyCoordinator && ev.facultyCoordinator.employeeName ? [ev.facultyCoordinator] : []);
 
     return (
       <div className="dynamic-bot-card event-card">
         <div className="event-header">
-           <i className="bi bi-calendar-event-fill"></i> Event Details
+          <i className="bi bi-calendar-event-fill"></i> Event Details
         </div>
         <div className="event-body">
-           <h4>{ev.eventName}</h4>
-           <div className="ev-desc">{ev.overview || ev.description || 'Join us for this exciting event!'}</div>
-           
-           <div className="ev-info-grid">
-             <div className="ev-info-item">
-               <i className="bi bi-currency-rupee"></i>
-               <span><strong>Cost:</strong> {ev.price ? `₹${ev.price}` : 'Free'}</span>
-             </div>
-             <div className="ev-info-item">
-               <i className="bi bi-people"></i>
-               <span><strong>Max Team Size:</strong> {ev.maxTeamSize || 1}</span>
-             </div>
-             <div className="ev-info-item">
-               <i className="bi bi-geo-alt"></i>
-               <span>{venueStr}</span>
-             </div>
-             <div className="ev-info-item">
-               <i className="bi bi-clock"></i>
-               <span>{ev.date ? new Date(ev.date).toLocaleDateString() : 'TBA'}</span>
-             </div>
-           </div>
-           
-           {coordinators.length > 0 && (
-             <div className="ev-faculty">
-               <h5>Faculty Coordinators:</h5>
-               <ul>
-                  {coordinators.map((fc, i) => {
-                    const contact = fc.phone || fc.mobile || fc.mobileNumber;
-                    return (
-                      <li key={i} style={{ display: 'flex', flexDirection: 'column', marginBottom: '8px' }}>
-                        <span style={{ fontWeight: '500' }}>{fc.employeeName || fc.name}</span>
-                        {contact && (
-                          <span style={{ color: '#8b5cf6', fontSize: '0.9em', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                            <i className="bi bi-telephone-fill"></i> {contact}
-                          </span>
-                        )}
-                      </li>
-                    );
-                  })}
-               </ul>
-             </div>
-           )}
+          <h4>{ev.eventName}</h4>
+          <div className="ev-desc">{ev.overview || ev.description || 'Join us for this exciting event!'}</div>
+
+          <div className="ev-info-grid">
+            <div className="ev-info-item">
+              <i className="bi bi-currency-rupee"></i>
+              <span><strong>Cost:</strong> {ev.price ? `₹${ev.price}` : 'Free'}</span>
+            </div>
+            <div className="ev-info-item">
+              <i className="bi bi-people"></i>
+              <span><strong>Max Team Size:</strong> {ev.maxTeamSize || 1}</span>
+            </div>
+            <div className="ev-info-item">
+              <i className="bi bi-geo-alt"></i>
+              <span>{venueStr}</span>
+            </div>
+            <div className="ev-info-item">
+              <i className="bi bi-clock"></i>
+              <span>{ev.date ? new Date(ev.date).toLocaleDateString() : 'TBA'}</span>
+            </div>
+          </div>
+
+          {coordinators.length > 0 && (
+            <div className="ev-faculty">
+              <h5>Faculty Coordinators:</h5>
+              <ul>
+                {coordinators.map((fc, i) => {
+                  const contact = fc.phone || fc.mobile || fc.mobileNumber;
+                  return (
+                    <li key={i} style={{ display: 'flex', flexDirection: 'column', marginBottom: '8px' }}>
+                      <span style={{ fontWeight: '500' }}>{fc.employeeName || fc.name}</span>
+                      {contact && (
+                        <span style={{ color: '#8b5cf6', fontSize: '0.9em', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                          <i className="bi bi-telephone-fill"></i> {contact}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -465,13 +465,13 @@ export default function ChatbotWidget() {
       <div className={`chatbot-window ${isOpen ? 'open' : ''}`}>
         <div className="chatbot-header">
           <div className="chatbot-title">
-            <i className="bi bi-robot"></i> VEDA AI Assistant
+            <i className="bi bi-robot"></i> VEDA Assistant
           </div>
           <button className="chatbot-close" onClick={toggleChat}>
             <i className="bi bi-x-lg"></i>
           </button>
         </div>
-        
+
         <div className="chatbot-messages">
           {messages.map((msg, index) => (
             <div key={index} className="chat-message-group">
@@ -479,7 +479,7 @@ export default function ChatbotWidget() {
                 {msg.type.includes('bot-pass-card') && renderPassCard(msg)}
                 {msg.type.includes('bot-team-card') && renderTeamCard(msg)}
                 {msg.type.includes('bot-event-card') && renderEventCard(msg)}
-                
+
                 {!msg.type.includes('card') && (
                   <div className="chat-bubble">
                     {msg.text}
@@ -492,8 +492,8 @@ export default function ChatbotWidget() {
                     const label = typeof opt === 'string' ? opt : opt.label;
                     const optType = typeof opt === 'string' ? msg.optionType : opt.type;
                     return (
-                      <button 
-                        key={idx} 
+                      <button
+                        key={idx}
                         className="chat-chip"
                         onClick={() => handleOptionClick(label, optType, index)}
                       >
@@ -509,9 +509,9 @@ export default function ChatbotWidget() {
         </div>
 
         <form className="chatbot-input-area" onSubmit={handleSend}>
-          <input 
-            type="text" 
-            placeholder="Type your question..." 
+          <input
+            type="text"
+            placeholder="Type your question..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
           />
