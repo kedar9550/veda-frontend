@@ -73,9 +73,9 @@ export default function ChatbotWidget() {
       type: 'bot',
       text: (
         <div style={{ lineHeight: '1.6', padding: '4px' }}>
-          <strong style={{ fontSize: '1.1em', color: '#a855f7', display: 'block', marginBottom: '8px' }}>👋 Welcome to VEDA 2026!</strong>
+          <strong className="chat-welcome-title" style={{ fontSize: '1.1em', display: 'block', marginBottom: '8px' }}>👋 Welcome to VEDA 2026!</strong>
           <p style={{ margin: '0 0 8px 0', fontSize: '0.95em' }}>I'm your AI Assistant. I can help you with Event info, Passes, and Teams.</p>
-          <p style={{ margin: 0, fontSize: '0.9em', color: '#b0b0b0', fontStyle: 'italic' }}>Please select a category below or type your question!</p>
+          <p className="chat-welcome-subtitle" style={{ margin: 0, fontSize: '0.9em', fontStyle: 'italic' }}>Please select a category below or type your question!</p>
         </div>
       ),
       options: mainOptions,
@@ -444,7 +444,7 @@ export default function ChatbotWidget() {
                     <li key={i} style={{ display: 'flex', flexDirection: 'column', marginBottom: '8px' }}>
                       <span style={{ fontWeight: '500' }}>{fc.employeeName || fc.name}</span>
                       {contact && (
-                        <span style={{ color: '#8b5cf6', fontSize: '0.9em', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                        <span className="ev-faculty-contact" style={{ fontSize: '0.9em', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
                           <i className="bi bi-telephone-fill"></i> {contact}
                         </span>
                       )}

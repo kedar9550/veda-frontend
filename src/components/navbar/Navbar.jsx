@@ -270,7 +270,34 @@ export default function Navbar({ activePage, onNavigate }) {
 
         {/* Actions (Admissions, Theme) */}
         <div className="nav-actions">
-
+          {/* Theme Toggle Button outside profile dropdown */}
+          <button
+            onClick={toggleTheme}
+            className="theme-toggle-btn"
+            style={{
+              background: 'transparent',
+              border: 'none',
+              fontSize: '1.2rem',
+              color: themeMode === 'dark' ? '#fff' : '#1e293b',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              transition: 'background 0.2s',
+            }}
+            aria-label="Toggle Theme"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = themeMode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          >
+            <i className={`bi ${themeMode === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'}`}></i>
+          </button>
 
           {/* Admissions CTA / Logged in User */}
           {loggedStudent ? (
@@ -421,38 +448,7 @@ export default function Navbar({ activePage, onNavigate }) {
                     Profile
                   </a>
 
-                  <button
-                    onClick={(e) => {
-                      toggleTheme(e);
-                      setDropdownOpen(false);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      color: 'var(--text-muted)',
-                      background: 'transparent',
-                      border: 'none',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                      width: '100%',
-                      textAlign: 'left',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = 'var(--text-light)';
-                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = 'var(--text-muted)';
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <i className={`bi ${themeMode === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'}`} style={{ fontSize: '1rem' }}></i>
-                    {themeMode === 'dark' ? 'Light Mode' : 'Dark Mode'}
-                  </button>
+                  {/* Logout Button */}
 
                   <button
                     style={{

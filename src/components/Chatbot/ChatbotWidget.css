@@ -57,10 +57,10 @@
   max-width: calc(100vw - 48px);
   height: 500px;
   max-height: calc(100vh - 160px);
-  background-color: #121220;
-  border: 1px solid #2a2a4a;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -78,13 +78,14 @@
 }
 
 .chatbot-header {
-  background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
-  color: white;
+  background: #ffffff;
+  color: #0f172a;
   padding: 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #2a2a4a;
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 16px 16px 0 0;
 }
 
 .chatbot-title {
@@ -96,20 +97,20 @@
 }
 
 .chatbot-title i {
-  color: #a855f7;
+  color: #f1683b;
 }
 
 .chatbot-close {
   background: transparent;
   border: none;
-  color: #a0a0a0;
+  color: #64748b;
   font-size: 1.2rem;
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .chatbot-close:hover {
-  color: white;
+  color: #0f172a;
 }
 
 .chatbot-messages {
@@ -130,7 +131,7 @@
   background: transparent;
 }
 .chatbot-messages::-webkit-scrollbar-thumb {
-  background-color: #2a2a4a;
+  background-color: #cbd5e1;
   border-radius: 10px;
 }
 
@@ -170,13 +171,13 @@
 }
 
 .chat-message.bot .chat-bubble {
-  background-color: #24243a;
-  color: #e0e0e0;
+  background-color: #f1f5f9;
+  color: #1e293b;
   border-bottom-left-radius: 4px;
 }
 
 .chat-message.user .chat-bubble {
-  background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+  background: linear-gradient(135deg, #274191 0%, #3b82f6 100%);
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -191,8 +192,8 @@
 
 .chat-chip {
   background-color: transparent;
-  border: 1px solid #4a4a7a;
-  color: #a855f7;
+  border: 1px solid #cbd5e1;
+  color: #274191;
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 0.85rem;
@@ -202,37 +203,37 @@
 }
 
 .chat-chip:hover {
-  background-color: #2a2a4a;
-  border-color: #a855f7;
+  background-color: #f8fafc;
+  border-color: #274191;
 }
 
 .chatbot-input-area {
   display: flex;
   padding: 12px;
-  border-top: 1px solid #2a2a4a;
-  background-color: #1a1a2e;
+  border-top: 1px solid #e2e8f0;
+  background-color: #ffffff;
 }
 
 .chatbot-input-area input {
   flex: 1;
-  background-color: #121220;
-  border: 1px solid #3a3a5a;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 20px;
   padding: 8px 16px;
-  color: white;
+  color: #1e293b;
   font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s;
 }
 
 .chatbot-input-area input:focus {
-  border-color: #a855f7;
+  border-color: #274191;
 }
 
 .chatbot-input-area button {
   background-color: transparent;
   border: none;
-  color: #a855f7;
+  color: #274191;
   font-size: 1.3rem;
   margin-left: 10px;
   cursor: pointer;
@@ -243,15 +244,23 @@
 }
 
 .chatbot-input-area button:disabled {
-  color: #4a4a7a;
+  color: #cbd5e1;
   cursor: not-allowed;
 }
 
 .chatbot-input-area button:not(:disabled):hover {
-  color: #c084fc;
+  color: #1d4ed8;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .chatbot-wrapper {
+    bottom: 90px;
+    right: 16px;
+  }
+  .chatbot-fab {
+    width: 85px;
+    height: 85px;
+  }
   .chatbot-window {
     width: calc(100vw - 32px);
     right: -8px;
@@ -261,19 +270,19 @@
 /* Dynamic Chatbot Cards */
 .dynamic-bot-card {
   width: 280px;
-  background: #1e1e2d;
-  border: 1px solid #3a3a5a;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
   animation: slideUp 0.3s ease-out;
-  color: #e0e0e0;
+  color: #334155;
   margin-top: 5px;
 }
 
 .dynamic-bot-card h4 {
   margin: 0 0 10px 0;
-  color: #fff;
+  color: #0f172a;
   font-size: 1.1rem;
 }
 
@@ -294,7 +303,7 @@
   font-size: 0.9rem;
 }
 .pass-detail strong {
-  color: #a855f7;
+  color: #274191;
 }
 
 .team-header {
@@ -314,11 +323,11 @@
   font-size: 0.9rem;
 }
 .highlight-id {
-  background: #2a2a4a;
+  background: #f1f5f9;
   padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
-  color: #60a5fa;
+  color: #2563eb;
 }
 .participant-list {
   list-style: none;
@@ -326,18 +335,19 @@
   margin: 10px 0 0 0;
 }
 .participant-list li {
-  background: #24243a;
+  background: #f8fafc;
   padding: 8px;
   border-radius: 6px;
   margin-bottom: 6px;
+  border: 1px solid #e2e8f0;
 }
 .pt-name {
   font-weight: 500;
-  color: #fff;
+  color: #0f172a;
 }
 .pt-roll {
   font-size: 0.8rem;
-  color: #a0a0a0;
+  color: #64748b;
   text-transform: uppercase;
 }
 
@@ -355,7 +365,7 @@
 }
 .ev-desc {
   font-size: 0.85rem;
-  color: #cbd5e1;
+  color: #475569;
   margin-bottom: 12px;
   line-height: 1.4;
 }
@@ -370,21 +380,22 @@
   align-items: center;
   gap: 8px;
   font-size: 0.9rem;
-  background: #2a2a4a;
+  background: #f1f5f9;
   padding: 6px 10px;
   border-radius: 6px;
+  color: #1e293b;
 }
 .ev-info-item i {
-  color: #34d399;
+  color: #059669;
 }
 .ev-faculty {
   margin-top: 10px;
-  border-top: 1px solid #3a3a5a;
+  border-top: 1px solid #e2e8f0;
   padding-top: 10px;
 }
 .ev-faculty h5 {
   margin: 0 0 6px 0;
-  color: #a855f7;
+  color: #274191;
   font-size: 0.9rem;
 }
 .ev-faculty ul {
@@ -392,8 +403,135 @@
   padding: 0;
   margin: 0;
   font-size: 0.85rem;
-  color: #cbd5e1;
+  color: #475569;
 }
 .ev-faculty li {
   margin-bottom: 4px;
+}
+
+/* Extracted Chatbot Inline Styles */
+.chat-welcome-title {
+  color: #274191;
+}
+.chat-welcome-subtitle {
+  color: #64748b;
+}
+.ev-faculty-contact {
+  color: #274191;
+}
+
+/* Dark Theme Chatbot Overrides */
+.dark-theme .chatbot-window {
+  background-color: #121220;
+  border-color: #2a2a4a;
+}
+.dark-theme .chatbot-header {
+  background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+  color: white;
+  border-bottom-color: #2a2a4a;
+}
+.dark-theme .chatbot-title {
+  color: white;
+}
+.dark-theme .chatbot-title i {
+  color: #a855f7;
+}
+.dark-theme .chatbot-close {
+  color: #a0a0a0;
+}
+.dark-theme .chatbot-close:hover {
+  color: white;
+}
+.dark-theme .chatbot-messages::-webkit-scrollbar-thumb {
+  background-color: #2a2a4a;
+}
+.dark-theme .chat-message.bot .chat-bubble {
+  background-color: #24243a;
+  color: #e0e0e0;
+}
+.dark-theme .chat-message.user .chat-bubble {
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+}
+.dark-theme .chat-chip {
+  border-color: #4a4a7a;
+  color: #a855f7;
+  background-color: transparent;
+}
+.dark-theme .chat-chip:hover {
+  background-color: #2a2a4a;
+  border-color: #a855f7;
+}
+.dark-theme .chatbot-input-area {
+  background-color: #1a1a2e;
+  border-top-color: #2a2a4a;
+}
+.dark-theme .chatbot-input-area input {
+  background-color: #121220;
+  border-color: #3a3a5a;
+  color: white;
+}
+.dark-theme .chatbot-input-area input:focus {
+  border-color: #a855f7;
+}
+.dark-theme .chatbot-input-area button {
+  color: #a855f7;
+}
+.dark-theme .chatbot-input-area button:disabled {
+  color: #4a4a7a;
+}
+.dark-theme .chatbot-input-area button:not(:disabled):hover {
+  color: #c084fc;
+}
+.dark-theme .dynamic-bot-card {
+  background: #1e1e2d;
+  border-color: #3a3a5a;
+  color: #e0e0e0;
+}
+.dark-theme .dynamic-bot-card h4 {
+  color: #fff;
+}
+.dark-theme .highlight-id {
+  background: #2a2a4a;
+  color: #60a5fa;
+}
+.dark-theme .participant-list li {
+  background: #24243a;
+  border-color: transparent;
+}
+.dark-theme .pt-name {
+  color: #fff;
+}
+.dark-theme .pt-roll {
+  color: #a0a0a0;
+}
+.dark-theme .ev-desc {
+  color: #cbd5e1;
+}
+.dark-theme .ev-info-item {
+  background: #2a2a4a;
+  color: #e0e0e0;
+}
+.dark-theme .ev-info-item i {
+  color: #34d399;
+}
+.dark-theme .ev-faculty {
+  border-top-color: #3a3a5a;
+}
+.dark-theme .ev-faculty h5 {
+  color: #a855f7;
+}
+.dark-theme .ev-faculty ul {
+  color: #cbd5e1;
+}
+.dark-theme .chat-welcome-title {
+  color: #a855f7;
+}
+.dark-theme .chat-welcome-subtitle {
+  color: #b0b0b0;
+}
+.dark-theme .ev-faculty-contact {
+  color: #8b5cf6;
+}
+.dark-theme .pass-detail strong {
+  color: #a855f7;
 }
