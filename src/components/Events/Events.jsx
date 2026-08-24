@@ -5,8 +5,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEvents } from './useEvents';
 gsap.registerPlugin(ScrollTrigger);
 
-/* ─── Cards Extra Metadata Mapping ─── */
-const CARD_METADATA = {};
 
 /* ─── Loading skeleton card ─── */
 function EventCardSkeleton() {
@@ -37,11 +35,6 @@ function EventCardSkeleton() {
 /* ─── Single Event Card ─── */
 function EventCard({ event, index, cardRef }) {
   const navigate = useNavigate();
-  const meta = CARD_METADATA[event.id] || CARD_METADATA[event.groupSlug] || {
-    participants: '80+',
-    achievements: '10+',
-    techFocus: 'Technical'
-  };
 
   return (
     <div
@@ -50,8 +43,8 @@ function EventCard({ event, index, cardRef }) {
       style={{ '--event-accent': event.accentColor }}
       role="button"
       tabIndex={0}
-      onClick={() => navigate(`/events/${event.id}`)}
-      onKeyDown={(e) => e.key === 'Enter' && navigate(`/events/${event.id}`)}
+      onClick={() => navigate(`/events/${event.slug}`)}
+      onKeyDown={(e) => e.key === 'Enter' && navigate(`/events/${event.slug}`)}
     >
       {/* Decorative Dots Pattern */}
       <div className="event-card__dots" />
@@ -59,13 +52,12 @@ function EventCard({ event, index, cardRef }) {
       {/* Top Header Section */}
       <div className="event-card__header-modern">
         {/* Category badge */}
-        <span className="event-card__badge-modern">{event.title}</span>
+        <span className="event-card__badge-modern">{event.shortName || event.title}</span>
 
         <h3 className="event-card__title-modern">{event.title}</h3>
         <div className="event-card__divider-modern" style={{ background: `linear-gradient(90deg, ${event.accentColor} 0%, transparent 100%)` }} />
       </div>
 
-      {/* Stats Row */}
       <div className="event-card__stats-row">
         {/* Stat Item: Events */}
         <div className="event-card__stat-col stat-events">
@@ -76,14 +68,14 @@ function EventCard({ event, index, cardRef }) {
           <span className="event-card__stat-val">{event.eventCount}</span>
         </div>
 
-        {/* Stat Item: Participants */}
+        {/* Stat Item: Status */}
         <div className="event-card__stat-col stat-participants">
           <div className="event-card__stat-icon-wrap">
-            <i className="bi bi-people" />
+            <i className="bi bi-activity" />
           </div>
-          <span className="event-card__stat-label">Participants</span>
-          <span className="event-card__stat-val">
-            {event.participantsCount || 0}
+          <span className="event-card__stat-label">Status</span>
+          <span className="event-card__stat-val" style={{ color: event.isActive ? '#10b981' : '#ef4444' }}>
+            {event.isActive ? 'Active' : 'Closed'}
           </span>
         </div>
       </div>
@@ -115,7 +107,7 @@ function EventCard({ event, index, cardRef }) {
           className="event-card__cta"
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/events/${event.id}`);
+            navigate(`/events/${event.slug}`);
           }}
           aria-label={`View ${event.title} events`}
         >

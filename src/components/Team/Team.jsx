@@ -55,6 +55,7 @@ function StudentPhoto({ rollNo, name }) {
 
 export default function Team() {
   const [conveners, setConveners] = useState([]);
+  const [members, setMembers] = useState([]);
   const [coordinators, setCoordinators] = useState([]);
   const [studentCoordinators, setStudentCoordinators] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -64,18 +65,17 @@ export default function Team() {
     const fetchTeamData = async () => {
       try {
         setLoading(true);
-        // Fetch Conveners & Co-conveners
+        // Fetch Conveners & Members
         const convRes = await fetch('/api/organisation-committee?role=Convener');
         const convData = await convRes.json();
-        const coconvRes = await fetch('/api/organisation-committee?role=Co-convener');
+        const coconvRes = await fetch('/api/organisation-committee?role=Member');
         const coconvData = await coconvRes.json();
 
-        const orgCommittee = [
-          ...(convData?.data || []),
-          ...(coconvData?.data || [])
-        ].filter(item => item.status === 'Active');
+        const activeConveners = (convData?.data || []).filter(item => item.status === 'Active');
+        const activeMembers = (coconvData?.data || []).filter(item => item.status === 'Active');
 
-        setConveners(orgCommittee);
+        setConveners(activeConveners);
+        setMembers(activeMembers);
 
         // Fetch Groups for Event Coordinators
         const groupsRes = await fetch('/api/groups');
@@ -190,14 +190,14 @@ export default function Team() {
       observer.disconnect();
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [loading, conveners, coordinators]);
+  }, [loading, conveners, members, coordinators]);
 
   return (
     <section className="testimonials-section team-page-container">
       <div className="container-premium text-center" style={{ marginBottom: '4rem' }}>
         <span className="testimonials-header-tag">Leadership</span>
         <h2 className="testimonials-title text-gradient">
-          VEDA Organizing Committee 2026
+          VEDA Conveners 2026
         </h2>
 
         {loading ? (
@@ -236,47 +236,49 @@ export default function Team() {
         )}
       </div>
 
-      <div className="container-premium text-center" style={{ marginTop: '8rem', marginBottom: '4rem' }}>
-        <span className="testimonials-header-tag">Event Leads</span>
+      <div className="container-premium text-center" style={{ marginBottom: '4rem' }}>
+        <span className="testimonials-header-tag">Committee</span>
         <h2 className="testimonials-title text-gradient">
-          VEDA Staff Co-Ordinators 2026
+          VEDA Members 2026
         </h2>
 
         {loading ? (
           <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>Loading...</div>
-        ) : coordinators.length === 0 ? (
-          <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>No coordinators found.</div>
+        ) : members.length === 0 ? (
+          <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>No active members found.</div>
         ) : (
           <div className="premium-team-grid">
-            {coordinators.map((coord, idx) => (
+            {members.map((member, idx) => (
               <div
-                key={coord.id}
+                key={member._id}
                 ref={(el) => (cardsRef.current[conveners.length + idx] = el)}
                 className="premium-team-card"
               >
                 <div className="avatar-ring-container" style={{ transition: 'transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1)', willChange: 'transform' }}>
                   <div className="avatar-inner">
                     <CoordinatorPhoto
-                      employeeCode={coord.id}
-                      name={coord.name}
+                      employeeCode={member.employee?.institutionId || member.employee?.employeeCode}
+                      name={member.employee?.name || member.employee?.employeeName}
                     />
                   </div>
                 </div>
                 <h4 className="member-name">
-                  {coord.name}
+                  {member.employee?.name || member.employee?.employeeName || 'Unknown'}
                 </h4>
                 <p className="member-role">
-                  {coord.roles.join(', ')}
+                  {member.role}
                 </p>
                 <div className="member-phone">
                   <i className="bi bi-telephone-fill" style={{ fontSize: '0.8rem', color: '#8b5cf6' }}></i>
-                  {coord.phone}
+                  {member.employee?.phone || 'N/A'}
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+
 
       <div className="container-premium text-center" style={{ marginTop: '8rem', marginBottom: '4rem' }}>
         <span className="testimonials-header-tag">Student Leads</span>

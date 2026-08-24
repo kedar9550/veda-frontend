@@ -5485,14 +5485,21 @@ textarea.form-input-custom {
   border-radius: 8px;
   border: 1px solid var(--glass-border);
   background: var(--bg-card);
-  color: var(--text);
+  color: var(--text-light);
+}
+
+.register-form option {
+  background: var(--bg-dark);
+  color: var(--text-light);
 }
 
 .register-form input:disabled,
-.register-form select:disabled {
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.4);
-  border-color: rgba(255, 255, 255, 0.08);
+.register-form select:disabled,
+.register-form input:read-only,
+.register-form select:read-only {
+  background: var(--glass);
+  color: var(--text-muted);
+  border-color: var(--glass-border);
   cursor: not-allowed;
 }
 

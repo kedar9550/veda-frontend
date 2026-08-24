@@ -96,7 +96,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   const location = useLocation();
   const { events } = useEvents();
   const { departments, error: departmentsError } = useDepartments();
-  const event = events.find(e => e.groupSlug === schoolId && e.id === eventId) || null;
+  const event = events.find(e => e.groupSlug === schoolId && e.slug === eventId) || null;
   const [form, setForm] = useState({
     category: '',
     amount: '',
@@ -110,13 +110,20 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Computation for amount based on extra team
+  // Computation for amount based on extra team and priceType
   const computedTotalAmountInPaisa = useMemo(() => {
     const baseAmountInPaisa = parseAmountToPaisa(event?.feeText || event?.feeAmount || event?.raw?.price || 0);
     const extraTeamSizeNum = Number(form.extraTeamSize) || 0;
     const extraAmountPerHeadInPaisa = parseAmountToPaisa(event?.raw?.extraAmountPerHead || 0);
-    return baseAmountInPaisa + (extraTeamSizeNum * extraAmountPerHeadInPaisa);
-  }, [event, form.extraTeamSize]);
+
+    let totalBase = baseAmountInPaisa;
+    if (event?.raw?.priceType?.toLowerCase() === 'per head') {
+      const selectedTeamSize = Number(form.teamSize) || 1;
+      totalBase = baseAmountInPaisa * selectedTeamSize;
+    }
+
+    return totalBase + (extraTeamSizeNum * extraAmountPerHeadInPaisa);
+  }, [event, form.teamSize, form.extraTeamSize]);
 
   useEffect(() => {
     const savedStudentStr = localStorage.getItem('eventStudent');
@@ -212,8 +219,8 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
         const data = await res.json();
         const payments = data.payments || [];
         const hasRegistered = payments.some(payment =>
-          payment.eventId === eventId &&
-          payment.schoolId === schoolId &&
+          payment.eventId === event.id &&
+          payment.schoolId === event.groupId &&
           (payment.category || '').toLowerCase() === formCategory
         );
 
@@ -370,12 +377,13 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     }
   };
 
+  const eligibleDepartments = Array.isArray(event?.raw?.department) && event.raw.department.length > 0
+    ? event.raw.department
+    : departments || [];
+
   const departmentOptions = [
     { title: 'Select', value: '' },
-    ...(departments && departments.length > 0
-      ? departments.map((dept) => ({ title: dept.name, value: dept.name }))
-      : []
-    )
+    ...eligibleDepartments.map((dept) => ({ title: dept.name, value: dept.name }))
   ];
 
   const handleChange = (e) => {
@@ -545,8 +553,11 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         amount: amountInPaisa,
+        eventId: event?.id,
+        teamSize: Number(form.teamSize) || 1,
+        extraTeamSize: Number(form.extraTeamSize) || 0,
         currency: 'INR',
-        receipt: `event-${eventId || schoolId || 'registration'}-${Date.now()}`,
+        receipt: `event-${event?.id || schoolId || 'registration'}-${Date.now()}`,
       }),
     });
 
@@ -575,8 +586,8 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        eventId,
-        schoolId,
+        eventId: event.id,
+        schoolId: event.groupId,
         category: form.category,
         eventName: form.eventName,
         amount: amountInRupees,
@@ -585,7 +596,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
         currency: 'INR',
         teamSize: (Number(form.teamSize) || 1) + (Number(form.extraTeamSize) || 0),
         participants: form.participants,
-        receipt: `event-${eventId || schoolId || 'registration'}-${Date.now()}`,
+        receipt: `event-${event?.id || schoolId || 'registration'}-${Date.now()}`,
         order_id: paymentDetails.orderId,
         payment_id: paymentDetails.paymentId,
         signature: paymentDetails.signature,
@@ -665,8 +676,8 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
             const data = await res.json();
             const payments = data.payments || [];
             const hasRegistered = payments.some(payment =>
-              payment.eventId === eventId &&
-              payment.schoolId === schoolId &&
+              payment.eventId === event.id &&
+              payment.schoolId === event.groupId &&
               (payment.category || '').toLowerCase() === formCategory
             );
 
@@ -682,7 +693,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       }
 
       // 3. Upload pending photos for Other College participants
-      const photoUploadBaseUrl = 'http://localhost:4000';
+      const photoUploadBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9022';
       for (let i = 0; i < form.participants.length; i++) {
         const p = form.participants[i];
         if (p.college === 'Other College' && p.photo) {
@@ -698,11 +709,10 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               throw new Error('Failed to upload photo for ' + p.name);
             }
             const uploadData = await uploadRes.json();
-            // Optional: update the participant state to reflect uploaded URL
             setForm(prev => {
               const newParticipants = [...prev.participants];
               if (newParticipants[i]) {
-                newParticipants[i] = { ...newParticipants[i], photoUrl: photoUploadBaseUrl + '/othercollegephotos/' + uploadData.filename, photo: null };
+                newParticipants[i] = { ...newParticipants[i], photoUrl: photoUploadBaseUrl + '/uploads/othercollegephotos/' + uploadData.filename, photo: null };
               }
               return { ...prev, participants: newParticipants };
             });
@@ -796,11 +806,16 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
         <form onSubmit={handleSubmit} className="register-form">
           <div className="register-grid">
             <label>
-              Event Category
+              School
               <input name="category" value={form.category} readOnly />
             </label>
             <label>
               AMOUNT
+              {event?.raw?.priceType?.toLowerCase() === 'per head' && (
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '6px', textTransform: 'none', fontWeight: 'normal' }}>
+                  (₹{parseAmountToPaisa(event?.feeText || event?.feeAmount || event?.raw?.price || 0) / 100} Per Head)
+                </span>
+              )}
               <input name="amount" value={form.amount} readOnly />
               {Number(form.extraTeamSize) > 0 && (
                 <span style={{ fontSize: '0.8rem', color: '#ffd700', marginTop: '0.25rem', display: 'block' }}>

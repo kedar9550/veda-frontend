@@ -32,15 +32,15 @@ function formatEventFee(feeAmount) {
 }
 
 /* ─── Minimal event card — image + title only ─── */
-function SubEventCard({ event, cardRef, schoolId }) {
+function SubEventCard({ event, cardRef, school }) {
   const navigate = useNavigate();
   const handleClick = () => {
-    navigate(`/events/${schoolId}/${event.id}`);
+    navigate(`/events/${school.slug}/${event.slug}`);
   };
 
   const organizerLogo = event.groupLogo || event.image;
   const organizerName = event.category || event.groupName || 'CSE';
-  const mainFestName = event.groupName || 'VEDA 2026';
+  const mainFestName = school?.shortName || school?.title || event.groupName || 'VEDA 2026';
 
   return (
     <div
@@ -143,22 +143,10 @@ export default function EventDetail({ schoolId }) {
   const cardsRef = useRef([]);
   const heroRef = useRef(null);
 
-  const { events, loading, error } = useEvents();
-  const groupEvents = events.filter((e) => e.groupSlug === schoolId);
-  const school = groupEvents.length > 0
-    ? {
-      id: schoolId,
-      title: groupEvents[0].groupName,
-      tagline: groupEvents[0].groupTagline || groupEvents[0].tagline,
-      image: groupEvents[0].groupImage || groupEvents[0].image,
-      organizer: groupEvents[0].groupCategory,
-      organizerIcon: groupEvents[0].organizerIcon,
-      likes: groupEvents[0].likes,
-      eventCount: groupEvents.length,
-      accentColor: groupEvents[0].accentColor,
-    }
-    : 0;
-  const subEvents = groupEvents;
+  const { events, groups, loading, error } = useEvents();
+  
+  const school = groups.find((g) => g.slug === schoolId) || null;
+  const subEvents = school ? events.filter((e) => e.groupSlug === school.slug) : [];
 
   const schoolParticipants = subEvents.reduce((acc, curr) => acc + (curr.realParticipantsCount || curr.participants || 0), 0);
 
@@ -178,56 +166,66 @@ export default function EventDetail({ schoolId }) {
     );
   }, [loading, subEvents]);
 
-  if (!school) return null;
+  if (!school) {
+    if (loading) {
+      return (
+        <section className="event-detail-section" style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ color: 'var(--text-secondary)' }}>Loading events...</div>
+        </section>
+      );
+    }
+    return null;
+  }
 
   return (
-    <section ref={sectionRef} className="event-detail-section">
+    <div ref={sectionRef} className="esingle-page">
       {/* Hero */}
-      <div ref={heroRef} className="event-detail-hero" style={{ '--school-accent': school.accentColor }}>
-        <img src={school.image} alt={school.title} className="event-detail-hero__bg" />
-        <div className="event-detail-hero__overlay" />
+      <div ref={heroRef} className="esingle-hero" style={{ '--ev-accent': school.accentColor }}>
+        <img src={school.image} alt={school.title} className="esingle-hero__img" />
+        <div className="esingle-hero__overlay" />
+      </div>
+
+      <div className="esingle-stats-bar">
+        <div className="esingle-stats-bar__inner">
+          <div className="esingle-stat">
+            <span className="esingle-stat__number">{school.eventCount}</span>
+            <span className="esingle-stat__label">Events</span>
+          </div>
+          <div className="esingle-stat">
+            <span className="esingle-stat__number">{schoolParticipants}</span>
+            <span className="esingle-stat__label">Total Participation</span>
+          </div>
+        </div>
       </div>
 
       {/* Content */}
-      <div className="container-premium">
+      <div className="container-premium esingle-body">
 
         {/* School Page Header Block */}
-        <div className="event-detail-page-header">
-          <div className="event-detail-header-left">
-            <div className="event-detail-badge-row">
-              <button
-                type="button"
-                className="event-detail-back-pill"
-                onClick={() => navigate('/events')}
-                aria-label="All Events"
-              >
-                <i className="bi bi-arrow-left" /> All Events
-              </button>
-              <span className="event-detail-page-tag" style={{ '--school-accent': school.accentColor }}>
-                {school.category || 'VEDA 2026'}
-              </span>
-            </div>
-            <h1 className="event-detail-page-title">
-              {school.title}
-            </h1>
-            <p className="event-detail-page-tagline">
-              {school.tagline}
-            </p>
+        <div className="esingle-header-block">
+          <div className="esingle-badge-row">
+            <button
+              type="button"
+              className="esingle-back-pill"
+              onClick={() => navigate('/events')}
+              aria-label="All Events"
+            >
+              <i className="bi bi-arrow-left" />
+            </button>
+            <span className="esingle-category-badge">
+              {school.category || 'VEDA 2026'}
+            </span>
           </div>
+          <h1 className="esingle-page-title">
+            {school.title}
+          </h1>
+          <p className="esingle-page-subtitle">
+            {school.tagline}
+          </p>
         </div>
 
-        <div className="event-detail-content-header">
+        <div className="event-detail-content-header" style={{ marginTop: '2rem', marginBottom: '1.5rem' }}>
           <h2 className="event-detail-content-title"><span className="text-gradient">EVENTS</span></h2>
-          <div className="event-detail-page-stats">
-            <div className="event-detail-page-stat">
-              <i className="bi bi-calendar-event" style={{ color: school.accentColor }} />
-              <span><strong>{school.eventCount}</strong> Events</span>
-            </div>
-            <div className="event-detail-page-stat">
-              <i className="bi bi-people-fill" style={{ color: school.accentColor }} />
-              <span><strong>{schoolParticipants}</strong> Total Students</span>
-            </div>
-          </div>
         </div>
 
         {error && <div className="events-error"><i className="bi bi-exclamation-triangle" /><p>Could not load events.</p></div>}
@@ -247,13 +245,13 @@ export default function EventDetail({ schoolId }) {
               <SubEventCard
                 key={event.id}
                 event={event}
-                schoolId={schoolId}
+                school={school}
                 cardRef={(el) => (cardsRef.current[index] = el)}
               />
             ))}
 
         </div>
       </div>
-    </section>
+    </div>
   );
 }

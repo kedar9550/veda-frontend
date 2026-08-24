@@ -70,9 +70,9 @@ export default function EventSingleDetail({ schoolId, eventId }) {
   const statsRef = useRef(null);
   const bodyRef = useRef(null);
 
-  const { events, loading } = useEvents();
-  const school = events.find((e) => e.groupSlug === schoolId);
-  const event = events.find((e) => e.groupSlug === schoolId && e.id === eventId);
+  const { events, groups, loading } = useEvents();
+  const school = groups.find((g) => g.slug === schoolId);
+  const event = events.find((e) => e.groupSlug === schoolId && e.slug === eventId);
 
   const coordinator = event?.coordinator || null;
   const coordinatorName = coordinator?.employeeName || coordinator?.name || coordinator?.fullName || '';
@@ -109,8 +109,8 @@ export default function EventSingleDetail({ schoolId, eventId }) {
           const payments = data.payments || [];
           const eventCategory = (event.category || event.groupCategory || schoolId || '').toLowerCase();
           const hasRegistered = payments.some(p =>
-            p.eventId === eventId &&
-            p.schoolId === schoolId &&
+            p.eventId === event.id &&
+            p.schoolId === school.id &&
             (p.category || '').toLowerCase() === eventCategory
           );
           setIsAlreadyRegistered(hasRegistered);
