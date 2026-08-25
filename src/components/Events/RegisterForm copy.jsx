@@ -189,6 +189,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   const colleges = ['Choose...', 'Aditya University', 'ACET', 'Other College'];
   const years = ['Select', '1', '2', '3', '4'];
   const genders = ['Select', 'Male', 'Female', 'Other'];
+  const accommodations = ['Select', 'Yes', 'No'];
 
   const validateParticipantRegistration = async (index, type, value) => {
     if (!value || !form.eventName) return;
@@ -223,12 +224,31 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
           (payment.category || '').toLowerCase() === formCategory
         );
 
+        const searchVal = value.toLowerCase();
+        const hasAccommodation = payments.some(payment =>
+          payment.participants && payment.participants.some(pt =>
+            ((pt.roll || '').toLowerCase() === searchVal || (pt.email || '').toLowerCase() === searchVal) &&
+            (pt.accommodation === 'Yes' || pt.accommodation === 'yes')
+          )
+        );
+
+        if (hasAccommodation) {
+          setForm(prev => {
+            const newParticipants = [...prev.participants];
+            if (newParticipants[index]) {
+              newParticipants[index] = { ...newParticipants[index], accommodation: 'No' };
+            }
+            return { ...prev, participants: newParticipants };
+          });
+        }
+
         setParticipantValidation(prev => ({
           ...prev,
           [index]: {
             ...prev[index],
             [`${type}Loading`]: false,
-            [`${type}Error`]: hasRegistered ? 'Already registered for this event.' : ''
+            [`${type}Error`]: hasRegistered ? 'Already registered for this event.' : '',
+            hasAccommodation
           }
         }));
       }
@@ -478,6 +498,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       if (participant.college === 'Other College' && !participant.otherCollege) pErr.otherCollege = 'Please provide the other college name.';
       if (participant.college === 'Other College' && !participant.photo && !participant.photoUrl) pErr.photo = 'Please upload a photo.';
       if (!participant.year || participant.year === 'Select') pErr.year = 'Please select a valid Year.';
+      if (!participant.accommodation || participant.accommodation === 'Select') pErr.accommodation = 'Please select a valid Accomodation.';
       if (!participant.department || participant.department === 'Select') pErr.department = 'Please select a valid Department.';
       if (!participant.location) pErr.location = 'Please provide a valid Location.';
       err.participants[idx] = pErr;
@@ -950,6 +971,28 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                 </div>
 
                 <div>
+                  <label>Accomodation</label>
+                  <div style={{ position: 'relative' }}>
+                    <select
+                      name="accommodation"
+                      value={participant.accommodation}
+                      onChange={(e) => handleParticipantChange(index, e)}
+                      disabled={participantValidation[index]?.hasAccommodation}
+                    >
+                      {accommodations.map(a => <option key={a} value={a}>{a}</option>)}
+                    </select>
+                  </div>
+                  {participantValidation[index]?.hasAccommodation && (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                      Accommodation already availed in another event.
+                    </div>
+                  )}
+                  {errors.participants?.[index]?.accommodation && !participantValidation[index]?.hasAccommodation && (
+                    <div className="field-error">{errors.participants[index].accommodation}</div>
+                  )}
+                </div>
+
+                <div>
                   <label>Departments</label>
                   <select name="department" value={participant.department} onChange={(e) => handleParticipantChange(index, e)}>
                     {departmentOptions.map((dept) => (
@@ -997,19 +1040,19 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
           backdropFilter: 'blur(4px)'
         }}>
           <div style={{
-            background: 'var(--bg-card, #1a1a1a)',
-            border: '1px solid var(--glass-border, #333)',
+            background: 'var(--card-bg, #1a1a1a)',
+            border: '1px solid var(--border-color, #333)',
             borderRadius: '12px',
             padding: '2rem',
             width: '90%', maxWidth: '500px',
-            boxShadow: 'var(--shadow-md, 0 10px 30px rgba(0,0,0,0.5))',
-            color: 'var(--text-light, #fff)'
+            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+            color: '#fff'
           }}>
             <h3 style={{ marginTop: 0, color: 'var(--primary, #ffd700)', marginBottom: '1rem', fontSize: '1.5rem' }}>Confirm Registration</h3>
-            <p style={{ marginBottom: '1.5rem', lineHeight: 1.5, color: 'var(--text-muted, #e0e0e0)' }}>
+            <p style={{ marginBottom: '1.5rem', lineHeight: 1.5, color: '#e0e0e0' }}>
               Please confirm the registration for {(Number(form.teamSize) || 1) + (Number(form.extraTeamSize) || 0)} participant{((Number(form.teamSize) || 1) + (Number(form.extraTeamSize) || 0)) > 1 ? 's' : ''}.
             </p>
-            <div style={{ background: 'var(--glass, rgba(255,255,255,0.05))', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', maxHeight: '200px', overflowY: 'auto' }}>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', maxHeight: '200px', overflowY: 'auto' }}>
               {form.participants.map((p, idx) => (
                 <div key={idx} style={{ marginBottom: idx < form.participants.length - 1 ? '0.75rem' : 0 }}>
                   <strong style={{ color: 'var(--primary, #ffd700)' }}>{idx + 1}.</strong> {p.name || 'Unnamed participant'}
@@ -1020,7 +1063,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                style={{ padding: '0.6rem 1.2rem', background: 'transparent', border: '1px solid var(--glass-border, #555)', color: 'var(--text-light, #ccc)', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
+                style={{ padding: '0.6rem 1.2rem', background: 'transparent', border: '1px solid #555', color: '#ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}
               >
                 Cancel
               </button>
@@ -1045,13 +1088,13 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
           backdropFilter: 'blur(4px)'
         }}>
           <div style={{
-            background: 'var(--bg-card, #1a1a1a)',
-            border: '1px solid var(--glass-border, #333)',
+            background: 'var(--card-bg, #1a1a1a)',
+            border: '1px solid var(--border-color, #333)',
             borderRadius: '12px',
             padding: '2.5rem 2rem',
             width: '90%', maxWidth: '400px',
-            boxShadow: 'var(--shadow-md, 0 10px 30px rgba(0,0,0,0.5))',
-            color: 'var(--text-light, #fff)',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+            color: '#fff',
             textAlign: 'center'
           }}>
             <div style={{
@@ -1061,8 +1104,8 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
             }}>
               ✓
             </div>
-            <h3 style={{ marginTop: 0, color: 'var(--text-light, #fff)', marginBottom: '1rem', fontSize: '1.5rem' }}>Payment Successful!</h3>
-            <p style={{ marginBottom: '2rem', lineHeight: 1.5, color: 'var(--text-muted, #e0e0e0)' }}>
+            <h3 style={{ marginTop: 0, color: '#fff', marginBottom: '1rem', fontSize: '1.5rem' }}>Payment Successful!</h3>
+            <p style={{ marginBottom: '2rem', lineHeight: 1.5, color: '#e0e0e0' }}>
               Your payment has been successfully processed and your registration is complete.
             </p>
             <button

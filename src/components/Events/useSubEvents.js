@@ -128,7 +128,7 @@ export function useSubEvents(schoolId, groupId) {
                 tagline: event.tagline || 'Technical Competitions & Challenges',
                 description: event.description || `Participate in ${eventName} organized by the department.`,
                 image: event.image || `/events/${schoolId}.png`,
-                date: event.date || '2025-10-15',
+                date: event.date || import.meta.env.VITE_EVENT_DATE || '',
                 time: event.time || '10:00 AM',
                 venue: event.venue || 'Campus Block',
                 prize: event.prize || '₹10,000',

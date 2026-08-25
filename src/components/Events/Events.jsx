@@ -1,50 +1,22 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEvents } from './useEvents';
-gsap.registerPlugin(ScrollTrigger);
+import './EventsPage.css';
 
-
-/* ─── Loading skeleton card ─── */
-function EventCardSkeleton() {
-  return (
-    <div className="event-card event-card--modern event-card--skeleton" style={{ minHeight: '340px' }}>
-      <div className="event-card__header-modern">
-        <div className="skeleton-line" style={{ height: '2.2rem', width: '50%', borderRadius: '8px', marginBottom: '0.5rem' }} />
-        <div className="skeleton-line" style={{ height: '3px', width: '70px', borderRadius: '99px' }} />
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', marginTop: '1.5rem' }}>
-        {Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div className="skeleton-circle" style={{ width: '42px', height: '42px', marginBottom: '0.6rem' }} />
-            <div className="skeleton-line" style={{ height: '0.68rem', width: '80px', borderRadius: '4px', marginBottom: '0.35rem' }} />
-            <div className="skeleton-line" style={{ height: '0.88rem', width: '50px', borderRadius: '4px' }} />
-          </div>
-        ))}
-      </div>
-
-      <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-        <div className="skeleton-btn" style={{ width: '120px', height: '36px', borderRadius: '99px' }} />
-      </div>
-    </div>
-  );
-}
-
-/* ─── Single Event Card ─── */
-function EventCard({ event, index, cardRef }) {
+function SchoolCard({ group }) {
   const navigate = useNavigate();
+
+  // Use a default accent color, or one from the group if available
+  const accentColor = group.accentColor || '#6c63ff';
 
   return (
     <div
-      ref={cardRef}
       className="event-card event-card--modern"
-      style={{ '--event-accent': event.accentColor }}
+      style={{ '--event-accent': accentColor, cursor: 'pointer' }}
       role="button"
       tabIndex={0}
-      onClick={() => navigate(`/events/${event.slug}`)}
-      onKeyDown={(e) => e.key === 'Enter' && navigate(`/events/${event.slug}`)}
+      onClick={() => navigate(`/events/${group.slug}`)}
+      onKeyDown={(e) => e.key === 'Enter' && navigate(`/events/${group.slug}`)}
     >
       {/* Decorative Dots Pattern */}
       <div className="event-card__dots" />
@@ -52,10 +24,10 @@ function EventCard({ event, index, cardRef }) {
       {/* Top Header Section */}
       <div className="event-card__header-modern">
         {/* Category badge */}
-        <span className="event-card__badge-modern">{event.shortName || event.title}</span>
+        <span className="event-card__badge-modern">{group.shortName || group.title || group.name}</span>
 
-        <h3 className="event-card__title-modern">{event.title}</h3>
-        <div className="event-card__divider-modern" style={{ background: `linear-gradient(90deg, ${event.accentColor} 0%, transparent 100%)` }} />
+        <h3 className="event-card__title-modern">{group.title || group.name}</h3>
+        <div className="event-card__divider-modern" style={{ background: `linear-gradient(90deg, ${accentColor} 0%, transparent 100%)` }} />
       </div>
 
       <div className="event-card__stats-row">
@@ -65,17 +37,17 @@ function EventCard({ event, index, cardRef }) {
             <i className="bi bi-calendar-event" />
           </div>
           <span className="event-card__stat-label">Events</span>
-          <span className="event-card__stat-val">{event.eventCount}</span>
+          <span className="event-card__stat-val">{group.eventCount || 0}</span>
         </div>
 
-        {/* Stat Item: Status */}
+        {/* Stat Item: Participants */}
         <div className="event-card__stat-col stat-participants">
-          <div className="event-card__stat-icon-wrap">
-            <i className="bi bi-activity" />
+          <div className="event-card__stat-icon-wrap" style={{ color: '#4dabf7' }}>
+            <i className="bi bi-people" />
           </div>
-          <span className="event-card__stat-label">Status</span>
-          <span className="event-card__stat-val" style={{ color: event.isActive ? '#10b981' : '#ef4444' }}>
-            {event.isActive ? 'Active' : 'Closed'}
+          <span className="event-card__stat-label">Participants</span>
+          <span className="event-card__stat-val" style={{ color: '#4dabf7' }}>
+            {group.participants || group.usersRegistered || 0}
           </span>
         </div>
       </div>
@@ -83,20 +55,20 @@ function EventCard({ event, index, cardRef }) {
       {/* Organizer Row */}
       <div className="event-card__organizer-row-modern">
         <div className="event-card__organizer-info-modern">
-          <div className="event-card__organizer-icon-modern" style={{ color: event.accentColor }}>
-            {event.groupLogo || event.image ? (
+          <div className="event-card__organizer-icon-modern" style={{ color: accentColor }}>
+            {group.groupLogo || group.image ? (
               <img
-                src={event.groupLogo || event.image}
-                alt={event.organizer || event.title}
+                src={group.groupLogo || group.image}
+                alt={group.organizer || group.title || group.name}
                 className="event-card__organizer-logo-img"
               />
             ) : (
-              <i className={`bi ${event.organizerIcon || 'bi-grid'}`} />
+              <i className={`bi ${group.organizerIcon || 'bi-grid'}`} />
             )}
           </div>
           <div className="event-card__organizer-text-modern">
             <span className="event-card__organizer-label-modern">Organized By</span>
-            <span className="event-card__organizer-name-modern">{event.organizer}</span>
+            <span className="event-card__organizer-name-modern">{group.organizer || group.name || 'VEDA'}</span>
           </div>
         </div>
       </div>
@@ -107,9 +79,9 @@ function EventCard({ event, index, cardRef }) {
           className="event-card__cta"
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/events/${event.slug}`);
+            navigate(`/events/${group.slug}`);
           }}
-          aria-label={`View ${event.title} events`}
+          aria-label={`View ${group.title || group.name} events`}
         >
           View Events
           <i className="bi bi-arrow-right" />
@@ -119,169 +91,216 @@ function EventCard({ event, index, cardRef }) {
   );
 }
 
-/* ─── Main Events Section ─── */
-export default function Events() {
-  const sectionRef = useRef(null);
-  const cardsRef = useRef([]);
-  const { groups, loading, error } = useEvents();
+function FeaturedEventCard({ event }) {
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (loading || groups.length === 0) return;
+  const accentColor = event.categoryColor || '#7c3aed';
+  
+  const rawDepts = event.raw?.department || [];
+  const isAllDepartments = rawDepts.length > 1;
+  
+  const badgeName = isAllDepartments 
+    ? 'ALL DEPTS' 
+    : (event.groupShortName || event.category || 'FEATURED');
 
-    const ctx = gsap.context(() => {
-      const mm = gsap.matchMedia();
+  const displayOrganizer = isAllDepartments
+    ? 'All Departments'
+    : (event.organizer || event.category || event.groupName || 'Event');
 
-      mm.add('(min-width: 769px)', () => {
-        gsap.fromTo(
-          cardsRef.current.filter(Boolean),
-          { opacity: 0, y: 60, scale: 0.95 },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.8,
-            stagger: 0.12,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 75%',
-              toggleActions: 'play none none none',
-            },
-          }
-        );
-      });
-    }, sectionRef);
-
-    // Mouse glow tracking
-    const cleanups = cardsRef.current.map((card) => {
-      if (!card) return null;
-      const handleMouseMove = (e) => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-        card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
-      };
-      card.addEventListener('mousemove', handleMouseMove);
-      return () => card.removeEventListener('mousemove', handleMouseMove);
-    });
-
-    return () => {
-      ctx.revert();
-      cleanups.forEach((c) => c && c());
-    };
-  }, [loading, groups]);
-
-  // Mobile GPU-Accelerated Parallax Depth Effect for Event Cards (< 768px)
-  useEffect(() => {
-    const isMobile = window.innerWidth <= 768;
-    if (!isMobile || loading || groups.length === 0) return;
-
-    let ticking = false;
-    const activeCards = new Set();
-
-    const updateMobileParallax = () => {
-      const windowHeight = window.innerHeight || document.documentElement.clientHeight;
-
-      activeCards.forEach((cardEl) => {
-        if (!cardEl) return;
-        const rect = cardEl.getBoundingClientRect();
-        const centerY = rect.top + rect.height / 2;
-        const normalizedScroll = (centerY - windowHeight / 2) / (windowHeight / 2);
-
-        // Clamp translation offset strictly between -12px and +12px for 60 FPS performance
-        const maxOffsetPx = 12;
-        const clampedOffset = Math.max(-maxOffsetPx, Math.min(maxOffsetPx, normalizedScroll * maxOffsetPx));
-
-        cardEl.style.transform = `translate3d(0, ${clampedOffset.toFixed(2)}px, 0)`;
-      });
-
-      ticking = false;
-    };
-
-    const handleScroll = () => {
-      if (!ticking && activeCards.size > 0) {
-        window.requestAnimationFrame(updateMobileParallax);
-        ticking = true;
-      }
-    };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            activeCards.add(entry.target);
-          } else {
-            activeCards.delete(entry.target);
-            entry.target.style.transform = 'translate3d(0, 0, 0)';
-          }
-        });
-
-        if (activeCards.size > 0) {
-          updateMobileParallax();
-          window.addEventListener('scroll', handleScroll, { passive: true });
-        } else {
-          window.removeEventListener('scroll', handleScroll);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    cardsRef.current.forEach((card) => {
-      if (card) observer.observe(card);
-    });
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [loading, groups]);
+  const dateStr = event.raw?.startDate ? new Date(event.raw.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase().replace(' ', ' - ') : (import.meta.env.VITE_EVENT_DATE || '11 - 12 SEP, 2026');
 
   return (
-    <section ref={sectionRef} id="events" className="events-section">
-      <div className="container-premium">
-
-        {/* Header */}
-        <div className="events-header">
-          <span className="events-header-tag">Campus Life</span>
-          <h2 className="events-title text-gradient">
-            Events &amp; Competitions
-          </h2>
-          <p className="events-subtitle">
-            Discover inter-school events, workshops, and competitions.
-            Register and showcase your talent.
-          </p>
+    <div
+      className="event-card event-card--modern"
+      style={{ '--card-accent': accentColor, overflow: 'visible' }}
+      onClick={() => navigate(`/events/${event.groupSlug}/${event.slug}`)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && navigate(`/events/${event.groupSlug}/${event.slug}`)}
+    >
+      <div className="event-card__img-container-tech" style={{ margin: '0 auto 1rem', width: '220px', height: '220px', position: 'relative' }}>
+        <img src={event.image || 'https://placehold.co/600x400/1e293b/94a3b8?text=Event+Image'} alt={event.title} className="event-card__img-tech" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+        <div className="event-card__date-badge-tech" style={{ position: 'absolute', top: '10px', left: '-10px', background: '#001f3f', color: '#fff', padding: '0.4rem 0.8rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+          <i className="bi bi-calendar-event"></i> {dateStr}
         </div>
-
-        {/* Error state */}
-        {error && (
-          <div className="events-error">
-            <i className="bi bi-exclamation-triangle" />
-            <p>Could not load events. Please try again.</p>
-          </div>
-        )}
-
-        {/* Cards grid */}
-        <div className="events-grid">
-          {loading
-            ? Array.from({ length: 5 }).map((_, i) => (
-              <EventCardSkeleton key={i} />
-            ))
-            : groups.map((group, index) => (
-              <EventCard
-                key={group.id}
-                event={{
-                  ...group,
-                  category: group.category || group.organizer,
-                  organizer: group.organizer || group.category,
-                  tagline: group.tagline || 'Explore more events in this group',
-                  image: group.image || '/events/techno.png',
-                }}
-                index={index}
-                cardRef={(el) => (cardsRef.current[index] = el)}
-              />
-            ))}
+        <div className="event-card__icon-badge-tech" style={{ position: 'absolute', bottom: '10px', left: '10px', background: '#0055ff', color: '#fff', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {event.title.toLowerCase().includes('robo') ? <i className="bi bi-robot"></i> :
+            event.title.toLowerCase().includes('hack') ? <i className="bi bi-lock-fill"></i> :
+              <i className="bi bi-cpu"></i>}
         </div>
-
       </div>
-    </section>
+      
+      <div className="event-card__header-modern" style={{ textAlign: 'center', padding: '0' }}>
+        <h3 className="event-card__title-modern" style={{ fontSize: '1.05rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: '0 auto 0.5rem', width: '100%', textAlign: 'center' }}>{event.title}</h3>
+      </div>
+
+      <p className="event-card__tagline-tech" style={{ textAlign: 'center', marginTop: '0.5rem' }}>{event.tagline || 'Explore exciting events, challenges and competitions'}</p>
+
+      <div className="event-card__divider-wrapper">
+        <div className="event-card__divider-modern" style={{ background: `linear-gradient(90deg, ${accentColor} 0%, transparent 100%)` }} />
+      </div>
+
+      <div className="event-card__stats-row">
+        {/* Stat Item: Teams Registered */}
+        <div className="event-card__stat-col stat-events">
+          <div className="event-card__stat-icon-wrap" style={{ color: '#7c3aed', backgroundColor: 'rgba(124, 58, 237, 0.12)' }}>
+            <i className="bi bi-people-fill" />
+          </div>
+          <span className="event-card__stat-label">Teams</span>
+          <span className="event-card__stat-val">{event.realRegistrationsCount || event.registeredStudents || 0}</span>
+        </div>
+
+        {/* Stat Item: Fee */}
+        <div className="event-card__stat-col stat-participants">
+          <div className="event-card__stat-icon-wrap" style={{ color: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.12)' }}>
+            <i className="bi bi-currency-rupee" />
+          </div>
+          <span className="event-card__stat-label">Fee</span>
+          <span className="event-card__stat-val" style={{ color: '#0ea5e9' }}>
+            {event.feeAmount ? '₹' + event.feeAmount : 'Free'}
+          </span>
+        </div>
+        
+        {/* Stat Item: Participants */}
+        <div className="event-card__stat-col stat-participants">
+          <div className="event-card__stat-icon-wrap" style={{ color: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.12)' }}>
+            <i className="bi bi-person-check-fill" />
+          </div>
+          <span className="event-card__stat-label">Participants</span>
+          <span className="event-card__stat-val" style={{ color: '#3b82f6' }}>
+            {event.realParticipantsCount || event.participants || 0}
+          </span>
+        </div>
+      </div>
+
+      {/* Organizer Row */}
+      <div className="event-card__organizer-row-modern">
+        <div className="event-card__organizer-info-modern">
+          <div className="event-card__organizer-icon-modern" style={{ color: accentColor }}>
+            {event.groupLogo || event.image ? (
+              <img
+                src={event.groupLogo || event.image}
+                alt={displayOrganizer}
+                className="event-card__organizer-logo-img"
+              />
+            ) : (
+              <i className="bi bi-grid" />
+            )}
+          </div>
+          <div className="event-card__organizer-text-modern">
+            <span className="event-card__organizer-label-modern">Organized By</span>
+            <span className="event-card__organizer-name-modern">{displayOrganizer}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="event-card__footer-modern">
+        <button
+          className="event-card__cta"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/events/${event.groupSlug}/${event.slug}`);
+          }}
+          aria-label={`View ${event.title} details`}
+        >
+          View Details
+          <i className="bi bi-arrow-right" />
+        </button>
+      </div>
+    </div>
   );
 }
+
+export default function Events() {
+  const { groups, events, loading, error } = useEvents();
+
+  // Find the FEATURED EVENTS group
+  const universityGroup = groups.find(
+    g => (g.name || g.title || '').toUpperCase().includes('FEATURED EVENTS') ||
+      (g.shortName || '').toUpperCase() === 'FEATURED EVENTS'
+  );
+
+  // Events for FEATURED EVENTS
+  const featuredEvents = universityGroup
+    ? events.filter(e => e.groupId === universityGroup.id || e.groupSlug === universityGroup.slug)
+    : [];
+
+  // Other schools
+  const schoolGroups = groups.filter(g => g.id !== universityGroup?.id);
+
+  return (
+    <div className="events-page-container">
+      {/* EXPLORE OUR SCHOOLS Section */}
+      <h2 className="events-section-title">EXPLORE OUR SCHOOLS</h2>
+
+      {error && (
+        <div style={{ color: '#ff6b6b', textAlign: 'center', marginBottom: '2rem' }}>
+          <i className="bi bi-exclamation-triangle" /> {error}
+        </div>
+      )}
+
+      {loading ? (
+        <div className="schools-grid">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="event-card event-card--skeleton" style={{ minHeight: '340px' }}>
+              <div className="event-card__header-modern">
+                <div className="skeleton-line" style={{ height: '2.2rem', width: '50%', borderRadius: '8px', marginBottom: '0.5rem' }} />
+                <div className="skeleton-line" style={{ height: '3px', width: '70px', borderRadius: '99px' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', marginTop: '1.5rem' }}>
+                {Array.from({ length: 2 }).map((_, idx) => (
+                  <div key={idx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div className="skeleton-circle" style={{ width: '42px', height: '42px', marginBottom: '0.6rem' }} />
+                    <div className="skeleton-line" style={{ height: '0.68rem', width: '80px', borderRadius: '4px', marginBottom: '0.35rem' }} />
+                    <div className="skeleton-line" style={{ height: '0.88rem', width: '50px', borderRadius: '4px' }} />
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                <div className="skeleton-btn" style={{ width: '120px', height: '36px', borderRadius: '99px' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="schools-grid">
+          {schoolGroups.map(group => (
+            <SchoolCard key={group.id} group={group} />
+          ))}
+        </div>
+      )}
+
+      {/* FEATURED EVENTS Section */}
+      {featuredEvents.length > 0 && (
+        <div style={{ marginTop: '2rem' }}>
+          <div className="featured-events-header">
+            <h2 className="featured-events-title">FEATURED EVENTS</h2>
+            <a
+              href={`/events/${universityGroup?.slug}`}
+              className="view-all-events"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = `/events/${universityGroup?.slug}`;
+              }}
+            >
+              View All Events <i className="bi bi-arrow-right" />
+            </a>
+          </div>
+          <div className="featured-grid">
+            {featuredEvents.map(event => (
+              <FeaturedEventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+
+
+
+

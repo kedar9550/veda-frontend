@@ -83,7 +83,7 @@ export default function Team() {
 
         const coordsMap = new Map();
 
-        (groupsData?.groups || []).forEach(group => {
+        (groupsData?.groups || []).filter(g => g.status === 'Active').forEach(group => {
           if (group.eventCoordinator) {
             const c = group.eventCoordinator;
             const id = c.institutionId || c.employeeId || c.employeeCode;

@@ -60,7 +60,7 @@ export function useEvents() {
               }
             });
 
-            globalGroups = rawGroups.map(g => {
+            globalGroups = rawGroups.filter(g => g.status === 'Active').map(g => {
               const groupSlug = (g.shortName || g.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
               return {
                 id: g._id,
@@ -92,7 +92,7 @@ export function useEvents() {
                 title: evt.eventName,
                 tagline: evt.overview || '',
                 description: evt.overview || '',
-                image: parentGroup?.image || '/events/techno.png',
+                image: formatImageUrl(evt.bannerImage, API_URL) || 'https://placehold.co/600x400/1e293b/94a3b8?text=Event+Image',
                 groupLogo: parentGroup?.groupLogo || null,
                 organizer: evt.department?.[0]?.name || evt.group?.name || 'Department',
                 feeAmount: evt.price || 0,
@@ -135,3 +135,5 @@ export function useEvents() {
 
   return state;
 }
+
+

@@ -38,95 +38,117 @@ function SubEventCard({ event, cardRef, school }) {
     navigate(`/events/${school.slug}/${event.slug}`);
   };
 
-  const organizerLogo = event.groupLogo || event.image;
-  const organizerName = event.category || event.groupName || 'CSE';
-  const mainFestName = school?.shortName || school?.title || event.groupName || 'VEDA 2026';
+  const accentColor = event.categoryColor || '#7c3aed';
+  const rawDepts = event.raw?.department || [];
+  const isAllDepartments = rawDepts.length > 1;
+  const badgeName = isAllDepartments 
+    ? 'ALL DEPTS' 
+    : (event.groupShortName || event.category || 'EVENT');
+
+  const displayOrganizer = isAllDepartments
+    ? 'All Departments'
+    : (event.organizer || event.category || event.groupName || 'Event');
+
+  const dateStr = event.raw?.startDate ? new Date(event.raw.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase().replace(' ', ' - ') : (import.meta.env.VITE_EVENT_DATE || '11 - 12 SEP, 2026');
 
   return (
     <div
       ref={cardRef}
-      className="sub-event-card sub-event-card--modern"
-      style={{ '--sub-accent': event.categoryColor || '#7c3aed' }}
+      className="event-card event-card--modern"
+      style={{ '--card-accent': accentColor, overflow: 'visible' }}
       onClick={handleClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && handleClick()}
       aria-label={`View ${event.title} details`}
     >
-      {/* Header Row: Event Title on Left, Main Fest Name (Kriya/Digi) Badge on Right */}
-      <div className="sub-event-card__header-modern">
-        <div className="sub-event-card__title-wrap-modern">
-          <h3 className="sub-event-card__title-modern">{event.title}</h3>
-          <div className="sub-event-card__underline-modern" />
+      <div className="event-card__img-container-tech" style={{ margin: '0 auto 1rem', width: '220px', height: '220px', position: 'relative' }}>
+        <img src={event.image || 'https://placehold.co/600x400/1e293b/94a3b8?text=Event+Image'} alt={event.title} className="event-card__img-tech" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+        <div className="event-card__date-badge-tech" style={{ position: 'absolute', top: '10px', left: '-10px', background: '#001f3f', color: '#fff', padding: '0.4rem 0.8rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+          <i className="bi bi-calendar-event"></i> {dateStr}
         </div>
-        <span className="sub-event-card__badge-modern">
-          {mainFestName}
-        </span>
+        <div className="event-card__icon-badge-tech" style={{ position: 'absolute', bottom: '10px', left: '10px', background: '#0055ff', color: '#fff', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {event.title.toLowerCase().includes('robo') ? <i className="bi bi-robot"></i> :
+            event.title.toLowerCase().includes('hack') ? <i className="bi bi-lock-fill"></i> :
+              <i className="bi bi-cpu"></i>}
+        </div>
+      </div>
+      
+      <div className="event-card__header-modern" style={{ textAlign: 'center', padding: '0' }}>
+        <h3 className="event-card__title-modern" style={{ fontSize: '1.05rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: '0 auto 0.5rem', width: '100%', textAlign: 'center' }}>{event.title}</h3>
       </div>
 
-      {/* Description / Tagline */}
-      {event.tagline && (
-        <p className="sub-event-card__tagline-modern">{event.tagline}</p>
-      )}
+      <p className="event-card__tagline-tech" style={{ textAlign: 'center', marginTop: '0.5rem' }}>{event.tagline || 'Explore exciting events, challenges and competitions'}</p>
 
-      {/* Middle Stats Row: Circular Icon Columns */}
-      <div className="sub-event-card__stats-modern">
-        <div className="sub-event-card__stat-item-modern">
-          <div className="sub-event-card__stat-icon-wrap-modern stat-purple">
+      <div className="event-card__divider-wrapper">
+        <div className="event-card__divider-modern" style={{ background: `linear-gradient(90deg, ${accentColor} 0%, transparent 100%)` }} />
+      </div>
+
+      <div className="event-card__stats-row">
+        {/* Stat Item: Teams Registered */}
+        <div className="event-card__stat-col stat-events">
+          <div className="event-card__stat-icon-wrap" style={{ color: '#7c3aed', backgroundColor: 'rgba(124, 58, 237, 0.12)' }}>
             <i className="bi bi-people-fill" />
           </div>
-          <span className="sub-event-card__stat-val-modern">
-            {event.realRegistrationsCount || event.registeredStudents || 0}
-          </span>
-          <span className="sub-event-card__stat-label-modern">Teams Registered</span>
+          <span className="event-card__stat-label">Teams</span>
+          <span className="event-card__stat-val">{event.realRegistrationsCount || event.registeredStudents || 0}</span>
         </div>
 
-        <div className="sub-event-card__stat-item-modern">
-          <div className="sub-event-card__stat-icon-wrap-modern stat-teal">
+        {/* Stat Item: Fee */}
+        <div className="event-card__stat-col stat-participants">
+          <div className="event-card__stat-icon-wrap" style={{ color: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.12)' }}>
             <i className="bi bi-currency-rupee" />
           </div>
-          <span className="sub-event-card__stat-val-modern">
-            {event.feeText || formatEventFee(event.feeAmount)}
+          <span className="event-card__stat-label">Fee</span>
+          <span className="event-card__stat-val" style={{ color: '#0ea5e9' }}>
+            {event.feeAmount ? '₹' + event.feeAmount : 'Free'}
           </span>
-          <span className="sub-event-card__stat-label-modern">Rupees</span>
         </div>
-
-        <div className="sub-event-card__stat-item-modern">
-          <div className="sub-event-card__stat-icon-wrap-modern stat-blue">
-            <i className="bi bi-people" />
+        
+        {/* Stat Item: Participants */}
+        <div className="event-card__stat-col stat-participants">
+          <div className="event-card__stat-icon-wrap" style={{ color: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.12)' }}>
+            <i className="bi bi-person-check-fill" />
           </div>
-          <span className="sub-event-card__stat-val-modern">
+          <span className="event-card__stat-label">Participants</span>
+          <span className="event-card__stat-val" style={{ color: '#3b82f6' }}>
             {event.realParticipantsCount || event.participants || 0}
           </span>
-          <span className="sub-event-card__stat-label-modern">Participation</span>
         </div>
       </div>
 
-      {/* Bottom Organizer Row & Action Button */}
-      <div className="sub-event-card__organizer-row-modern">
-        <div className="sub-event-card__organizer-info-modern">
-          <div className="sub-event-card__organizer-icon-modern">
-            {organizerLogo ? (
-              <img src={organizerLogo} alt={organizerName} className="sub-event-card__organizer-logo-img" />
+      {/* Organizer Row */}
+      <div className="event-card__organizer-row-modern">
+        <div className="event-card__organizer-info-modern">
+          <div className="event-card__organizer-icon-modern" style={{ color: accentColor }}>
+            {event.groupLogo || event.image ? (
+              <img
+                src={event.groupLogo || event.image}
+                alt={displayOrganizer}
+                className="event-card__organizer-logo-img"
+              />
             ) : (
-              <i className="bi bi-grid-fill" />
+              <i className="bi bi-grid" />
             )}
           </div>
-          <div className="sub-event-card__organizer-text-modern">
-            <span className="sub-event-card__organizer-label-modern">ORGANIZED BY</span>
-            <span className="sub-event-card__organizer-name-modern">{organizerName}</span>
+          <div className="event-card__organizer-text-modern">
+            <span className="event-card__organizer-label-modern">Organized By</span>
+            <span className="event-card__organizer-name-modern">{displayOrganizer}</span>
           </div>
         </div>
+      </div>
 
+      {/* Footer */}
+      <div className="event-card__footer-modern">
         <button
-          type="button"
-          className="sub-event-card__cta-modern"
+          className="event-card__cta"
           onClick={(e) => {
             e.stopPropagation();
             handleClick();
           }}
+          aria-label={`View ${event.title} details`}
         >
-          {event.isOpen ? 'View Event' : 'Closed'}
+          View Details
           <i className="bi bi-arrow-right" />
         </button>
       </div>
@@ -144,7 +166,7 @@ export default function EventDetail({ schoolId }) {
   const heroRef = useRef(null);
 
   const { events, groups, loading, error } = useEvents();
-  
+
   const school = groups.find((g) => g.slug === schoolId) || null;
   const subEvents = school ? events.filter((e) => e.groupSlug === school.slug) : [];
 
@@ -255,3 +277,9 @@ export default function EventDetail({ schoolId }) {
     </div>
   );
 }
+
+
+
+
+
+

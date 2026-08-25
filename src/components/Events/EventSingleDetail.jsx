@@ -209,7 +209,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
           <div className="esingle-meta-row">
             <div className="esingle-meta-chip">
               <i className="bi bi-calendar3" />
-              <span>{event.date ? formatDate(event.date) : 'Date TBD'}</span>
+              <span>{event.date ? formatDate(event.date) : (import.meta.env.VITE_EVENT_DATE || 'Date TBD')}</span>
             </div>
             <div className="esingle-meta-chip">
               <i className="bi bi-geo-alt" />
