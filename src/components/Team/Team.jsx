@@ -78,14 +78,17 @@ export default function Team() {
         setMembers(activeMembers);
 
         // Fetch Groups for Event Coordinators
-        const groupsRes = await fetch('/api/groups');
+        const groupsRes = await fetch('/api/event-schools');
         const groupsData = await groupsRes.json();
+        const rawSchoolGroups = Array.isArray(groupsData)
+          ? groupsData
+          : (groupsData?.data || groupsData?.schools || groupsData?.eventSchools || groupsData?.groups || []);
 
         const coordsMap = new Map();
 
-        (groupsData?.groups || []).filter(g => g.status === 'Active').forEach(group => {
-          if (group.eventCoordinator) {
-            const c = group.eventCoordinator;
+        rawSchoolGroups.filter(g => !g.status || g.status.toLowerCase() === 'active').forEach(group => {
+          const c = group.coordinator || group.eventCoordinator;
+          if (c) {
             const id = c.institutionId || c.employeeId || c.employeeCode;
             if (id) {
               if (!coordsMap.has(id)) {
