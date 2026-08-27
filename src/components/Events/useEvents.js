@@ -7,7 +7,7 @@ let globalLoading = true;
 let globalError = null;
 let subscribers = new Set();
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:2000';
+const API_URL = import.meta.env.VITE_API_URL;
 
 function formatImageUrl(path, baseUrl = API_URL) {
   if (!path) return null;
@@ -83,7 +83,7 @@ export function useEvents() {
               const parentGroup = globalGroups.find(g => g._id === groupId);
               const eventSlug = (evt.eventName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
               const groupSlug = parentGroup?.slug || (evt.group?.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-              
+
               return {
                 id: evt._id,
                 _id: evt._id,
