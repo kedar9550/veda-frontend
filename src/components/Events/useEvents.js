@@ -45,6 +45,7 @@ export function useEvents() {
             fetch(`${API_URL}/api/events`)
           ]);
 
+
           if (groupsRes.ok && eventsRes.ok) {
             const groupsData = await groupsRes.json();
             const eventsData = await eventsRes.json();
