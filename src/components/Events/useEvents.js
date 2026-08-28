@@ -188,6 +188,8 @@ const fetchAll = async () => {
           isOpen: evt.isOpen !== false,
           isActive: evt.status ? evt.status.toLowerCase() === 'active' : true,
           rules: evt.rules || [],
+          coordinator: evt.facultyCoordinator || evt.coordinator || evt.eventCoordinator || (evt.facultyCoordinators && evt.facultyCoordinators[0]) || null,
+          coordinators: evt.facultyCoordinators || (evt.facultyCoordinator ? [evt.facultyCoordinator] : (evt.coordinator ? [evt.coordinator] : (evt.eventCoordinator ? [evt.eventCoordinator] : []))),
           groupId: groupId,
           groupName: parentGroup?.title || evt.school?.name || evt.eventSchool?.name || evt.group?.name || '',
           realRegistrationsCount,

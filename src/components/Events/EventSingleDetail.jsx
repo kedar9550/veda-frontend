@@ -74,9 +74,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
   const school = groups.find((g) => g.slug === schoolId);
   const event = events.find((e) => e.groupSlug === schoolId && e.slug === eventId);
 
-  const coordinator = event?.coordinator || null;
-  const coordinatorName = coordinator?.employeeName || coordinator?.name || coordinator?.fullName || '';
-  const coordinatorCode = coordinator?.employeeCode || coordinator?.employeeId || coordinator?.id || coordinator?._id || '';
+  const coordinators = event?.coordinators?.length > 0 ? event.coordinators : (event?.coordinator ? [event.coordinator] : []);
 
   const [student, setStudent] = useState(null);
   const [isAlreadyRegistered, setIsAlreadyRegistered] = useState(false);
@@ -256,27 +254,36 @@ export default function EventSingleDetail({ schoolId, eventId }) {
         )}
 
         {/* ── COORDINATOR DETAILS ── */}
-        {coordinator && (
+        {coordinators && coordinators.length > 0 && (
           <div className="esingle-section">
             <h2 className="esingle-section-title">
-              <span>FACULTY COORDINATOR</span><span className="esingle-section-colon"> :</span>
+              <span>FACULTY COORDINATOR{coordinators.length > 1 ? 'S' : ''}</span><span className="esingle-section-colon"> :</span>
             </h2>
-            <div className="esingle-coordinator-row">
-              <CoordinatorPhoto
-                employeeCode={coordinatorCode}
-                name={coordinatorName}
-                className="esingle-coordinator-photo"
-              />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginTop: '1rem' }}>
+              {coordinators.map((coordinator, idx) => {
+                const coordinatorName = coordinator?.employeeName || coordinator?.name || coordinator?.fullName || '';
+                const coordinatorCode = coordinator?.employeeCode || coordinator?.employeeId || coordinator?.id || coordinator?._id || '';
+                
+                return (
+                  <div key={idx} className="esingle-coordinator-row" style={{ marginTop: 0, marginBottom: '1rem', flex: '1 1 min-content', minWidth: '300px' }}>
+                    <CoordinatorPhoto
+                      employeeCode={coordinatorCode}
+                      name={coordinatorName}
+                      className="esingle-coordinator-photo"
+                    />
 
-              <div className="esingle-coordinator-info">
-                <p className="esingle-section-text">
-                  <strong>{coordinatorName || coordinator?.designation || 'Faculty Coordinator'}</strong>
-                  {coordinator?.designation && coordinatorName ? ` — ${coordinator.designation}` : null}
-                </p>
-                <p className="esingle-section-text">
-                  <small className="esingle-coordinator-code">Employee Code: {coordinatorCode || 'N/A'}</small>
-                </p>
-              </div>
+                    <div className="esingle-coordinator-info">
+                      <p className="esingle-section-text" style={{ marginBottom: '0.25rem' }}>
+                        <strong>{coordinatorName || coordinator?.designation || 'Faculty Coordinator'}</strong>
+                        {coordinator?.designation && coordinatorName ? ` — ${coordinator.designation}` : null}
+                      </p>
+                      <p className="esingle-section-text">
+                        <small className="esingle-coordinator-code">Employee Code: {coordinatorCode || 'N/A'}</small>
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
