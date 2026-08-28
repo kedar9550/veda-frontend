@@ -165,8 +165,8 @@ const fetchAll = async () => {
         const groupSlug = parentGroup?.slug || (evt.school?.name || evt.eventSchool?.name || evt.group?.name || evt.schoolName || evt.groupName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         const eStat = eventStats[evt._id] || { regCount: 0, partCount: 0 };
 
-        const realRegistrationsCount = evt.registeredStudents || evt.usersRegistered || eStat.regCount || 0;
-        const realParticipantsCount = evt.participants || evt.participation || eStat.partCount || 0;
+        const realRegistrationsCount = eStat.regCount || 0;
+        const realParticipantsCount = eStat.partCount || 0;
 
         return {
           id: evt._id,

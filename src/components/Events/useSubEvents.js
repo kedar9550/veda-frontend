@@ -118,8 +118,8 @@ export function useSubEvents(schoolId, groupId) {
                 employeeCode: event.coordinator.employeeCode || event.coordinator.employeeId || event.coordinator.id || event.coordinator._id || ''
               } : null;
 
-              const realRegistrationsCount = event.registeredStudents || event.usersRegistered || rStats.regCount || 0;
-              const realParticipantsCount = event.participants || event.participation || rStats.partCount || 0;
+              const realRegistrationsCount = rStats.regCount || 0;
+              const realParticipantsCount = rStats.partCount || 0;
 
               return {
                 id: eventKey,
