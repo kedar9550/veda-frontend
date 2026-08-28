@@ -13,6 +13,7 @@ export default function LoginPage() {
     college: 'Choose...',
     otherCollege: '',
     roll: '',
+    branch: '',
     gender: 'Select',
     mobile: '',
     email: '',
@@ -31,7 +32,8 @@ export default function LoginPage() {
     email: false,
     mobile: false,
     gender: false,
-    college: false
+    college: false,
+    branch: false
   });
 
   // If already logged in, redirect to dashboard
@@ -46,7 +48,7 @@ export default function LoginPage() {
     const cleanRoll = (rollNo || '').trim().toUpperCase();
     if (!cleanRoll || cleanRoll.length < 5) {
       setStudentLookupStatus('');
-      setDisabledFields({ name: false, email: false, mobile: false, gender: false, college: false });
+      setDisabledFields({ name: false, email: false, mobile: false, gender: false, college: false, branch: false });
       return;
     }
 
@@ -119,7 +121,7 @@ export default function LoginPage() {
       if (Array.isArray(data) && data.length > 0 && !data[0].error && data[0].studentname) {
         const info = data[0];
         const updatedFields = {};
-        const newDisabled = { name: false, email: false, mobile: false, gender: false, college: false };
+        const newDisabled = { name: false, email: false, mobile: false, gender: false, college: false, branch: false };
 
         if (info.studentname) {
           updatedFields.name = info.studentname;
@@ -150,6 +152,11 @@ export default function LoginPage() {
         updatedFields.college = 'Aditya University';
         newDisabled.college = true;
 
+        if (info.branch) {
+          updatedFields.branch = info.branch;
+          newDisabled.branch = true;
+        }
+
         setForm(prev => ({
           ...prev,
           ...updatedFields
@@ -158,12 +165,12 @@ export default function LoginPage() {
         setStudentLookupStatus('found');
       } else {
         setStudentLookupStatus('not_found');
-        setDisabledFields({ name: false, email: false, mobile: false, gender: false, college: false });
+        setDisabledFields({ name: false, email: false, mobile: false, gender: false, college: false, branch: false });
       }
     } catch (err) {
       console.error('Error fetching student data:', err);
       setStudentLookupStatus('error');
-      setDisabledFields({ name: false, email: false, mobile: false, gender: false, college: false });
+      setDisabledFields({ name: false, email: false, mobile: false, gender: false, college: false, branch: false });
     } finally {
       setFetchingStudent(false);
     }
@@ -194,6 +201,7 @@ export default function LoginPage() {
     if (!form.name) err.name = 'Please provide a valid name.';
     if (!form.college || form.college === 'Choose...') err.college = 'Please select a valid College.';
     if (!form.roll) err.roll = 'Please provide Roll Number.';
+    if (!form.branch) err.branch = 'Please provide a valid Branch.';
     if (!form.gender || form.gender === 'Select') err.gender = 'Please select a Gender.';
     if (!form.mobile) err.mobile = 'Please provide a valid Number.';
     if (!form.email) err.email = 'Please provide a valid Email.';
@@ -424,6 +432,33 @@ export default function LoginPage() {
                 required
               />
               {errors.name && <div style={{ color: '#dc3545', fontSize: '0.8rem' }}>{errors.name}</div>}
+            </div>
+
+            <div className="col-md-6 col-12 d-flex flex-column gap-2">
+              <div className="d-flex justify-content-between align-items-center">
+                <label style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)', marginBottom: 0 }}>Branch</label>
+                {disabledFields.branch && <span style={{ fontSize: '0.75rem', color: '#28a745' }}><i className="bi bi-lock-fill"></i> Auto-filled</span>}
+              </div>
+              <input
+                name="branch"
+                value={form.branch}
+                onChange={handleChange}
+                readOnly={disabledFields.branch}
+                placeholder="e.g. CSE, ECE, MECH"
+                style={{
+                  padding: '12px 16px',
+                  border: '1px solid var(--glass-border)',
+                  borderRadius: '10px',
+                  background: disabledFields.branch ? 'rgba(255, 255, 255, 0.05)' : 'var(--bg-dark)',
+                  color: 'var(--text-light)',
+                  fontSize: '0.95rem',
+                  width: '100%',
+                  cursor: disabledFields.branch ? 'not-allowed' : 'text',
+                  opacity: disabledFields.branch ? 0.85 : 1
+                }}
+                required
+              />
+              {errors.branch && <div style={{ color: '#dc3545', fontSize: '0.8rem' }}>{errors.branch}</div>}
             </div>
 
             <div className="col-md-6 col-12 d-flex flex-column gap-2">

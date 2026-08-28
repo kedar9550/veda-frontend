@@ -35,10 +35,10 @@ export default function Poster() {
   return (
     <section ref={sectionRef} id="campus" className="campus-section">
       <div className="container-premium text-center">
-        <span className="campus-header-tag">Veda Poster</span>
-        <h2 className="campus-title text-gradient">
+        <span className="campus-header-tag">Veda — Celebrating Ideas, Talent & Excellence</span>
+        {/* <h2 className="campus-title text-gradient">
           Explore Aditya's Veda Events
-        </h2>
+        </h2> */}
       </div>
 
       {/* Full-width scroll zoom container inside container-premium for side alignment */}

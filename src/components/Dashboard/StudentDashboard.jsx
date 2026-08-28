@@ -1108,7 +1108,7 @@ export default function StudentDashboard({ onNavigate }) {
                     </div>
                   </div>
 
-                  {/* Center Header (VEDA, EVENT PASS, Code Reto) */}
+                  {/* Center Header (VEDA, EVENT PASS, TECH NOVA) */}
                   <div style={{ position: 'absolute', top: 20, left: 180, right: 180, display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                       <div style={{ color: '#061638', fontSize: '48px', fontWeight: 900, lineHeight: 1 }}>VEDA</div>
@@ -1121,7 +1121,7 @@ export default function StudentDashboard({ onNavigate }) {
                     </div>
                     <div style={{ backgroundColor: '#061638', borderRadius: '20px', padding: '3px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', minWidth: '160px', width: 'max-content' }}>
                       <div style={{ position: 'absolute', left: -5, width: '8px', height: '8px', backgroundColor: '#c69a37', transform: 'rotate(45deg)' }} />
-                      <div style={{ color: '#fff', fontSize: '16px', fontWeight: 700, whiteSpace: 'nowrap' }}>{selectedPass.eventName || 'Code Reto'}</div>
+                      <div style={{ color: '#fff', fontSize: '16px', fontWeight: 700, whiteSpace: 'nowrap' }}>{selectedPass.eventName || 'TECH NOVA'}</div>
                       <div style={{ position: 'absolute', right: -5, width: '8px', height: '8px', backgroundColor: '#c69a37', transform: 'rotate(45deg)' }} />
                     </div>
                   </div>

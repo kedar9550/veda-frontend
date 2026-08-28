@@ -41,8 +41,8 @@ function SubEventCard({ event, cardRef, school }) {
   const accentColor = event.categoryColor || '#7c3aed';
   const rawDepts = event.raw?.department || [];
   const isAllDepartments = rawDepts.length > 1;
-  const badgeName = isAllDepartments 
-    ? 'ALL DEPTS' 
+  const badgeName = isAllDepartments
+    ? 'ALL DEPTS'
     : (event.groupShortName || event.category || 'EVENT');
 
   const displayOrganizer = isAllDepartments
@@ -73,7 +73,7 @@ function SubEventCard({ event, cardRef, school }) {
               <i className="bi bi-cpu"></i>}
         </div>
       </div>
-      
+
       <div className="event-card__header-modern" style={{ textAlign: 'center', padding: '0' }}>
         <h3 className="event-card__title-modern" style={{ fontSize: '1.05rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: '0 auto 0.5rem', width: '100%', textAlign: 'center' }}>{event.title}</h3>
       </div>
@@ -104,7 +104,7 @@ function SubEventCard({ event, cardRef, school }) {
             {event.feeAmount ? '₹' + event.feeAmount : 'Free'}
           </span>
         </div>
-        
+
         {/* Stat Item: Participants */}
         <div className="event-card__stat-col stat-participants">
           <div className="event-card__stat-icon-wrap" style={{ color: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.12)' }}>
@@ -118,7 +118,7 @@ function SubEventCard({ event, cardRef, school }) {
       </div>
 
       {/* Organizer Row */}
-      <div className="event-card__organizer-row-modern">
+      {/* <div className="event-card__organizer-row-modern">
         <div className="event-card__organizer-info-modern">
           <div className="event-card__organizer-icon-modern" style={{ color: accentColor }}>
             {event.groupLogo || event.image ? (
@@ -136,7 +136,7 @@ function SubEventCard({ event, cardRef, school }) {
             <span className="event-card__organizer-name-modern">{displayOrganizer}</span>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Footer */}
       <div className="event-card__footer-modern">

@@ -126,6 +126,15 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     return totalBase + (extraTeamSizeNum * extraAmountPerHeadInPaisa);
   }, [event, form.teamSize, form.extraTeamSize]);
 
+  const eligibleDepartments = Array.isArray(event?.raw?.department) && event.raw.department.length > 0
+    ? event.raw.department
+    : departments || [];
+
+  const departmentOptions = [
+    { title: 'Select', value: '' },
+    ...eligibleDepartments.map((dept) => ({ title: dept.name, value: dept.name }))
+  ];
+
   useEffect(() => {
     const savedStudentStr = localStorage.getItem('eventStudent');
     if (savedStudentStr) {
@@ -142,8 +151,13 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               roll: student.roll || '',
               gender: student.gender || '',
               mobile: student.mobile || '',
-              email: student.email || ''
+              email: student.email || '',
+              branch: student.branch || ''
             };
+            if (student.branch) {
+              const match = eligibleDepartments.find(d => d.name.trim().toLowerCase() === student.branch.trim().toLowerCase());
+              if (match) newParticipants[0].department = match.name;
+            }
           }
           return { ...prev, participants: newParticipants };
         });
@@ -156,7 +170,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       sessionStorage.setItem('authRedirect', location.pathname);
       navigate('/login');
     }
-  }, [location.pathname]);
+  }, [location.pathname, eligibleDepartments]);
 
   const teamSizeOptions = useMemo(
     () => buildTeamSizeOptions(event?.teamSize || event?.maxTeamSize || event?.raw?.maxTeamSize || event?.registrationTeamSize || '1'),
@@ -191,14 +205,6 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   const years = ['Select', '1', '2', '3', '4'];
   const genders = ['Select', 'Male', 'Female', 'Other'];
 
-  const eligibleDepartments = Array.isArray(event?.raw?.department) && event.raw.department.length > 0
-    ? event.raw.department
-    : departments || [];
-
-  const departmentOptions = [
-    { title: 'Select', value: '' },
-    ...eligibleDepartments.map((dept) => ({ title: dept.name, value: dept.name }))
-  ];
 
   const validateParticipantRegistration = async (index, type, value) => {
     if (!value || !form.eventName) return;
@@ -354,7 +360,13 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               else if (rawGender.startsWith('m')) updatedParticipant.gender = 'Male';
               else updatedParticipant.gender = 'Other';
             }
-            if (info.branch) updatedParticipant.branch = info.branch;
+            if (info.branch) {
+              updatedParticipant.branch = info.branch;
+              const matchedDept = eligibleDepartments.find(dept => dept.name.trim().toLowerCase() === info.branch.trim().toLowerCase());
+              if (matchedDept) {
+                updatedParticipant.department = matchedDept.name;
+              }
+            }
 
             updatedParticipant.college = 'Aditya University';
 
@@ -966,7 +978,12 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
                 <div>
                   <label>Departments</label>
-                  <select name="department" value={participant.department} onChange={(e) => handleParticipantChange(index, e)}>
+                  <select 
+                    name="department" 
+                    value={participant.department} 
+                    onChange={(e) => handleParticipantChange(index, e)}
+                    disabled={!!participant.branch && eligibleDepartments.some(d => d.name.trim().toLowerCase() === participant.branch.trim().toLowerCase())}
+                  >
                     {departmentOptions.map((dept) => (
                       <option key={dept.value || dept.title} value={dept.value}>{dept.title}</option>
                     ))}

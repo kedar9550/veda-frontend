@@ -7,8 +7,8 @@
 }
 
 .chatbot-fab {
-  width: 120px;
-  height: 120px;
+  width: 80px;
+  height: 80px;
   background: transparent;
   color: white;
   border: none;
@@ -55,7 +55,7 @@
   right: 0;
   width: 350px;
   max-width: calc(100vw - 48px);
-  height: 500px;
+  height: 400px;
   max-height: calc(100vh - 160px);
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
@@ -258,8 +258,8 @@
     right: 16px;
   }
   .chatbot-fab {
-    width: 85px;
-    height: 85px;
+    width: 60px;
+    height: 60px;
   }
   .chatbot-window {
     width: calc(100vw - 32px);

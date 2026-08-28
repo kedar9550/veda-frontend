@@ -53,7 +53,7 @@ function SchoolCard({ group }) {
       </div>
 
       {/* Organizer Row */}
-      <div className="event-card__organizer-row-modern">
+      {/* <div className="event-card__organizer-row-modern">
         <div className="event-card__organizer-info-modern">
           <div className="event-card__organizer-icon-modern" style={{ color: accentColor }}>
             {group.groupLogo || group.image ? (
@@ -71,7 +71,7 @@ function SchoolCard({ group }) {
             <span className="event-card__organizer-name-modern">{group.organizer || group.name || 'VEDA'}</span>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Footer */}
       <div className="event-card__footer-modern">
@@ -95,12 +95,12 @@ function FeaturedEventCard({ event }) {
   const navigate = useNavigate();
 
   const accentColor = event.categoryColor || '#7c3aed';
-  
+
   const rawDepts = event.raw?.department || [];
   const isAllDepartments = rawDepts.length > 1;
-  
-  const badgeName = isAllDepartments 
-    ? 'ALL DEPTS' 
+
+  const badgeName = isAllDepartments
+    ? 'ALL DEPTS'
     : (event.groupShortName || event.category || 'FEATURED');
 
   const displayOrganizer = isAllDepartments
@@ -129,7 +129,7 @@ function FeaturedEventCard({ event }) {
               <i className="bi bi-cpu"></i>}
         </div>
       </div>
-      
+
       <div className="event-card__header-modern" style={{ textAlign: 'center', padding: '0' }}>
         <h3 className="event-card__title-modern" style={{ fontSize: '1.05rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', margin: '0 auto 0.5rem', width: '100%', textAlign: 'center' }}>{event.title}</h3>
       </div>
@@ -160,7 +160,7 @@ function FeaturedEventCard({ event }) {
             {event.feeAmount ? '₹' + event.feeAmount : 'Free'}
           </span>
         </div>
-        
+
         {/* Stat Item: Participants */}
         <div className="event-card__stat-col stat-participants">
           <div className="event-card__stat-icon-wrap" style={{ color: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.12)' }}>
@@ -174,7 +174,7 @@ function FeaturedEventCard({ event }) {
       </div>
 
       {/* Organizer Row */}
-      <div className="event-card__organizer-row-modern">
+      {/* <div className="event-card__organizer-row-modern">
         <div className="event-card__organizer-info-modern">
           <div className="event-card__organizer-icon-modern" style={{ color: accentColor }}>
             {event.groupLogo || event.image ? (
@@ -192,7 +192,7 @@ function FeaturedEventCard({ event }) {
             <span className="event-card__organizer-name-modern">{displayOrganizer}</span>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Footer */}
       <div className="event-card__footer-modern">
@@ -231,8 +231,8 @@ export default function Events() {
 
   return (
     <div className="events-page-container">
-      {/* EXPLORE OUR SCHOOLS Section */}
-      <h2 className="events-section-title">EXPLORE OUR SCHOOLS</h2>
+      {/* EXPLORE EVENTS Section */}
+      <h2 className="events-section-title">EXPLORE EVENTS</h2>
 
       {error && (
         <div style={{ color: '#ff6b6b', textAlign: 'center', marginBottom: '2rem' }}>

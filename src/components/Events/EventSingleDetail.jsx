@@ -209,10 +209,10 @@ export default function EventSingleDetail({ schoolId, eventId }) {
               <i className="bi bi-calendar3" />
               <span>{event.date ? formatDate(event.date) : (import.meta.env.VITE_EVENT_DATE || 'Date TBD')}</span>
             </div>
-            <div className="esingle-meta-chip">
+            {/* <div className="esingle-meta-chip">
               <i className="bi bi-geo-alt" />
               <span>{event.venue || 'Venue TBD'}</span>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -263,7 +263,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
               {coordinators.map((coordinator, idx) => {
                 const coordinatorName = coordinator?.employeeName || coordinator?.name || coordinator?.fullName || '';
                 const coordinatorCode = coordinator?.employeeCode || coordinator?.employeeId || coordinator?.id || coordinator?._id || '';
-                
+
                 return (
                   <div key={idx} className="esingle-coordinator-row" style={{ marginTop: 0, marginBottom: '1rem', flex: '1 1 min-content', minWidth: '300px' }}>
                     <CoordinatorPhoto
@@ -278,7 +278,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
                         {coordinator?.designation && coordinatorName ? ` — ${coordinator.designation}` : null}
                       </p>
                       <p className="esingle-section-text">
-                        <small className="esingle-coordinator-code">Employee Code: {coordinatorCode || 'N/A'}</small>
+                        <small className="esingle-coordinator-code"><i className="bi bi-telephone-fill" style={{ marginRight: '6px' }}></i>{coordinator?.mobileNumber || coordinator?.phoneNumber || coordinator?.phone || coordinator?.mobile || 'N/A'}</small>
                       </p>
                     </div>
                   </div>
@@ -296,9 +296,9 @@ export default function EventSingleDetail({ schoolId, eventId }) {
             </h2>
             <p className="esingle-section-text">
               {event.raw?.venueType === 'Indoor' && event.raw?.building && event.raw?.floor
-                ? `${event.raw?.roomNo ? `Room No: ${event.raw.roomNo}, ` : ''}${event.raw.building.name || event.raw.building} - ${event.raw.floor.name || event.raw.floor}`
+                ? `${event.raw.building.name || event.raw.building} - ${event.raw.floor.name || event.raw.floor}${event.raw?.roomNo ? ` - ${event.raw.roomNo}` : ''}`
                 : event.raw?.venueType === 'Outdoor' && event.raw?.ground
-                  ? `${event.raw?.roomNo ? `Room No: ${event.raw.roomNo}, ` : ''}${event.raw.ground.name || event.raw.ground}`
+                  ? `${event.raw.ground.name || event.raw.ground}${event.raw?.roomNo ? ` - ${event.raw.roomNo}` : ''}`
                   : event.venue || 'N/A'}
             </p>
           </div>

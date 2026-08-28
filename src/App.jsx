@@ -19,6 +19,7 @@ import StudentDashboard from './components/Dashboard/StudentDashboard';
 import Footer from './components/Footer/Footer';
 import LoginPage from './components/Login/LoginPage';
 import ChatbotWidget from './components/Chatbot/ChatbotWidget';
+import RightStrip from './components/common/RightStrip';
 
 function RegisterFormWrapper() {
   const { schoolId, eventId } = useParams();
@@ -95,6 +96,9 @@ export default function App() {
       
       {/* Global Floating AI Chatbot */}
       <ChatbotWidget />
+
+      {/* Global Right Strip */}
+      <RightStrip />
     </>
   );
 }

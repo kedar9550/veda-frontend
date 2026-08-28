@@ -302,7 +302,7 @@ export default function ChatbotWidget() {
     setTimeout(() => {
       if (type === 'action') {
         if (option === 'Search Event') {
-          setMessages(prev => [...prev, { type: 'bot', text: 'Please type any event name (e.g., Code Reto) to see its details.' }]);
+          setMessages(prev => [...prev, { type: 'bot', text: 'Please type any event name (e.g., TECH NOVA) to see its details.' }]);
         } else if (option === 'Get Participant Pass') {
           setMessages(prev => [...prev, { type: 'bot', text: 'Please enter your Roll Number to retrieve your pass.' }]);
         } else if (option === 'Get Team Info') {

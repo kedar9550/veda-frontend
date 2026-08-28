@@ -25,7 +25,7 @@ export default function MobileNav({ activePage, onNavigate }) {
     if (currentPath.startsWith('/team')) return 'team';
     if (currentPath.startsWith('/poster')) return 'poster';
     if (currentPath.startsWith('/contact')) return 'contact';
-    if (currentPath.startsWith('/about')) return 'about';
+    // if (currentPath.startsWith('/about')) return 'about';
     return '';
   };
 

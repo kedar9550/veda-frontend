@@ -9,47 +9,48 @@ const bgHero = '/bg-hero.png';
 gsap.registerPlugin(ScrollTrigger);
 
 // 1. Research (Road Map) Data
-const RESEARCH_DATA = [
+const TIMELINE_DATA = [
   {
     id: 1,
-    side: 'left',
-    year: 'September 11, 2026',
-    title: '',
-    icon: 'bi-calendar3',
-    desc: 'Veda 2026 is the annual National Technological and Entrepreneurial Festival organized by the Aditya University, Surampalem. Celebrating innovation, creativity, and technical excellence, Veda serves as a confluence of ideas, where young engineers, tech enthusiasts, and entrepreneurs come together to showcase their skills, exchange knowledge, and collaborate on groundbreaking projects.',
+    stage: 'About Veda',
+    desc: 'Discover the grandeur of VEDA 2k26, a national-level technical symposium. Explore exciting events, workshops, and opportunities to showcase your skills and innovation.The event provides a vibrant platform for aspiring engineers to showcase their talent through technical competitions, research presentations, workshops, project exhibitions, and collaborative learning experiences. By bringing together academia, industry, and young innovators, VEDA empowers participants to transform ideas into real-world solutions while celebrating the spirit of engineering that drives progress and innovation.',
   },
   {
     id: 2,
-    side: 'right',
-    year: 'September 11, 2026',
-    title: '',
-    icon: 'bi-cpu',
-    desc: 'Veda 2026 brings together a diverse range of department-specific events, each designed to challenge, inspire, and foster innovation among students from various engineering and technology disciplines. These events provide a platform for students to apply their theoretical knowledge, collaborate on projects, and gain hands-on experience in their respective fields.',
+    stage: 'Student Registration',
+    desc: 'Create your profile seamlessly. Enter your roll number to auto-fill details, select your department, and get ready to participate in an array of technical and non-technical events.',
   },
   {
     id: 3,
-    side: 'left',
-    year: 'September 11, 2026',
-    title: '',
-    icon: 'bi-trophy',
-    desc: 'Participants can choose from a wide variety of events based on their interests and expertise. Whether you are looking to test your technical knowledge or showcase your artistic talents, Veda Fest has something for you. Browse through the event list, read the rules, and pick the events that excite you the most. Some events are team-based, so gather your friends and colleagues to compete for glory. Donot forget to check the prerequisites and materials needed for each event before making your selection.',
+    stage: 'Event Pass',
+    desc: 'Secure your spot in the events of your choice. Complete the secure online payment process to receive your official Event Pass and team ID for group activities.',
   },
   {
     id: 4,
-    side: 'right',
-    year: 'September 11, 2026',
-    title: '',
-    icon: 'bi-pencil-square',
-    desc: 'To participate in any of the events at Veda Fest, you\'ll need to complete the online registration form. The form is simple and user-friendly, requiring basic details like your name, department, and the events you wish to join. Make sure to provide accurate information, as it will be used for all communications and certificates. Early registration is recommended, as some events have limited slots. Keep an eye on the deadlines to ensure your spot in the fest.',
+    stage: 'Participation Certificate',
+    desc: 'Attend workshops, present your papers, and compete in hackathons. Every active participant receives a verifiable digital certificate to boost their professional portfolio.',
   },
   {
     id: 5,
-    side: 'left',
-    year: 'September 11, 2026',
-    title: '',
-    icon: 'bi-credit-card-2-front',
-    desc: 'Once you have selected your events, the final step is to complete the payment through our secure online gateway. The fee covers participation in multiple events, access to workshops, and other fest amenities. We accept all major credit/debit cards, UPI, and net banking options. Our payment gateway is designed to provide a safe and seamless transaction experience. All transactions are protected with SSL encryption, ensuring that your payment information remains confidential and secure.',
-  },
+    stage: 'Results Announcement',
+    desc: 'Stay updated with live leaderboards and result announcements. Check the dashboard to see if your team made it to the podium and claim your well-deserved prizes.',
+  }
+  // {
+  //   id: 4,
+  //   side: 'right',
+  //   year: 'September 11, 2026',
+  //   title: '',
+  //   icon: 'bi-pencil-square',
+  //   desc: 'To participate in any of the events at Veda Fest, you\'ll need to complete the online registration form. The form is simple and user-friendly, requiring basic details like your name, department, and the events you wish to join. Make sure to provide accurate information, as it will be used for all communications and certificates. Early registration is recommended, as some events have limited slots. Keep an eye on the deadlines to ensure your spot in the fest.',
+  // },
+  // {
+  //   id: 5,
+  //   side: 'left',
+  //   year: 'September 11, 2026',
+  //   title: '',
+  //   icon: 'bi-credit-card-2-front',
+  //   desc: 'Once you have selected your events, the final step is to complete the payment through our secure online gateway. The fee covers participation in multiple events, access to workshops, and other fest amenities. We accept all major credit/debit cards, UPI, and net banking options. Our payment gateway is designed to provide a safe and seamless transaction experience. All transactions are protected with SSL encryption, ensuring that your payment information remains confidential and secure.',
+  // },
 ];
 
 export default function Home({ loadingComplete = true }) {
@@ -58,9 +59,10 @@ export default function Home({ loadingComplete = true }) {
   const headingRef = useRef(null);
 
   // B. Research refs
-  const researchContainerRef = useRef(null);
-  const pathRef = useRef(null);
-  const nodesRef = useRef([]);
+  const containerRef = useRef(null);
+  const progressLineRef = useRef(null);
+  const itemsRef = useRef([]);
+  const dotsRef = useRef([]);
 
   // C. SDGs / Highlights refs
   const sdgsSectionRef = useRef(null);
@@ -128,7 +130,7 @@ export default function Home({ loadingComplete = true }) {
       { threshold: 0.1 }
     );
 
-    nodesRef.current.forEach((node) => {
+    itemsRef.current.forEach((node) => {
       if (node) observer.observe(node);
     });
 
@@ -240,41 +242,67 @@ export default function Home({ loadingComplete = true }) {
           });
         }
 
-        // 2. Research timeline scroll path & nodes (Desktop only)
-        const mm = gsap.matchMedia();
+        // 2. Timeline Section: Animate progress line scaleY along scroll
+        gsap.to(progressLineRef.current, {
+          scaleY: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: 'top 30%',
+            end: 'bottom 70%',
+            scrub: true,
+          },
+        });
 
-        mm.add('(min-width: 769px)', () => {
-          if (pathRef.current) {
-            gsap.to(pathRef.current, {
-              strokeDashoffset: 0,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: researchContainerRef.current,
-                start: 'top 30%',
-                end: 'bottom 60%',
-                scrub: 1,
+        // 3. Timeline Section: Sequential animation per item (dot -> connector -> card)
+        itemsRef.current.forEach((item, index) => {
+          if (!item) return;
+
+          const isEven = index % 2 === 0;
+          const card = item.querySelector('.timeline-card');
+          const connector = item.querySelector('.timeline-connector');
+          const dot = dotsRef.current[index];
+
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: item,
+              start: 'top 55%',
+              toggleActions: 'play none none reverse',
+            }
+          });
+
+          // Step 1: Activate dot & parent container
+          tl.to([dot, item], {
+            onStart: () => {
+              dot.classList.add('active');
+              item.classList.add('active');
+            },
+            onReverseComplete: () => {
+              dot.classList.remove('active');
+              item.classList.remove('active');
+            },
+            duration: 0.1,
+          })
+            // Step 2: Animate horizontal connector line scaleX (extends sideways)
+            .to(connector, {
+              scaleX: 1,
+              duration: 0.35,
+              ease: 'power2.out',
+            })
+            // Step 3: Animate card appearance (fade-in & slide-in)
+            .fromTo(card,
+              {
+                opacity: 0,
+                x: isEven ? -40 : 40,
               },
-            });
-          }
-
-          nodesRef.current.forEach((node) => {
-            if (!node) return;
-            gsap.fromTo(
-              node,
-              { opacity: 0, y: 55 },
               {
                 opacity: 1,
-                y: 0,
-                duration: 1,
+                x: 0,
+                duration: 0.55,
                 ease: 'power3.out',
-                scrollTrigger: {
-                  trigger: node,
-                  start: 'top 80%',
-                  toggleActions: 'play none none reverse',
-                },
-              }
+              },
+              '-=0.15'
             );
-          });
         });
 
         // 4. SDGs Section left detail reveal
@@ -349,50 +377,52 @@ export default function Home({ loadingComplete = true }) {
         </div>
       </section>
 
-      {/* 2. RESEARCH TIMELINE SECTION */}
-      <section ref={researchContainerRef} id="research" className="research-section">
+      {/* 2. Timeline Component Content */}
+      <section ref={containerRef} id="programs" className="programs-section">
         <div className="container-premium">
-          <span className="research-header-tag text-center">Road Map</span>
-          <h2 className="research-title text-center text-gradient">
-            The Journey of VEDA_2K26
+
+          {/* Section Header */}
+          {/* <span className="programs-header-tag text-center">Journey</span> */}
+          <h2 className="programs-title text-center text-gradient">
+            Journey of Veda Event
           </h2>
 
-          <div className="research-timeline-wrap">
-            <div className="research-svg-container">
-              <svg width="100%" height="100%" viewBox="0 0 900 800" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="researchGlowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="var(--primary)" />
-                    <stop offset="100%" stopColor="var(--secondary)" />
-                  </linearGradient>
-                </defs>
-                <path
-                  ref={pathRef}
-                  className="research-svg-path"
-                  d="M 450,0 C 450,150 200,200 200,350 C 200,500 700,500 700,650 C 700,750 450,750 450,800"
-                />
-              </svg>
-            </div>
+          {/* Timeline */}
+          <div className="timeline-container">
+            {/* Central Lines */}
+            <div className="timeline-line"></div>
+            <div ref={progressLineRef} className="timeline-progress-line"></div>
 
-            {RESEARCH_DATA.map((node, index) => (
-              <div
-                key={node.id}
-                ref={(el) => (nodesRef.current[index] = el)}
-                className={`research-node ${node.side === 'left' ? 'research-node-left' : 'research-node-right'}`}
-              >
-                <div className="research-glass-card">
-                  <div className="research-card-header">
-                    <span className="research-card-meta">{node.year}</span>
-                    <div className="research-card-icon-small">
-                      <i className="bi bi-calendar3"></i>
+            {/* Timeline Nodes */}
+            {TIMELINE_DATA.map((item, index) => {
+              const isEven = index % 2 === 0;
+              return (
+                <div
+                  key={item.id}
+                  ref={(el) => (itemsRef.current[index] = el)}
+                  className={`timeline-item ${isEven ? 'timeline-item-left' : 'timeline-item-right'
+                    }`}
+                >
+                  {/* Info Card */}
+                  <div className="timeline-card-wrap">
+                    <div className="timeline-connector"></div>
+                    <div className="timeline-card">
+                      <span className="timeline-badge">{item.stage}</span>
+                      <h4 className="timeline-card-title">{item.title}</h4>
+                      <p className="timeline-card-desc">{item.desc}</p>
                     </div>
                   </div>
-                  {node.title && <h4 className="research-card-title">{node.title}</h4>}
-                  <p className="research-card-desc">{node.desc}</p>
+
+                  {/* Node Center Dot */}
+                  <div
+                    ref={(el) => (dotsRef.current[index] = el)}
+                    className="timeline-dot"
+                  ></div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
+
         </div>
       </section>
 

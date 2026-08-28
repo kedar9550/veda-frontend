@@ -181,15 +181,15 @@ export default function Navbar({ activePage, onNavigate }) {
         <a
           href="#"
           className="nav-logo"
+          style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}
           onClick={(e) => {
             e.preventDefault();
             handleLinkClick('home', null);
           }}
         >
-          <span>
-            <span className="logo-text-aditya">VEDA</span>
-            <span className="logo-text-uni">&nbsp;2026</span>
-          </span>
+          <img src="/site-logo.svg" alt="Aditya University" style={{ height: '45px', width: 'auto' }} />
+          <div style={{ height: '40px', width: '2px', backgroundColor: '#e5e7eb' }}></div>
+          <img src="/naac-logo.svg" alt="NAAC A++ Grade" style={{ height: '40px', width: 'auto' }} />
         </a>
 
         {/* Menu Navigation */}
@@ -242,7 +242,7 @@ export default function Navbar({ activePage, onNavigate }) {
               Contact
             </a>
           </li>
-          <li>
+          {/* <li>
             <a
               href="#about"
               className={`nav-item-link ${activePage === 'about' ? 'active' : ''}`}
@@ -253,7 +253,7 @@ export default function Navbar({ activePage, onNavigate }) {
             >
               About
             </a>
-          </li>
+          </li> */}
           <li>
             <a
               href="#poster"

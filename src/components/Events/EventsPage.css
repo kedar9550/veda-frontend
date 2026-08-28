@@ -15,7 +15,7 @@
   color: var(--text-light);
 }
 
-/* --- EXPLORE OUR SCHOOLS --- */
+/* --- EXPLORE EVENTS --- */
 .schools-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -37,7 +37,7 @@
   color: #fff;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -50,8 +50,11 @@
 .school-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.4) 100%);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
   pointer-events: none;
 }
 
@@ -131,12 +134,29 @@
 }
 
 /* School Colors */
-.school-bg-computing { background: linear-gradient(135deg, #0a4da2 0%, #1e6bc6 100%); }
-.school-bg-engineering { background: linear-gradient(135deg, #107c41 0%, #1c9d57 100%); }
-.school-bg-business { background: linear-gradient(135deg, #d35400 0%, #e67e22 100%); }
-.school-bg-forensics { background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%); }
-.school-bg-science { background: linear-gradient(135deg, #455a64 0%, #607d8b 100%); }
-.school-bg-default { background: linear-gradient(135deg, #333333 0%, #555555 100%); }
+.school-bg-computing {
+  background: linear-gradient(135deg, #0a4da2 0%, #1e6bc6 100%);
+}
+
+.school-bg-engineering {
+  background: linear-gradient(135deg, #107c41 0%, #1c9d57 100%);
+}
+
+.school-bg-business {
+  background: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
+}
+
+.school-bg-forensics {
+  background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);
+}
+
+.school-bg-science {
+  background: linear-gradient(135deg, #455a64 0%, #607d8b 100%);
+}
+
+.school-bg-default {
+  background: linear-gradient(135deg, #333333 0%, #555555 100%);
+}
 
 /* --- FEATURED EVENTS --- */
 .featured-events-header {
@@ -179,7 +199,7 @@
   padding-bottom: 1rem;
 }
 
-.featured-grid > * {
+.featured-grid>* {
   flex: 0 0 280px;
 }
 
@@ -187,10 +207,12 @@
 .featured-grid::-webkit-scrollbar {
   height: 8px;
 }
+
 .featured-grid::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.05);
   border-radius: 4px;
 }
+
 .featured-grid::-webkit-scrollbar-thumb {
   background: rgba(0, 100, 255, 0.3);
   border-radius: 4px;
@@ -241,11 +263,25 @@
 }
 
 /* Text colors for categories based on image */
-.text-computing { color: #4dabf7; }
-.text-engineering { color: #51cf66; }
-.text-business { color: #fcc419; }
-.text-forensics { color: #cc5de8; }
-.text-default { color: #aaa; }
+.text-computing {
+  color: #4dabf7;
+}
+
+.text-engineering {
+  color: #51cf66;
+}
+
+.text-business {
+  color: #fcc419;
+}
+
+.text-forensics {
+  color: #cc5de8;
+}
+
+.text-default {
+  color: #aaa;
+}
 
 /* Professional Tooltip Styles */
 .sub-event-card__organizer-text-modern {
@@ -300,4 +336,3 @@
 .custom-tooltip-item:last-child {
   border-bottom: none;
 }
-

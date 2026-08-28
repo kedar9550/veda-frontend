@@ -14,14 +14,14 @@ function CoordinatorPhoto({ employeeCode, name }) {
   const placeholderSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='100%' height='100%' fill='%231e40af'/><text x='50%' y='50%' dy='.35em' text-anchor='middle' font-family='Inter, Arial, Helvetica, sans-serif' font-size='46' fill='%23ffffff'>${initials}</text></svg>`;
   const placeholderDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(placeholderSvg)}`;
 
-  const [attemptIndex, setAttemptIndex] = useState(0);
+  const [attemptIndex, setAttemptIndex] = useState(-1);
   const [imgSrc, setImgSrc] = useState(
-    employeeCode ? `${CAMPUS_PHOTO_BASES[0]}/${employeeCode}.jpg` : placeholderDataUrl
+    employeeCode ? `/${employeeCode}.jpeg` : placeholderDataUrl
   );
 
   useEffect(() => {
-    setAttemptIndex(0);
-    setImgSrc(employeeCode ? `${CAMPUS_PHOTO_BASES[0]}/${employeeCode}.jpg` : placeholderDataUrl);
+    setAttemptIndex(-1);
+    setImgSrc(employeeCode ? `/${employeeCode}.jpeg` : placeholderDataUrl);
   }, [employeeCode]);
 
   const handleError = () => {
@@ -198,10 +198,10 @@ export default function Team() {
   return (
     <section className="testimonials-section team-page-container">
       <div className="container-premium text-center" style={{ marginBottom: '4rem' }}>
-        <span className="testimonials-header-tag">Leadership</span>
-        <h2 className="testimonials-title text-gradient">
+        <span className="testimonials-header-tag">Team</span>
+        {/* <h2 className="testimonials-title text-gradient">
           VEDA Conveners 2026
-        </h2>
+        </h2> */}
 
         {loading ? (
           <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>Loading...</div>
@@ -218,8 +218,8 @@ export default function Team() {
                 <div className="avatar-ring-container" style={{ transition: 'transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1)', willChange: 'transform' }}>
                   <div className="avatar-inner">
                     <CoordinatorPhoto
-                      employeeCode={member.employee?.institutionId || member.employee?.employeeCode}
-                      name={member.employee?.name || member.employee?.employeeName}
+                      employeeCode={member.employee?.institutionId || member.employee?.employeeCode || member.employee?.employeeId || member.institutionId || member.employeeCode || member.employeeId}
+                      name={member.employee?.name || member.employee?.employeeName || member.name || member.employeeName}
                     />
                   </div>
                 </div>
@@ -240,10 +240,10 @@ export default function Team() {
       </div>
 
       <div className="container-premium text-center" style={{ marginBottom: '4rem' }}>
-        <span className="testimonials-header-tag">Committee</span>
-        <h2 className="testimonials-title text-gradient">
+        <span className="testimonials-header-tag">Members</span>
+        {/* <h2 className="testimonials-title text-gradient">
           VEDA Members 2026
-        </h2>
+        </h2> */}
 
         {loading ? (
           <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>Loading...</div>
@@ -260,8 +260,8 @@ export default function Team() {
                 <div className="avatar-ring-container" style={{ transition: 'transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1)', willChange: 'transform' }}>
                   <div className="avatar-inner">
                     <CoordinatorPhoto
-                      employeeCode={member.employee?.institutionId || member.employee?.employeeCode}
-                      name={member.employee?.name || member.employee?.employeeName}
+                      employeeCode={member.employee?.institutionId || member.employee?.employeeCode || member.employee?.employeeId || member.institutionId || member.employeeCode || member.employeeId}
+                      name={member.employee?.name || member.employee?.employeeName || member.name || member.employeeName}
                     />
                   </div>
                 </div>
@@ -285,9 +285,9 @@ export default function Team() {
 
       <div className="container-premium text-center" style={{ marginTop: '8rem', marginBottom: '4rem' }}>
         <span className="testimonials-header-tag">Student Leads</span>
-        <h2 className="testimonials-title text-gradient">
+        {/* <h2 className="testimonials-title text-gradient">
           VEDA Student Co-Ordinators 2026
-        </h2>
+        </h2> */}
 
         {loading ? (
           <div style={{ color: 'var(--text-secondary)', marginTop: '2rem' }}>Loading...</div>
