@@ -220,7 +220,7 @@ export default function StudentDashboard({ onNavigate }) {
           if (res.ok) {
             const data = await res.json();
             const currentRegistrations = data.payments || [];
-            
+
             // Check if the current selected pass is still valid and if it's verified
             let isVerified = false;
             let isValid = false;
@@ -446,45 +446,45 @@ export default function StudentDashboard({ onNavigate }) {
       {!loading && (
         <div className="dashboard-grid-two-col" style={{ marginTop: '2rem' }}>
           {/* Card 1: Registered Events */}
-          <div 
-            className="profile-card" 
-            style={{ 
+          <div
+            className="profile-card"
+            style={{
               height: 'fit-content',
               padding: eventsCardExpanded ? '1.5rem 2rem' : '1rem 1.5rem',
               transition: 'padding 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            <div 
-              style={{ 
-                cursor: 'pointer', 
-                userSelect: 'none', 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center' 
-              }} 
+            <div
+              style={{
+                cursor: 'pointer',
+                userSelect: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
               onClick={() => setEventsCardExpanded(!eventsCardExpanded)}
             >
-              <h3 style={{ 
-                margin: 0, 
-                display: 'flex', 
-                alignItems: 'center', 
+              <h3 style={{
+                margin: 0,
+                display: 'flex',
+                alignItems: 'center',
                 gap: '8px',
                 fontSize: eventsCardExpanded ? '1.35rem' : '1.05rem',
                 fontWeight: eventsCardExpanded ? '700' : '600',
                 transition: 'font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1), font-weight 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
               }}>
-                <i 
-                  className={`bi ${eventsCardExpanded ? 'bi-chevron-down' : 'bi-chevron-right'}`} 
-                  style={{ 
-                    color: 'var(--primary)', 
-                    fontSize: eventsCardExpanded ? '1.1rem' : '0.95rem', 
-                    transition: 'font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1)' 
+                <i
+                  className={`bi ${eventsCardExpanded ? 'bi-chevron-down' : 'bi-chevron-right'}`}
+                  style={{
+                    color: 'var(--primary)',
+                    fontSize: eventsCardExpanded ? '1.1rem' : '0.95rem',
+                    transition: 'font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 ></i>
                 Registered Events
               </h3>
             </div>
-            
+
             {eventsCardExpanded && (
               <div style={{ marginTop: '1.25rem', borderTop: '1px dashed var(--glass-border)', paddingTop: '1rem' }}>
                 {registrations.length === 0 ? (
@@ -498,13 +498,13 @@ export default function StudentDashboard({ onNavigate }) {
                     const isExpanded = !!expandedEvents[index];
                     return (
                       <div key={reg._id || index} className="event-reg-card" style={{ padding: '1.25rem', marginBottom: '1rem', border: '1px solid var(--glass-border)' }}>
-                        <div 
-                          className="event-reg-header" 
-                          style={{ 
-                            display: 'flex', 
-                            justifyContent: 'space-between', 
-                            flexWrap: 'wrap', 
-                            gap: '0.5rem', 
+                        <div
+                          className="event-reg-header"
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            flexWrap: 'wrap',
+                            gap: '0.5rem',
                             cursor: 'pointer',
                             userSelect: 'none'
                           }}
@@ -517,7 +517,7 @@ export default function StudentDashboard({ onNavigate }) {
                             </h4>
                             <div className="event-sub-info" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1rem', fontSize: '0.8rem', marginTop: '0.25rem', paddingLeft: '1.25rem' }}>
                               {reg.category && <span className="tag-category" style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.08)' }}>{reg.category}</span>}
-                              {reg.schoolId && <span className="tag-school" style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.08)' }}>School: {reg.schoolId}</span>}
+                              {/* {reg.schoolId && <span className="tag-school" style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.08)' }}>School: {reg.schoolId}</span>} */}
                               <span><i className="bi bi-people"></i> Team: {reg.teamSize}</span>
                             </div>
                           </div>
@@ -565,7 +565,7 @@ export default function StudentDashboard({ onNavigate }) {
                                               computedUrl = `https://info.aec.edu.in/aec/employeephotos/${p.roll}.jpg`;
                                             }
                                             return (
-                                              <div 
+                                              <div
                                                 style={{ position: 'relative', width: '36px', height: '36px', cursor: computedUrl ? 'pointer' : 'default' }}
                                                 onClick={() => {
                                                   if (computedUrl) setZoomedPhoto(computedUrl);
@@ -575,10 +575,10 @@ export default function StudentDashboard({ onNavigate }) {
                                                   <i className="bi bi-person-fill" style={{ fontSize: '18px' }}></i>
                                                 </div>
                                                 {computedUrl && (
-                                                  <img 
-                                                    src={computedUrl} 
-                                                    alt={p.name || 'Participant'} 
-                                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }} 
+                                                  <img
+                                                    src={computedUrl}
+                                                    alt={p.name || 'Participant'}
+                                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }}
                                                     onError={(e) => { e.target.style.display = 'none'; }}
                                                   />
                                                 )}
@@ -628,45 +628,45 @@ export default function StudentDashboard({ onNavigate }) {
           </div>
 
           {/* Card 2: Payment Details */}
-          <div 
-            className="profile-card" 
-            style={{ 
+          <div
+            className="profile-card"
+            style={{
               height: 'fit-content',
               padding: paymentsExpanded ? '1.5rem 2rem' : '1rem 1.5rem',
               transition: 'padding 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            <div 
-              style={{ 
-                cursor: 'pointer', 
-                userSelect: 'none', 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center' 
-              }} 
+            <div
+              style={{
+                cursor: 'pointer',
+                userSelect: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
               onClick={() => setPaymentsExpanded(!paymentsExpanded)}
             >
-              <h3 style={{ 
-                margin: 0, 
-                display: 'flex', 
-                alignItems: 'center', 
+              <h3 style={{
+                margin: 0,
+                display: 'flex',
+                alignItems: 'center',
                 gap: '8px',
                 fontSize: paymentsExpanded ? '1.35rem' : '1.05rem',
                 fontWeight: paymentsExpanded ? '700' : '600',
                 transition: 'font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1), font-weight 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
               }}>
-                <i 
-                  className={`bi ${paymentsExpanded ? 'bi-chevron-down' : 'bi-chevron-right'}`} 
-                  style={{ 
-                    color: 'var(--primary)', 
-                    fontSize: paymentsExpanded ? '1.1rem' : '0.95rem', 
-                    transition: 'font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1)' 
+                <i
+                  className={`bi ${paymentsExpanded ? 'bi-chevron-down' : 'bi-chevron-right'}`}
+                  style={{
+                    color: 'var(--primary)',
+                    fontSize: paymentsExpanded ? '1.1rem' : '0.95rem',
+                    transition: 'font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}
                 ></i>
                 Payment Details
               </h3>
             </div>
-            
+
             {paymentsExpanded && (
               <div style={{ marginTop: '1.25rem', borderTop: '1px dashed var(--glass-border)', paddingTop: '1rem' }}>
                 {registrations.length === 0 ? (
@@ -967,16 +967,16 @@ export default function StudentDashboard({ onNavigate }) {
       {selectedPass && (
         <div className="modal-overlay" onClick={() => setSelectedPass(null)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backgroundColor: 'rgba(0, 0, 0, 0.6)' }}>
           <div className="receipt-modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '850px', width: '100%', position: 'relative', padding: '0', background: '#f8fafc', border: 'none', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
-            
+
             {/* Modal Header */}
             <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', color: '#ffffff', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <i className="bi bi-person-vcard-fill" style={{ color: '#38bdf8', fontSize: '24px' }}></i>
                 <h2 style={{ fontSize: '1.25rem', margin: '0', fontWeight: '800', color: '#fff' }}>Event Pass</h2>
               </div>
-              
+
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button 
+                <button
                   onClick={async () => {
                     const passElement = document.getElementById('event-pass-card');
                     if (passElement) {
@@ -990,7 +990,7 @@ export default function StudentDashboard({ onNavigate }) {
                           html2canvas: { scale: 2, useCORS: true, logging: false },
                           jsPDF: { unit: 'px', format: [750, 480], orientation: 'landscape' }
                         };
-                        
+
                         // Clone the pass element to prevent visual shaking in the UI
                         const clone = passElement.cloneNode(true);
                         const wrapper = document.createElement('div');
@@ -1001,9 +1001,9 @@ export default function StudentDashboard({ onNavigate }) {
                         clone.style.transform = 'none';
                         wrapper.appendChild(clone);
                         document.body.appendChild(wrapper);
-                        
+
                         await html2pdf().set(opt).from(clone).save();
-                        
+
                         // Cleanup
                         document.body.removeChild(wrapper);
                       } catch (err) {
@@ -1016,7 +1016,7 @@ export default function StudentDashboard({ onNavigate }) {
                 >
                   <i className="bi bi-download" style={{ fontSize: '1.2rem' }}></i>
                 </button>
-                <button 
+                <button
                   onClick={() => setSelectedPass(null)}
                   style={{ background: 'transparent', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#cbd5e1', transition: 'all 0.2s', padding: '4px' }}
                   title="Close Pass"
@@ -1050,7 +1050,7 @@ export default function StudentDashboard({ onNavigate }) {
                     flexDirection: 'column'
                   }}
                 >
-                          {/* SVG Base L-Shape Background */}
+                  {/* SVG Base L-Shape Background */}
                   <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}>
                     <svg width="100%" height="100%" preserveAspectRatio="none">
                       {/* Top right subtle dot pattern in white area */}
@@ -1128,7 +1128,7 @@ export default function StudentDashboard({ onNavigate }) {
 
                   {/* Central Details & Photo area */}
                   <div style={{ position: 'absolute', top: 140, left: 190, right: 35, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 2 }}>
-                    
+
                     {/* Details List */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', paddingRight: '16px' }}>
                       {[
@@ -1211,10 +1211,10 @@ export default function StudentDashboard({ onNavigate }) {
                               <i className="bi bi-person-fill" style={{ fontSize: '70px' }}></i>
                             </div>
                             {computedUrl && (
-                              <img 
-                                src={computedUrl} 
-                                alt={selectedPass.name} 
-                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
+                              <img
+                                src={computedUrl}
+                                alt={selectedPass.name}
+                                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                                 onError={(e) => { e.target.style.display = 'none'; }}
                               />
                             )}
@@ -1307,16 +1307,16 @@ export default function StudentDashboard({ onNavigate }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center'
         }} onClick={() => setZoomedPhoto(null)}>
           <div style={{ position: 'relative', padding: '1rem', backgroundColor: '#1e293b', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', maxWidth: '95vw', maxHeight: '95vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={(e) => e.stopPropagation()}>
-            <button 
+            <button
               onClick={() => setZoomedPhoto(null)}
               style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10 }}
             >
               <i className="bi bi-x-lg"></i>
             </button>
-            <img 
-              src={zoomedPhoto} 
-              alt="Zoomed Participant" 
-              style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: '8px' }} 
+            <img
+              src={zoomedPhoto}
+              alt="Zoomed Participant"
+              style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: '8px' }}
               onError={(e) => { e.target.style.display = 'none'; }}
             />
           </div>

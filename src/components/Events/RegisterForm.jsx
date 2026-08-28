@@ -76,6 +76,7 @@ const defaultParticipant = () => ({
   year: '',
   accommodation: '',
   department: '',
+  branch: '',
   location: '',
   photo: null,
   photoUrl: null
@@ -190,6 +191,15 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   const years = ['Select', '1', '2', '3', '4'];
   const genders = ['Select', 'Male', 'Female', 'Other'];
 
+  const eligibleDepartments = Array.isArray(event?.raw?.department) && event.raw.department.length > 0
+    ? event.raw.department
+    : departments || [];
+
+  const departmentOptions = [
+    { title: 'Select', value: '' },
+    ...eligibleDepartments.map((dept) => ({ title: dept.name, value: dept.name }))
+  ];
+
   const validateParticipantRegistration = async (index, type, value) => {
     if (!value || !form.eventName) return;
 
@@ -242,7 +252,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
     if (type === 'roll' && value && form.participants[index].college === 'Other College') {
       try {
-        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9022';
+        const baseUrl = import.meta.env.VITE_API_BASE_URL;
         const res = await fetch(`${baseUrl}/api/razorpay/registrations/photo/${encodeURIComponent(value)}`);
         if (res.ok) {
           const data = await res.json();
@@ -344,12 +354,24 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               else if (rawGender.startsWith('m')) updatedParticipant.gender = 'Male';
               else updatedParticipant.gender = 'Other';
             }
+            if (info.branch) updatedParticipant.branch = info.branch;
 
             updatedParticipant.college = 'Aditya University';
 
             newParticipants[index] = updatedParticipant;
             return { ...prev, participants: newParticipants };
           });
+
+          // Verify branch eligibility
+          if (info && info.branch) {
+            const isEligible = eligibleDepartments.some(dept => dept.name.trim().toLowerCase() === info.branch.trim().toLowerCase());
+            if (!isEligible) {
+              setParticipantValidation(prev => ({
+                ...prev,
+                [index]: { ...prev[index], rollError: `Branch '${info.branch}' is not eligible for this event.` }
+              }));
+            }
+          }
         }
       } catch (err) {
         console.error('Error fetching student data in RegisterForm:', err);
@@ -357,14 +379,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     }
   };
 
-  const eligibleDepartments = Array.isArray(event?.raw?.department) && event.raw.department.length > 0
-    ? event.raw.department
-    : departments || [];
 
-  const departmentOptions = [
-    { title: 'Select', value: '' },
-    ...eligibleDepartments.map((dept) => ({ title: dept.name, value: dept.name }))
-  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -958,6 +973,13 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                   </select>
                   {errors.participants?.[index]?.department && <div className="field-error">{errors.participants[index].department}</div>}
                 </div>
+
+                {participant.branch && participant.college === 'Aditya University' && (
+                  <div>
+                    <label>Branch</label>
+                    <input name="branch" value={participant.branch} disabled />
+                  </div>
+                )}
 
                 <div>
                   <label>Location</label>
