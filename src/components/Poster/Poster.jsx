@@ -47,7 +47,7 @@ export default function Poster() {
           <img
             ref={imgRef}
             className="campus-zoom-img"
-            src="/campus_showcase.png"
+            src="/campus_showcase.jpeg"
             alt="Aditya University Smart Campus"
           />
         </div>
