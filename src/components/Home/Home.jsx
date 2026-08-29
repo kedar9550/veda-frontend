@@ -13,44 +13,45 @@ const TIMELINE_DATA = [
   {
     id: 1,
     stage: 'About Veda',
+    title: 'Discover the Grandeur',
+    icon: 'bi-info-circle',
     desc: 'Discover the grandeur of VEDA 2k26, a national-level technical symposium. Explore exciting events, workshops, and opportunities to showcase your skills and innovation.The event provides a vibrant platform for aspiring engineers to showcase their talent through technical competitions, research presentations, workshops, project exhibitions, and collaborative learning experiences. By bringing together academia, industry, and young innovators, VEDA empowers participants to transform ideas into real-world solutions while celebrating the spirit of engineering that drives progress and innovation.',
   },
   {
     id: 2,
     stage: 'Student Registration',
+    title: 'Create Your Profile',
+    icon: 'bi-person-plus',
     desc: 'Create your profile seamlessly. Enter your roll number to auto-fill details, select your department, and get ready to participate in an array of technical and non-technical events.',
   },
   {
     id: 3,
     stage: 'Event Pass',
+    title: 'Secure Your Spot',
+    icon: 'bi-ticket-perforated',
     desc: 'Secure your spot in the events of your choice. Complete the secure online payment process to receive your official Event Pass and team ID for group activities.',
   },
   {
     id: 4,
-    stage: 'Participation Certificate',
-    desc: 'Attend workshops, present your papers, and compete in hackathons. Every active participant receives a verifiable digital certificate to boost their professional portfolio.',
+    stage: 'Workshops & Exhibitions',
+    title: 'Learn and Showcase',
+    icon: 'bi-lightbulb',
+    desc: 'Enhance your skills by attending hands-on workshops and expert seminars. Showcase your innovative hardware and software projects to industry experts and peers.',
   },
   {
     id: 5,
+    stage: 'Participation Certificate',
+    title: 'Boost Your Portfolio',
+    icon: 'bi-award',
+    desc: 'Attend workshops, present your papers, and compete in hackathons. Every active participant receives a verifiable digital certificate to boost their professional portfolio.',
+  },
+  {
+    id: 6,
     stage: 'Results Announcement',
+    title: 'Claim Your Prizes',
+    icon: 'bi-trophy',
     desc: 'Stay updated with live leaderboards and result announcements. Check the dashboard to see if your team made it to the podium and claim your well-deserved prizes.',
   }
-  // {
-  //   id: 4,
-  //   side: 'right',
-  //   year: 'September 11, 2026',
-  //   title: '',
-  //   icon: 'bi-pencil-square',
-  //   desc: 'To participate in any of the events at Veda Fest, you\'ll need to complete the online registration form. The form is simple and user-friendly, requiring basic details like your name, department, and the events you wish to join. Make sure to provide accurate information, as it will be used for all communications and certificates. Early registration is recommended, as some events have limited slots. Keep an eye on the deadlines to ensure your spot in the fest.',
-  // },
-  // {
-  //   id: 5,
-  //   side: 'left',
-  //   year: 'September 11, 2026',
-  //   title: '',
-  //   icon: 'bi-credit-card-2-front',
-  //   desc: 'Once you have selected your events, the final step is to complete the payment through our secure online gateway. The fee covers participation in multiple events, access to workshops, and other fest amenities. We accept all major credit/debit cards, UPI, and net banking options. Our payment gateway is designed to provide a safe and seamless transaction experience. All transactions are protected with SSL encryption, ensuring that your payment information remains confidential and secure.',
-  // },
 ];
 
 export default function Home({ loadingComplete = true }) {
@@ -408,7 +409,14 @@ export default function Home({ loadingComplete = true }) {
                     <div className="timeline-connector"></div>
                     <div className="timeline-card">
                       <span className="timeline-badge">{item.stage}</span>
-                      <h4 className="timeline-card-title">{item.title}</h4>
+                      <div className="d-flex align-items-center mt-2 mb-2">
+                        {item.icon && (
+                          <div style={{ fontSize: '1.8rem', color: 'var(--primary, #00d2ff)', marginRight: '12px' }}>
+                            <i className={`bi ${item.icon}`}></i>
+                          </div>
+                        )}
+                        <h4 className="timeline-card-title mb-0">{item.title}</h4>
+                      </div>
                       <p className="timeline-card-desc">{item.desc}</p>
                     </div>
                   </div>

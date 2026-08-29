@@ -65,6 +65,30 @@ function getRazorpayVerifyUrl() {
   return import.meta.env.VITE_RAZORPAY_VERIFY_URL || '/api/razorpay/verify-payment';
 }
 
+function isBranchMatch(branch, dept) {
+  if (!branch || !dept) return false;
+  const b = String(branch).trim().toLowerCase();
+  
+  // Safely extract the department name, checking multiple possible property keys
+  const deptName = typeof dept === 'string' ? dept : (dept.name || dept.departmentName || dept.title || '');
+  const dName = deptName ? String(deptName).trim().toLowerCase() : '';
+
+  if (dName === 'all departments' || dName === 'all') return true;
+  if (dName === b) return true;
+
+  const altNames = dept.alternativeNames || dept.alternative_names || dept.alternativenames;
+  if (altNames) {
+    let alts = [];
+    if (Array.isArray(altNames)) {
+      alts = altNames.map(a => String(a).trim().toLowerCase());
+    } else if (typeof altNames === 'string') {
+      alts = altNames.split(',').map(a => a.trim().toLowerCase());
+    }
+    if (alts.includes(b)) return true;
+  }
+  return false;
+}
+
 const defaultParticipant = () => ({
   name: '',
   college: '',
@@ -106,6 +130,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     extraTeamSize: '0',
     participants: createParticipants(1),
   });
+  const [apiBranches, setApiBranches] = useState({});
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -126,13 +151,26 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     return totalBase + (extraTeamSizeNum * extraAmountPerHeadInPaisa);
   }, [event, form.teamSize, form.extraTeamSize]);
 
-  const eligibleDepartments = Array.isArray(event?.raw?.department) && event.raw.department.length > 0
-    ? event.raw.department
-    : departments || [];
+  const eligibleDepartments = useMemo(() => {
+    const isAllDepartments = Array.isArray(event?.raw?.department) && event.raw.department.some(ed => {
+      const n = typeof ed === 'string' ? ed : ed.name;
+      return n && (n.toLowerCase() === 'all departments' || n.toLowerCase() === 'all');
+    });
+
+    return isAllDepartments || !event?.raw?.department || event.raw.department.length === 0
+      ? departments || []
+      : event.raw.department.map(ed => {
+        const deptName = typeof ed === 'string' ? String(ed).trim().toLowerCase() : String(ed.name || '').trim().toLowerCase();
+        return (departments || []).find(d => String(d.name || '').trim().toLowerCase() === deptName) || ed;
+      });
+  }, [event?.raw?.department, departments]);
 
   const departmentOptions = [
     { title: 'Select', value: '' },
-    ...eligibleDepartments.map((dept) => ({ title: dept.name, value: dept.name }))
+    ...eligibleDepartments.map((dept) => {
+      const n = dept.name || dept.departmentName || dept.title || dept;
+      return { title: n, value: n };
+    })
   ];
 
   useEffect(() => {
@@ -155,7 +193,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               branch: student.branch || ''
             };
             if (student.branch) {
-              const match = eligibleDepartments.find(d => d.name.trim().toLowerCase() === student.branch.trim().toLowerCase());
+              const match = eligibleDepartments.find(d => isBranchMatch(student.branch, d));
               if (match) newParticipants[0].department = match.name;
             }
           }
@@ -224,7 +262,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     }));
 
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9022';
+      const baseUrl = import.meta.env.VITE_API_BASE_URL;
       const formCategory = (form.category || '').toLowerCase();
       const queryParams = new URLSearchParams();
       queryParams.append(type, value);
@@ -300,45 +338,30 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
         let studentData = null;
         for (const targetRoll of candidates) {
           try {
-            const proxyUrl = import.meta.env.VITE_API_BASE_URL
-              ? `${import.meta.env.VITE_API_BASE_URL}/api/event-students/studentdata/${encodeURIComponent(targetRoll)}`
-              : `/api/event-students/studentdata/${encodeURIComponent(targetRoll)}`;
-            const res = await fetch(proxyUrl);
+            // Note: We MUST use the Vite proxy '/adityaapi' here instead of the direct 
+            // https://info.aec.edu.in URL to bypass the CORS (Cross-Origin) browser block.
+            const targetUrl = `/adityaapi/api/studentdata/${encodeURIComponent(targetRoll)}`;
+
+            console.log(`[TargetRoll: ${targetRoll}] Fetching from proxy: ${targetUrl}...`);
+            const res = await fetch(targetUrl);
+
             if (res.ok) {
               const json = await res.json();
-              if (Array.isArray(json) && json.length > 0 && !json[0].error && json[0].studentname) {
-                studentData = json;
-                break;
+              console.log(`[TargetRoll: ${targetRoll}] API response:`, json);
+
+              const norm = Array.isArray(json) ? json : (json ? [json] : []);
+              if (norm.length > 0 && !norm[0].error && norm[0].studentname) {
+                studentData = norm;
+                if (norm[0].branch) {
+                  console.log(`[TargetRoll: ${targetRoll}] Branch found! Branch: ${norm[0].branch}`);
+                }
+                break; // Stop looking through candidates once we find valid student data
               }
+            } else {
+              console.log(`[TargetRoll: ${targetRoll}] API failed with status: ${res.status}`);
             }
-          } catch (err) { }
-
-          if (!studentData) {
-            try {
-              const res = await fetch(`/adityaapi/api/studentdata/${encodeURIComponent(targetRoll)}`);
-              if (res.ok) {
-                const json = await res.json();
-                if (Array.isArray(json) && json.length > 0 && !json[0].error && json[0].studentname) {
-                  studentData = json;
-                  break;
-                }
-              }
-            } catch (err) { }
-          }
-
-          if (!studentData) {
-            try {
-              const envUrl = import.meta.env.VITE_STUDENT_DATA_URL || 'https://info.aec.edu.in/adityaapi/api/studentdata';
-              const cleanEnvUrl = envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
-              const res = await fetch(`${cleanEnvUrl}/${encodeURIComponent(targetRoll)}`);
-              if (res.ok) {
-                const json = await res.json();
-                if (Array.isArray(json) && json.length > 0 && !json[0].error && json[0].studentname) {
-                  studentData = json;
-                  break;
-                }
-              }
-            } catch (err) { }
+          } catch (err) {
+            console.error(`[TargetRoll: ${targetRoll}] API fetch error:`, err);
           }
         }
 
@@ -361,10 +384,14 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               else updatedParticipant.gender = 'Other';
             }
             if (info.branch) {
-              updatedParticipant.branch = info.branch;
-              const matchedDept = eligibleDepartments.find(dept => dept.name.trim().toLowerCase() === info.branch.trim().toLowerCase());
+              setApiBranches(prev => ({ ...prev, [index]: info.branch }));
+              
+              const matchedDept = eligibleDepartments.find(dept => isBranchMatch(info.branch, dept));
               if (matchedDept) {
-                updatedParticipant.department = matchedDept.name;
+                console.log(`matchedDept found!`, matchedDept);
+                updatedParticipant.department = matchedDept.name || matchedDept.departmentName || matchedDept.title || '';
+              } else {
+                console.log(`No matchedDept found for branch: ${info.branch}`);
               }
             }
 
@@ -376,7 +403,14 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
           // Verify branch eligibility
           if (info && info.branch) {
-            const isEligible = eligibleDepartments.some(dept => dept.name.trim().toLowerCase() === info.branch.trim().toLowerCase());
+            console.log(`Verifying eligibility for branch: ${info.branch}`);
+            console.log(`Global departments loaded:`, departments?.length || 0);
+            console.log(`Eligible Departments for this event:`, eligibleDepartments);
+
+            // We use `isBranchMatch` which explicitly checks BOTH `dept.name` and `dept.alternativeNames`
+            const isEligible = eligibleDepartments.some(dept => isBranchMatch(info.branch, dept));
+            console.log(`isEligible result: ${isEligible}`);
+
             if (!isEligible) {
               setParticipantValidation(prev => ({
                 ...prev,
@@ -874,6 +908,22 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                 )}
 
                 <div>
+                  <label>Roll Number</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      name="roll"
+                      value={participant.roll}
+                      onChange={(e) => handleParticipantChange(index, e)}
+                      onBlur={(e) => validateParticipantRegistration(index, 'roll', e.target.value)}
+                      disabled={index === 0}
+                    />
+                    {participantValidation[index]?.rollLoading && <span style={{ position: 'absolute', right: '10px', top: '10px', fontSize: '0.75rem', color: 'var(--primary)' }}>Checking...</span>}
+                  </div>
+                  {participantValidation[index]?.rollError && <div className="field-error">{participantValidation[index].rollError}</div>}
+                  {errors.participants?.[index]?.roll && !participantValidation[index]?.rollError && <div className="field-error">{errors.participants[index].roll}</div>}
+                </div>
+
+                <div>
                   <label>Name</label>
                   <input name="name" value={participant.name} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0} />
                   {errors.participants?.[index]?.name && <div className="field-error">{errors.participants[index].name}</div>}
@@ -922,21 +972,6 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                   </>
                 )}
 
-                <div>
-                  <label>Roll Number</label>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      name="roll"
-                      value={participant.roll}
-                      onChange={(e) => handleParticipantChange(index, e)}
-                      onBlur={(e) => validateParticipantRegistration(index, 'roll', e.target.value)}
-                      disabled={index === 0}
-                    />
-                    {participantValidation[index]?.rollLoading && <span style={{ position: 'absolute', right: '10px', top: '10px', fontSize: '0.75rem', color: 'var(--primary)' }}>Checking...</span>}
-                  </div>
-                  {participantValidation[index]?.rollError && <div className="field-error">{participantValidation[index].rollError}</div>}
-                  {errors.participants?.[index]?.roll && !participantValidation[index]?.rollError && <div className="field-error">{errors.participants[index].roll}</div>}
-                </div>
 
                 <div>
                   <label>Gender</label>
@@ -978,25 +1013,34 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
                 <div>
                   <label>Departments</label>
-                  <select 
-                    name="department" 
-                    value={participant.department} 
+                  <select
+                    name="department"
+                    value={participant.department}
                     onChange={(e) => handleParticipantChange(index, e)}
-                    disabled={!!participant.branch && eligibleDepartments.some(d => d.name.trim().toLowerCase() === participant.branch.trim().toLowerCase())}
+                    disabled={!!apiBranches[index] && eligibleDepartments.some(d => isBranchMatch(apiBranches[index], d))}
                   >
-                    {departmentOptions.map((dept) => (
-                      <option key={dept.value || dept.title} value={dept.value}>{dept.title}</option>
-                    ))}
+                    {departmentOptions
+                      .filter(dept => {
+                        if (dept.value === '') return true;
+                        if (!apiBranches[index]) return false;
+                        const valMatch = String(dept.value || '').trim().toLowerCase();
+                        const fullDept = departments?.find(d => String(d.name || d.departmentName || d.title || '').trim().toLowerCase() === valMatch) || dept;
+                        return isBranchMatch(apiBranches[index], fullDept);
+                      })
+                      .map((dept) => (
+                        <option key={dept.value || dept.title} value={dept.value}>{dept.title}</option>
+                      ))
+                    }
                   </select>
                   {errors.participants?.[index]?.department && <div className="field-error">{errors.participants[index].department}</div>}
                 </div>
 
-                {participant.branch && participant.college === 'Aditya University' && (
-                  <div>
-                    <label>Branch</label>
-                    <input name="branch" value={participant.branch} disabled />
-                  </div>
-                )}
+
+                <div>
+                  <label>Branch</label>
+                  <input name="branch" value={apiBranches[index] || ''} disabled />
+                </div>
+
 
                 <div>
                   <label>Location</label>

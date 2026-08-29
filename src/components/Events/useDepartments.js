@@ -81,7 +81,12 @@ export function useDepartments() {
             const mapped = items.map((item) => {
               const id = item.id || item._id || item.departmentId || item.deptId || item.code || item.name || item.department || item.title || '';
               const name = item.name || item.department || item.title || item.code || item.id || item._id || '';
-              return { id: String(id || name).trim(), name: String(name || id).trim() };
+              const alternativeNames = item.alternativeNames || item.alternative_names || item.alternativenames;
+              return { 
+                id: String(id || name).trim(), 
+                name: String(name || id).trim(),
+                alternativeNames
+              };
             }).filter((item) => item.id);
 
             if (!isMounted) return;
