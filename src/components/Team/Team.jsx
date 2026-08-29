@@ -42,11 +42,26 @@ function StudentPhoto({ rollNo, name }) {
   const placeholderSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='100%' height='100%' fill='%231e40af'/><text x='50%' y='50%' dy='.35em' text-anchor='middle' font-family='Inter, Arial, Helvetica, sans-serif' font-size='46' fill='%23ffffff'>${initials}</text></svg>`;
   const placeholderDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(placeholderSvg)}`;
 
+  const [imgSrc, setImgSrc] = useState(rollNo ? `/${rollNo}.jpeg` : placeholderDataUrl);
+  const [hasTriedApi, setHasTriedApi] = useState(false);
+
+  useEffect(() => {
+    setImgSrc(rollNo ? `/${rollNo}.jpeg` : placeholderDataUrl);
+    setHasTriedApi(false);
+  }, [rollNo]);
+
   return (
     <img
-      src={rollNo ? `/api/proxy/student-photo/${rollNo}` : placeholderDataUrl}
+      src={imgSrc}
       alt={name || 'Photo'}
-      onError={(e) => { e.target.onerror = null; e.target.src = placeholderDataUrl; }}
+      onError={(e) => {
+        if (rollNo && !hasTriedApi) {
+          setHasTriedApi(true);
+          setImgSrc(`/api/proxy/student-photo/${rollNo}`);
+        } else {
+          setImgSrc(placeholderDataUrl);
+        }
+      }}
       loading="lazy"
       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
     />
@@ -111,9 +126,15 @@ export default function Team() {
         // Fetch Student Coordinators
         const studentCoordsRes = await fetch('/api/organisation-committee?role=Student Coordinator');
         const studentCoordsData = await studentCoordsRes.json();
-        setStudentCoordinators(
-          (studentCoordsData?.data || []).filter(item => item.status === 'Active')
-        );
+        const activeStudentCoords = (studentCoordsData?.data || []).filter(item => item.status === 'Active');
+        setStudentCoordinators([
+          ...activeStudentCoords,
+          {
+            studentName: 'T. Vamshi',
+            rollNo: '240217178129',
+            mobileNumber: '91481 83680'
+          }
+        ]);
       } catch (error) {
         console.error("Failed to fetch team data", error);
       } finally {
