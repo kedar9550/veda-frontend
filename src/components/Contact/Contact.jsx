@@ -146,6 +146,12 @@ export default function Contact() {
                 <i className="bi bi-envelope"></i>
                 <span>veda2026@adityauniversity.in</span>
               </div>
+              <div className="contact-info-item">
+                <i className="bi bi-globe"></i>
+                <a href="https://www.adityauniversity.in/" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', textDecoration: 'none' }}>
+                  www.adityauniversity.in
+                </a>
+              </div>
             </div>
           </div>
 

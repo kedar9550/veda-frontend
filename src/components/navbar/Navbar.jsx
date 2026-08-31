@@ -256,14 +256,14 @@ export default function Navbar({ activePage, onNavigate }) {
           </li> */}
           <li>
             <a
-              href="#poster"
-              className={`nav-item-link ${activePage === 'poster' ? 'active' : ''}`}
+              href="#gallery"
+              className={`nav-item-link ${activePage === 'gallery' ? 'active' : ''}`}
               onClick={(e) => {
                 e.preventDefault();
-                handleLinkClick('poster', null);
+                handleLinkClick('gallery', null);
               }}
             >
-              Poster
+              Gallery
             </a>
           </li>
         </ul>

@@ -61,11 +61,13 @@
 
 .member-name {
   color: var(--text-light);
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: 14px !important;
+  font-weight: 700;
   margin-bottom: 0.5rem;
   letter-spacing: -0.5px;
   line-height: 1.25;
+  width: 100%;
+  text-align: center;
 }
 
 .member-role {

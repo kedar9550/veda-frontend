@@ -130,7 +130,7 @@ export default function Team() {
         setStudentCoordinators([
           ...activeStudentCoords,
           {
-            studentName: 'T. Vamshi',
+            studentName: 'T. VAMSHI',
             rollNo: '240217178129',
             mobileNumber: '91481 83680'
           }

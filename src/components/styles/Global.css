@@ -94,6 +94,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global Typography Adjustments for Justification */
+p, li {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
 /* Scrollbar styles */
 ::-webkit-scrollbar {
   width: 10px;

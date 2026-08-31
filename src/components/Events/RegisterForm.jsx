@@ -68,7 +68,7 @@ function getRazorpayVerifyUrl() {
 function isBranchMatch(branch, dept) {
   if (!branch || !dept) return false;
   const b = String(branch).trim().toLowerCase();
-  
+
   // Safely extract the department name, checking multiple possible property keys
   const deptName = typeof dept === 'string' ? dept : (dept.name || dept.departmentName || dept.title || '');
   const dName = deptName ? String(deptName).trim().toLowerCase() : '';
@@ -183,17 +183,17 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
           if (newParticipants.length > 0) {
             newParticipants[0] = {
               ...newParticipants[0],
-              name: student.name || '',
-              college: student.college || '',
-              otherCollege: student.otherCollege || '',
-              roll: student.roll || '',
-              gender: student.gender || '',
-              mobile: student.mobile || '',
-              email: student.email || '',
-              branch: student.branch || ''
+              name: newParticipants[0].name || student.name || '',
+              college: newParticipants[0].college || student.college || '',
+              otherCollege: newParticipants[0].otherCollege || student.otherCollege || '',
+              roll: newParticipants[0].roll || student.roll || '',
+              gender: newParticipants[0].gender || student.gender || '',
+              mobile: newParticipants[0].mobile || student.mobile || '',
+              email: newParticipants[0].email || student.email || '',
+              branch: newParticipants[0].branch || student.branch || ''
             };
-            if (student.branch) {
-              const match = eligibleDepartments.find(d => isBranchMatch(student.branch, d));
+            if ((student.branch || newParticipants[0].branch) && !newParticipants[0].department) {
+              const match = eligibleDepartments.find(d => isBranchMatch(student.branch || newParticipants[0].branch, d));
               if (match) newParticipants[0].department = match.name;
             }
           }
@@ -367,6 +367,11 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
         if (studentData && Array.isArray(studentData) && studentData.length > 0 && !studentData[0].error && studentData[0].studentname) {
           const info = studentData[0];
+          
+          if (info.branch) {
+            setApiBranches(prev => ({ ...prev, [index]: info.branch }));
+          }
+
           setForm(prev => {
             const newParticipants = [...prev.participants];
             const updatedParticipant = { ...newParticipants[index] };
@@ -385,8 +390,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
             }
             if (info.branch) {
               updatedParticipant.branch = info.branch;
-              setApiBranches(prev => ({ ...prev, [index]: info.branch }));
-              
+
               const matchedDept = eligibleDepartments.find(dept => isBranchMatch(info.branch, dept));
               if (matchedDept) {
                 console.log(`matchedDept found!`, matchedDept);
@@ -1117,7 +1121,8 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                 type="button"
                 onClick={processRegistration}
                 className="esingle-cta"
-                style={{ padding: '0.6rem 1.5rem' }}
+                disabled={true}
+                style={{ padding: '0.6rem 1.5rem', opacity: 0.6, cursor: 'not-allowed' }}
               >
                 Proceed to Payment
               </button>

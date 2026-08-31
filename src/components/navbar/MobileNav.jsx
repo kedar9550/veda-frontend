@@ -23,7 +23,7 @@ export default function MobileNav({ activePage, onNavigate }) {
     if (currentPath === '/' || currentPath === '/home') return 'home';
     if (currentPath.startsWith('/events')) return 'events';
     if (currentPath.startsWith('/team')) return 'team';
-    if (currentPath.startsWith('/poster')) return 'poster';
+    if (currentPath.startsWith('/gallery')) return 'gallery';
     if (currentPath.startsWith('/contact')) return 'contact';
     // if (currentPath.startsWith('/about')) return 'about';
     return '';
@@ -54,11 +54,11 @@ export default function MobileNav({ activePage, onNavigate }) {
       path: 'team',
     },
     {
-      key: 'poster',
-      label: 'Poster',
+      key: 'gallery',
+      label: 'Gallery',
       iconActive: 'bi-easel-fill',
       iconInactive: 'bi-easel',
-      path: 'poster',
+      path: 'gallery',
     },
     {
       key: 'contact',

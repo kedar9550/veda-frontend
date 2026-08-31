@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Poster() {
+export default function Gallery() {
   const sectionRef = useRef(null);
   const containerRef = useRef(null);
   const imgRef = useRef(null);

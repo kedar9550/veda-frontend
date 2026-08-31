@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Medhamanthan - Hackathon Problem Statements</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #00529b, #003b70);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 38px;
+            letter-spacing: 2px;
+        }
+
+        .header h2 {
+            margin: 5px 0 0;
+            font-size: 20px;
+            font-weight: normal;
+        }
+
+        .header p {
+            margin-top: 12px;
+            font-size: 15px;
+        }
+
+        /* Container */
+        .container {
+            width: 95%;
+            max-width: 1500px;
+            margin: 30px auto;
+        }
+
+        /* Search */
+        .search-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 13px 16px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #00529b;
+        }
+
+        /* School Section */
+        .school-section {
+            background: white;
+            margin-bottom: 40px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .school-title {
+            background: linear-gradient(135deg, #f58220, #e85d04);
+            color: white;
+            padding: 18px 22px;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+            margin: 50px auto;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background: #00529b;
+            color: white;
+            padding: 14px;
+            text-align: left;
+            font-size: 15px;
+            justify-content: center;
+            /* Horizontal center */
+            align-items: center;
+            /* Vertical center */
+            text-align: center;
+            /* Align text inside flex item */
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #ddd;
+            border: 1px solid #ccc;
+            justify-content: center;
+            /* Horizontal center */
+            align-items: center;
+            /* Vertical center */
+            text-align: center;
+            /* Align text inside flex item */
+        }
+
+        tr:nth-child(even) {
+            background: #f8fbff;
+        }
+
+        tr:hover {
+            background: #eef6ff;
+        }
+
+        .theme {
+            font-weight: bold;
+            color: #00529b;
+        }
+
+        .category {
+            font-weight: bold;
+            color: #e85d04;
+        }
+
+        .project {
+            font-weight: bold;
+            color: #222;
+        }
+
+        /* Number */
+        .number {
+            text-align: center;
+            font-weight: bold;
+            color: #00529b;
+            width: 60px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            background: #003b70;
+            color: white;
+            padding: 25px;
+            margin-top: 40px;
+        }
+
+        footer strong {
+            color: #f58220;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .header h2 {
+                font-size: 16px;
+            }
+
+            .school-title {
+                font-size: 18px;
+                text-align: center;
+            }
+
+            table {
+                min-width: 750px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="header">
+        <h1>MEDHAMANTHAN</h1>
+        <h2>Technical Hackathon – Aditya University</h2>
+        <p>
+            Problem Statements & Project Ideas
+        </p>
+    </header>
+
+
+    <div class="container">
+
+        <!-- ================= SEARCH ================= -->
+
+        <div class="search-box">
+            <input type="text" id="searchInput"
+                placeholder="Search by theme, category, project idea or problem statement..." onkeyup="searchTable()">
+        </div>
+
+
+        <!-- ========================================================= -->
+        <!-- SCHOOL OF COMPUTING -->
+        <!-- ========================================================= -->
+
+        <section class="school-section">
+
+            <div class="school-title">
+                SCHOOL OF COMPUTING
+                <br>
+                <small>CSE • IT • AI & ML • Data Science • CA</small>
+            </div>
+
+            <div class="table-container">
+
+                <table class="problem-table">
+
+                    <thead>
+                        <tr>
+                            <th class="number">#</th>
+                            <th>Theme</th>
+                            <th>Category</th>
+                            <th>Project Idea</th>
+                            <th>Problem Statement / Prototype Statement</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td class="number">1</td>
+                            <td class="theme" rowspan="5">AI for Campus Life</td>
+                            <td class="category" rowspan="5">AI</td>
+                            <td class="project">Campus Assistant</td>
+                            <td>
+                                Build an AI chatbot that answers questions about departments,
+                                classrooms, faculty, events, regulations and campus facilities.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">2</td>
+                            <td class="project">Study Planner</td>
+                            <td>
+                                Student enters subjects, exam dates and available study hours.
+                                The system generates a personalized study schedule.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">3</td>
+                            <td class="project">Smart Attendance Analyzer</td>
+                            <td>
+                                Analyze attendance data and identify students who may fall
+                                short of attendance requirements.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">4</td>
+                            <td class="project">Resume Analyzer</td>
+                            <td>
+                                Upload a resume and job description to identify missing skills
+                                and suggest improvements.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">5</td>
+                            <td class="project">Interview Coach</td>
+                            <td>
+                                Conduct a mock interview using text or voice and provide
+                                feedback on answers.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">6</td>
+                            <td class="theme" rowspan="5">Data & Intelligent Systems</td>
+                            <td class="category" rowspan="2">Data Science</td>
+                            <td class="project">Student Performance Predictor</td>
+                            <td>
+                                Use academic data to predict students who may need
+                                academic support.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">7</td>
+                            <td class="project">Campus Feedback Analyzer</td>
+                            <td>
+                                Analyze student feedback and automatically identify major
+                                complaints, suggestions and sentiment.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">8</td>
+                            <td class="category" rowspan="2">ML</td>
+                            <td class="project">Smart Waste Classifier</td>
+                            <td>
+                                Upload an image of waste and classify it as recyclable,
+                                organic or hazardous.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">9</td>
+                            <td class="project">Food Demand Predictor</td>
+                            <td>
+                                Predict mess/canteen food demand using historical
+                                consumption data.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">10</td>
+                            <td class="category">Analytics</td>
+                            <td class="project">Placement Analytics Dashboard</td>
+                            <td>
+                                Dashboard showing branch-wise placement trends, skills,
+                                companies and salary statistics.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">11</td>
+                            <td class="theme" rowspan="5">Cyber & Digital Safety</td>
+                            <td class="category" rowspan="5">Cyber Security</td>
+                            <td class="project">Phishing Message Detector</td>
+                            <td>
+                                Analyze email/SMS text and identify potential phishing attempts.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">12</td>
+                            <td class="project">Password Strength Analyzer</td>
+                            <td>
+                                Evaluate password strength and educate users about secure
+                                password practices.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">13</td>
+                            <td class="project">Fake Website Detector</td>
+                            <td>
+                                Analyze a URL/webpage and identify suspicious characteristics.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">14</td>
+                            <td class="project">Cyber Awareness Game</td>
+                            <td>
+                                Interactive game that teaches students about phishing,
+                                OTP fraud and social engineering.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">15</td>
+                            <td class="project">Digital Evidence Organizer</td>
+                            <td>
+                                Secure interface for organizing digital evidence and
+                                maintaining evidence metadata.
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SCHOOL OF ENGINEERING -->
+        <!-- ========================================================= -->
+
+        <section class="school-section">
+
+            <div class="school-title">
+                SCHOOL OF ENGINEERING
+                <br>
+                <small>
+                    ECE • EEE • Mechanical • Petroleum • Mining • Civil • Agricultural
+                </small>
+            </div>
+
+            <div class="table-container">
+
+                <table class="problem-table">
+
+                    <thead>
+                        <tr>
+                            <th class="number">#</th>
+                            <th>Theme</th>
+                            <th>Category</th>
+                            <th>Project Idea</th>
+                            <th>Problem Statement / Expected Prototype</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td class="number" colspan="5">ECE</td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">1</td>
+                            <td class="theme" rowspan="5">Smart Electronics for Smart Living</td>
+                            <td class="category" rowspan="5">IoT</td>
+                            <td class="project">Smart Campus IoT System</td>
+                            <td>
+                                Monitor classroom temperature, humidity, occupancy and
+                                energy usage using sensors.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">2</td>
+                            <td class="project">Smart Parking System</td>
+                            <td>
+                                Detect available parking slots and display availability
+                                through an app/dashboard.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">3</td>
+                            <td class="project">IoT Water Level Monitor</td>
+                            <td>
+                                Monitor tank water level and automatically generate alerts.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">4</td>
+                            <td class="project">Smart Street Light</td>
+                            <td>
+                                Develop an intelligent street-light system that adjusts
+                                operation based on movement/light conditions.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">5</td>
+                            <td class="project">Emergency Alert Device</td>
+                            <td>
+                                Build a low-cost device that detects emergency situations
+                                and sends alerts.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number" colspan="5">EEE</td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">6</td>
+                            <td class="theme" rowspan="5">Energy for a Sustainable Future</td>
+                            <td class="category" rowspan="5">Energy Efficiency & Sustainability</td>
+                            <td class="project">Smart Energy Meter</td>
+                            <td>
+                                Monitor electricity consumption and provide real-time
+                                usage analytics.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">7</td>
+                            <td class="project">Energy Theft Detection</td>
+                            <td>
+                                Develop a prototype/model to identify abnormal electricity
+                                consumption patterns.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">8</td>
+                            <td class="project">Solar Power Monitor</td>
+                            <td>
+                                Monitor solar panel generation and efficiency.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">9</td>
+                            <td class="project">Smart Classroom Energy Saver</td>
+                            <td>
+                                Automatically control lights and fans based on occupancy.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">10</td>
+                            <td class="project">EV Charging Monitor</td>
+                            <td>
+                                Develop a dashboard to monitor EV charging status and
+                                energy consumption.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number" colspan="5">MECH</td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">11</td>
+                            <td class="theme" rowspan="5">Smart Machines & Automation</td>
+                            <td class="category">Energy Efficiency & Sustainability</td>
+                            <td class="project">Predictive Machine Maintenance</td>
+                            <td>
+                                Use sensor data to predict possible machine failures.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">12</td>
+                            <td class="category" rowspan="3">Automation</td>
+                            <td class="project">Smart Workshop Monitor</td>
+                            <td>
+                                Monitor machine usage, operating hours and maintenance schedules.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">13</td>
+                            <td class="project">Automated Material Sorting</td>
+                            <td>
+                                Build a prototype that automatically sorts objects based
+                                on size, material or color.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">14</td>
+                            <td class="project">Ergonomic Workplace Analyzer</td>
+                            <td>
+                                Analyze workstation posture/arrangement and suggest improvements.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">15</td>
+                            <td class="category">Energy Efficiency</td>
+                            <td class="project">Energy-Efficient Machine Design</td>
+                            <td>
+                                Design a prototype/model that reduces energy consumption
+                                during operation.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number" colspan="5">PETROLEUM</td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">16</td>
+                            <td class="theme" rowspan="5">Smart & Sustainable Energy</td>
+                            <td class="category" rowspan="5">Sustainability</td>
+                            <td class="project">Oil Well Production Dashboard</td>
+                            <td>
+                                Visualize production data and identify production trends.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">17</td>
+                            <td class="project">Leak Detection System</td>
+                            <td>
+                                Develop a sensor/data-based system for detecting pipeline leakage.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">18</td>
+                            <td class="project">Fuel Consumption Analyzer</td>
+                            <td>
+                                Analyze fuel consumption and identify efficiency improvements.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">19</td>
+                            <td class="project">Oil Spill Monitoring System</td>
+                            <td>
+                                Develop a model for detecting and monitoring oil spills.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">20</td>
+                            <td class="project">Predictive Equipment Maintenance</td>
+                            <td>
+                                Predict maintenance requirements using equipment operating data.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number" colspan="5">MINING</td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">21</td>
+                            <td class="theme" rowspan="5">Safe & Smart Mining</td>
+                            <td class="category" rowspan="5">Safety Measurement</td>
+                            <td class="project">Mine Worker Safety System</td>
+                            <td>
+                                Monitor worker location and generate emergency alerts.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">22</td>
+                            <td class="project">Gas Detection & Alert System</td>
+                            <td>
+                                Detect hazardous gases and provide an early warning.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">23</td>
+                            <td class="project">Mine Accident Prediction</td>
+                            <td>
+                                Analyze historical accident data to identify risk factors.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">24</td>
+                            <td class="project">Smart Helmet</td>
+                            <td>
+                                Design a helmet concept with safety monitoring features.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">25</td>
+                            <td class="project">Mine Environment Dashboard</td>
+                            <td>
+                                Monitor temperature, gases, humidity and other environmental
+                                parameters.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number" colspan="5">CIVIL</td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">26</td>
+                            <td class="theme" rowspan="5">Smart Infrastructure & Sustainable Cities</td>
+                            <td class="category" rowspan="4">Sustainability</td>
+                            <td class="project">Smart Road Damage Detector</td>
+                            <td>
+                                Upload road images to identify potholes and cracks.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">27</td>
+                            <td class="project">Smart Building Energy Monitor</td>
+                            <td>
+                                Analyze building energy consumption and suggest improvements.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">28</td>
+                            <td class="project">Flood Risk Mapping</td>
+                            <td>
+                                Use geographic/environmental data to identify flood-prone areas.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">29</td>
+                            <td class="project">Smart Water Management</td>
+                            <td>
+                                Monitor water usage and identify wastage.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">30</td>
+                            <td class="category">Safety</td>
+                            <td class="project">Construction Safety Monitor</td>
+                            <td>
+                                Identify unsafe construction practices using images/checklists.
+                            </td>
+                        </tr>
+
+
+
+                        <tr>
+                            <td class="number" colspan="5">AGRI</td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">31</td>
+                            <td class="theme" rowspan="5">Smart Agriculture for Tomorrow</td>
+                            <td class="category">AI in Agri</td>
+                            <td class="project">AI Crop Disease Detector</td>
+                            <td>
+                                Upload crop/leaf image and identify possible disease.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">32</td>
+                            <td class="category">IoT</td>
+                            <td class="project">Smart Irrigation System</td>
+                            <td>
+                                Use soil moisture data to determine when irrigation is required.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">33</td>
+                            <td class="category">Analytics</td>
+                            <td class="project">Farm Weather Dashboard</td>
+                            <td>
+                                Provide farmers with useful weather information for farming decisions.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">34</td>
+                            <td class="category" rowspan="2">Recommender Systems</td>
+                            <td class="project">Crop Recommendation System</td>
+                            <td>
+                                Recommend suitable crops based on soil and weather parameters.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">35</td>
+                            <td class="project">Fertilizer Recommendation System</td>
+                            <td>
+                                Recommend fertilizer requirements based on soil parameters
+                                and crop type.
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SCHOOL OF PHARMACY -->
+        <!-- ========================================================= -->
+
+        <section class="school-section">
+
+            <div class="school-title">
+                SCHOOL OF PHARMACY
+                <br>
+                <small>B.Pharm • M.Pharm</small>
+            </div>
+
+            <div class="table-container">
+
+                <table class="problem-table">
+
+                    <thead>
+                        <tr>
+                            <th class="number">#</th>
+                            <th>Theme</th>
+                            <th>Category</th>
+                            <th>Project Idea</th>
+                            <th>Problem Statement / Expected Prototype</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td class="number">1</td>
+                            <td class="theme" rowspan="5">PharmaTech</td>
+                            <td class="category" rowspan="4">Smart Pharma</td>
+                            <td class="project">Medicine Information Assistant</td>
+                            <td>
+                                Enter a medicine name to display dosage information,
+                                precautions, storage information and other verified information.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">2</td>
+                            <td class="project">Medicine Inventory System</td>
+                            <td>
+                                Track medicine stock, expiry dates and low-stock alerts.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">3</td>
+                            <td class="project">Drug Expiry Alert System</td>
+                            <td>
+                                Automatically identify medicines approaching expiry.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">4</td>
+                            <td class="project">Pharmacy Management Dashboard</td>
+                            <td>
+                                Manage medicine inventory, suppliers, expiry and sales data.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">5</td>
+                            <td class="category">IoT</td>
+                            <td class="project">Medicine Storage Monitor</td>
+                            <td>
+                                Monitor temperature/humidity conditions for medicines
+                                using IoT sensors.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">6</td>
+                            <td class="theme" rowspan="5">Healthcare Innovation</td>
+                            <td class="category" rowspan="4">Innovation</td>
+                            <td class="project">Medication Reminder</td>
+                            <td>
+                                Help patients remember medication schedules.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">7</td>
+                            <td class="project">Prescription Organizer</td>
+                            <td>
+                                Digitally organize prescriptions and medicine schedules.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">8</td>
+                            <td class="project">Drug Interaction Information System</td>
+                            <td>
+                                Provide information about potential interactions between
+                                selected medicines using a verified knowledge base.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">9</td>
+                            <td class="project">Patient Medication Tracker</td>
+                            <td>
+                                Track medication adherence and generate reports.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">10</td>
+                            <td class="category">AI</td>
+                            <td class="project">Pharma Awareness Chatbot</td>
+                            <td>
+                                Educational chatbot providing verified information about
+                                common medicines and safe medication practices.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">11</td>
+                            <td class="theme" rowspan="5">Pharma Sustainability</td>
+                            <td class="category" rowspan="5">Sustainability</td>
+                            <td class="project">Medicine Waste Management</td>
+                            <td>
+                                Develop a system to classify and track expired/unwanted medicines.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">12</td>
+                            <td class="project">Eco-Friendly Pharmacy</td>
+                            <td>
+                                Design a model pharmacy that reduces waste and energy consumption.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">13</td>
+                            <td class="project">Pharmaceutical Waste Tracker</td>
+                            <td>
+                                Track pharmaceutical waste generation and disposal.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">14</td>
+                            <td class="project">Green Packaging Idea</td>
+                            <td>
+                                Design an environmentally friendly medicine packaging concept.
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SCHOOL OF BUSINESS -->
+        <!-- ========================================================= -->
+
+        <section class="school-section">
+
+            <div class="school-title">
+                SCHOOL OF BUSINESS
+                <br>
+                <small>BBA • MBA</small>
+            </div>
+
+            <div class="table-container">
+
+                <table class="problem-table">
+
+                    <thead>
+                        <tr>
+                            <th class="number">#</th>
+                            <th>Theme</th>
+                            <th>Category</th>
+                            <th>Project Idea</th>
+                            <th>Problem Statement / Expected Prototype</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td class="number">1</td>
+                            <td class="theme" rowspan="5">AI for Business</td>
+                            <td class="category" rowspan="3">InnoTech</td>
+                            <td class="project">AI Business Idea Generator</td>
+                            <td>
+                                User provides a problem/market and the system generates
+                                possible business ideas.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">2</td>
+                            <td class="project">Startup Feasibility Analyzer</td>
+                            <td>
+                                Analyze a startup idea based on market, competition,
+                                cost and target customers.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">3</td>
+                            <td class="project">AI Marketing Assistant</td>
+                            <td>
+                                Generate marketing campaign ideas based on product
+                                and target audience.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">4</td>
+                            <td class="category">Analytics</td>
+                            <td class="project">Customer Sentiment Dashboard</td>
+                            <td>
+                                Analyze customer reviews and identify satisfaction trends.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">5</td>
+                            <td class="category">InnoTech</td>
+                            <td class="project">Business Pitch Generator</td>
+                            <td>
+                                Enter startup details and generate structured pitch
+                                presentation/content.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">6</td>
+                            <td class="theme" rowspan="5">Entrepreneurship & Innovation</td>
+                            <td class="category" rowspan="2">Marketplace</td>
+                            <td class="project">Campus Startup Marketplace</td>
+                            <td>
+                                Platform connecting student entrepreneurs with customers,
+                                investors and mentors.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">7</td>
+                            <td class="project">Student Freelancer Marketplace</td>
+                            <td>
+                                Connect students possessing skills with small projects/jobs.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">8</td>
+                            <td class="category">Digitalization</td>
+                            <td class="project">Local Business Digitalization Tool</td>
+                            <td>
+                                Help small businesses manage customers, inventory
+                                and marketing digitally.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">9</td>
+                            <td class="category">Analytics</td>
+                            <td class="project">Business Expense Analyzer</td>
+                            <td>
+                                Analyze business expenses and identify cost-saving opportunities.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">10</td>
+                            <td class="category">Social Enterprise</td>
+                            <td class="project">Social Enterprise Solution</td>
+                            <td>
+                                Develop a sustainable business model addressing a social problem.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">11</td>
+                            <td class="theme" rowspan="5">FinTech & Smart Business</td>
+                            <td class="category" rowspan="3">Smart Fin</td>
+                            <td class="project">Personal Finance Dashboard</td>
+                            <td>
+                                Track income, expenses and savings goals.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">12</td>
+                            <td class="project">Small Business Cash Flow Predictor</td>
+                            <td>
+                                Predict future cash flow using historical data.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">13</td>
+                            <td class="project">Smart Budget Planner</td>
+                            <td>
+                                Create budgets based on income and spending patterns.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">14</td>
+                            <td class="category" rowspan="2">Analytics</td>
+                            <td class="project">Customer Churn Analyzer</td>
+                            <td>
+                                Identify customers likely to stop using a service.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">15</td>
+                            <td class="project">Sales Prediction Dashboard</td>
+                            <td>
+                                Predict future sales using historical business data.
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- ========================================================= -->
+        <!-- SCHOOL OF FORENSICS -->
+        <!-- ========================================================= -->
+
+        <section class="school-section">
+
+            <div class="school-title">
+                SCHOOL OF FORENSICS
+                <br>
+
+            </div>
+
+            <div class="table-container">
+
+                <table class="problem-table">
+
+                    <thead>
+                        <tr>
+                            <th class="number">#</th>
+                            <th>Theme</th>
+                            <th>Category</th>
+                            <th>Project Idea</th>
+                            <th>Problem Statement / Expected Prototype</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td class="number">1</td>
+                            <td class="theme" rowspan="5">Digital Forensics</td>
+                            <td class="category" rowspan="3">Digital Forensics</td>
+                            <td class="project">Digital Evidence Organizer</td>
+                            <td>
+                                Organize digital evidence with timestamps, descriptions
+                                and evidence IDs.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">2</td>
+                            <td class="project">File Metadata Analyzer</td>
+                            <td>
+                                Extract and visualize metadata from digital files.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">3</td>
+                            <td class="project">Digital Evidence Timeline</td>
+                            <td>
+                                Generate a chronological timeline from digital evidence records.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">4</td>
+                            <td class="category">Cyber Forensics</td>
+                            <td class="project">Cyber Incident Dashboard</td>
+                            <td>
+                                Visualize a cyber incident using logs and event data.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">5</td>
+                            <td class="category">Cyber Security</td>
+                            <td class="project">Password Attack Awareness Simulator</td>
+                            <td>
+                                Demonstrate different password attack concepts in a
+                                controlled educational environment.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">6</td>
+                            <td class="theme" rowspan="5">AI in Forensics</td>
+                            <td class="category" rowspan="4">AI</td>
+                            <td class="project">Image Evidence Analyzer</td>
+                            <td>
+                                Analyze an image and extract useful forensic metadata/features.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">7</td>
+                            <td class="project">Document Forgery Detection</td>
+                            <td>
+                                Develop a prototype to identify possible alterations in documents.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">8</td>
+                            <td class="project">Signature Comparison Assistant</td>
+                            <td>
+                                Compare sample signatures and highlight differences
+                                for educational purposes.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">9</td>
+                            <td class="project">Face Evidence Organizer</td>
+                            <td>
+                                Organize facial image evidence and associated metadata.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">10</td>
+                            <td class="category">Analytics</td>
+                            <td class="project">Crime Data Analytics Dashboard</td>
+                            <td>
+                                Analyze historical crime data to identify patterns and trends.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">11</td>
+                            <td class="theme" rowspan="5">Forensic Investigation</td>
+                            <td class="category">Simulation</td>
+                            <td class="project">Digital Crime Scene Simulator</td>
+                            <td>
+                                Create an interactive virtual crime scene where participants
+                                collect and analyze evidence.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">12</td>
+                            <td class="category">Evidence Management</td>
+                            <td class="project">Evidence Chain-of-Custody System</td>
+                            <td>
+                                Digitally record who collected, transferred and examined evidence.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">13</td>
+                            <td class="category">Case Management</td>
+                            <td class="project">Forensic Case Management System</td>
+                            <td>
+                                Manage cases, evidence, reports and investigation status.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">14</td>
+                            <td class="category">Documentation</td>
+                            <td class="project">Crime Scene Documentation Tool</td>
+                            <td>
+                                Digitally record photographs, observations and evidence details.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="number">15</td>
+                            <td class="category">Reporting</td>
+                            <td class="project">Forensic Report Generator</td>
+                            <td>
+                                Convert structured investigation data into a standardized report.
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+        <strong>MEDHAMANTHAN</strong> – Technical Hackathon
+        <br>
+        Aditya University
+        <br>
+        <small>Ideate • Innovate • Impact</small>
+    </footer>
+
+
+    <!-- ================= SEARCH SCRIPT ================= -->
+
+    <script>
+
+        function searchTable() {
+
+            let input = document
+                .getElementById("searchInput")
+                .value
+                .toLowerCase();
+
+            let tables = document.querySelectorAll(".problem-table");
+
+            tables.forEach(function (table) {
+
+                let rows = table
+                    .getElementsByTagName("tbody")[0]
+                    .getElementsByTagName("tr");
+
+                for (let i = 0; i < rows.length; i++) {
+
+                    let rowText = rows[i]
+                        .innerText
+                        .toLowerCase();
+
+                    if (rowText.includes(input)) {
+                        rows[i].style.display = "";
+                    } else {
+                        rows[i].style.display = "none";
+                    }
+                }
+            });
+        }
+
+    </script>
+
+</body>
+
+</html>

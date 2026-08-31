@@ -56,11 +56,91 @@ function CoordinatorPhoto({ employeeCode, name, className }) {
   );
 }
 
+function StudentCoordinatorPhoto({ rollNo, name, className }) {
+  const initials = (name || '').split(' ').filter(Boolean).slice(0, 2).map(n => n[0]).join('').toUpperCase() || 'SC';
+  const placeholderSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><rect width='100%' height='100%' fill='%23222222'/><text x='50%' y='50%' dy='.35em' text-anchor='middle' font-family='Inter, Arial, Helvetica, sans-serif' font-size='46' fill='%23ffffff'>${initials}</text></svg>`;
+  const placeholderDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(placeholderSvg)}`;
+
+  const [hasError, setHasError] = useState(false);
+  const imgSrc = !hasError && rollNo ? `https://info.aec.edu.in/adityacentral/StudentPhotos/${rollNo}.jpg` : placeholderDataUrl;
+
+  return (
+    <img
+      src={imgSrc}
+      alt={`Photo of ${name || 'Coordinator'}`}
+      className={className}
+      onError={() => setHasError(true)}
+    />
+  );
+}
+
 function formatDate(dateStr) {
   if (!dateStr) return '';
   return new Date(dateStr).toLocaleDateString('en-IN', {
     day: 'numeric', month: 'long', year: 'numeric',
   });
+}
+
+function StudentCoordinatorCard({ studentCoord }) {
+  const [data, setData] = useState(null);
+
+  let initialName = '';
+  let initialRoll = '';
+  let initialPhone = 'N/A';
+
+  if (typeof studentCoord === 'string') {
+    const match = studentCoord.match(/^(.*?)\s*\(([\w]+)\)(?:\s*\((\d+)\))?/);
+    if (match) {
+      initialName = match[1].trim();
+      initialRoll = match[2].trim();
+      if (match[3]) initialPhone = match[3].trim();
+    } else {
+      initialName = studentCoord;
+    }
+  } else {
+    initialName = studentCoord?.name || studentCoord?.fullName || '';
+    initialRoll = studentCoord?.rollNumber || studentCoord?.rollNo || studentCoord?.roll || studentCoord?.id || '';
+    initialPhone = studentCoord?.mobileNumber || studentCoord?.phoneNumber || studentCoord?.phone || studentCoord?.mobile || 'N/A';
+  }
+
+  useEffect(() => {
+    if (initialRoll) {
+      fetch(`/adityaapi/api/studentdata/${initialRoll}`)
+        .then(res => res.json())
+        .then(json => {
+          const info = Array.isArray(json) ? json[0] : json;
+          if (info && !info.error) {
+            setData(info);
+          }
+        })
+        .catch(err => console.error("Error fetching student coord data:", err));
+    }
+  }, [initialRoll]);
+
+  const displayName = data?.studentname || initialName || 'Student Coordinator';
+  const displayPhone = data?.mobilenumber || data?.fathermobilenumber || initialPhone;
+
+  return (
+    <div className="esingle-coordinator-row" style={{ marginTop: 0, marginBottom: '1rem', flex: '1 1 min-content', minWidth: '300px' }}>
+      <StudentCoordinatorPhoto
+        rollNo={initialRoll}
+        name={displayName}
+        className="esingle-coordinator-photo"
+      />
+      <div className="esingle-coordinator-info">
+        <p className="esingle-section-text" style={{ marginBottom: '0.25rem' }}>
+          <strong>{displayName}</strong>
+          {initialRoll ? ` — ${initialRoll}` : null}
+        </p>
+        <p className="esingle-section-text">
+          <small className="esingle-coordinator-code">
+            <i className="bi bi-telephone-fill" style={{ marginRight: '6px' }}></i>
+            {displayPhone}
+          </small>
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default function EventSingleDetail({ schoolId, eventId }) {
@@ -204,6 +284,15 @@ export default function EventSingleDetail({ schoolId, eventId }) {
           </div>
           <h1 className="esingle-page-title">{event.title}</h1>
           {event.tagline && <p className="esingle-page-subtitle">{event.tagline}</p>}
+
+          {eventId === 'medhamanthan' && (
+            <div style={{ marginBottom: '1rem', fontWeight: 600 }}>
+              click for <a href="/MM2026.html" style={{ color: 'orange', textDecoration: 'underline' }}>
+                MedhaManthan Themes and Problem Statements
+              </a>
+            </div>
+          )}
+
           <div className="esingle-meta-row">
             <div className="esingle-meta-chip">
               <i className="bi bi-calendar3" />
@@ -232,14 +321,25 @@ export default function EventSingleDetail({ schoolId, eventId }) {
             <h2 className="esingle-section-title">
               <span>Rules</span><span className="esingle-section-colon"> :</span>
             </h2>
-            <ul className="esingle-rules-list">
-              {event.rules.map((rule, i) => (
-                <li key={i} className="esingle-rule-item">
-                  <span className="esingle-rule-bullet">•</span>
-                  <span>{rule}</span>
-                </li>
-              ))}
-            </ul>
+            {eventId != 'medhamanthan' && (
+              <ul className="esingle-rules-list">
+                {event.rules.map((rule, i) => (
+                  <li key={i} className="esingle-rule-item">
+                    <span className="esingle-rule-bullet">•</span>
+                    <span>{rule}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {eventId === 'medhamanthan' && (
+
+              <div style={{ marginBottom: '1rem', fontWeight: 600 }}>
+                click for &nbsp;
+                <a href="/MM_Rules.html" style={{ color: 'orange', textDecoration: 'underline' }}>
+                  Rules and Regulations
+                </a>
+              </div>
+            )}
           </div>
         )}
 
@@ -284,6 +384,20 @@ export default function EventSingleDetail({ schoolId, eventId }) {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* ── STUDENT COORDINATOR DETAILS ── */}
+        {(event?.raw?.studentCoordinators?.length > 0 || event?.studentCoordinators?.length > 0) && (
+          <div className="esingle-section">
+            <h2 className="esingle-section-title">
+              <span>STUDENT COORDINATOR{(event?.raw?.studentCoordinators?.length > 1 || event?.studentCoordinators?.length > 1) ? 'S' : ''}</span><span className="esingle-section-colon"> :</span>
+            </h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginTop: '1rem' }}>
+              {(event?.raw?.studentCoordinators || event?.studentCoordinators).map((studentCoord, idx) => (
+                <StudentCoordinatorCard key={idx} studentCoord={studentCoord} />
+              ))}
             </div>
           </div>
         )}

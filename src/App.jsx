@@ -14,7 +14,7 @@ import RegisterForm from './components/Events/RegisterForm';
 import Team from './components/Team/Team';
 import Contact from './components/Contact/Contact';
 import AboutPage from './components/About/AboutPage';
-import Poster from './components/Poster/Poster';
+import Gallery from './components/Gallery/Gallery';
 import StudentDashboard from './components/Dashboard/StudentDashboard';
 import Footer from './components/Footer/Footer';
 import LoginPage from './components/Login/LoginPage';
@@ -80,7 +80,7 @@ export default function App() {
           <Route path="/home" element={<Home loadingComplete={loadingComplete} />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/team" element={<Team />} />
-          <Route path="/poster" element={<Poster />} />
+          <Route path="/gallery" element={<Gallery />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<StudentDashboard />} />
