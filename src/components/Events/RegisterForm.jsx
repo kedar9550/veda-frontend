@@ -120,7 +120,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { events } = useEvents();
-  const { departments, error: departmentsError } = useDepartments();
+  const { departments, loading: departmentsLoading, error: departmentsError } = useDepartments();
   const event = events.find(e => e.groupSlug === schoolId && e.slug === eventId) || null;
   const [form, setForm] = useState({
     category: '',
@@ -384,6 +384,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               else updatedParticipant.gender = 'Other';
             }
             if (info.branch) {
+              updatedParticipant.branch = info.branch;
               setApiBranches(prev => ({ ...prev, [index]: info.branch }));
               
               const matchedDept = eligibleDepartments.find(dept => isBranchMatch(info.branch, dept));
@@ -488,7 +489,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
   // Auto-validate Participant 1 (logged-in user) since their fields are disabled and can't trigger onBlur
   useEffect(() => {
-    if (form.eventName && (form.participants[0]?.roll || form.participants[0]?.email)) {
+    if (!departmentsLoading && form.eventName && (form.participants[0]?.roll || form.participants[0]?.email)) {
       if (form.participants[0].roll) {
         validateParticipantRegistration(0, 'roll', form.participants[0].roll);
       } else if (form.participants[0].email) {
@@ -496,7 +497,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.eventName]);
+  }, [form.eventName, departmentsLoading]);
 
   const validate = () => {
     const participantCount = Number(form.teamSize) || 1;
@@ -1022,7 +1023,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                     {departmentOptions
                       .filter(dept => {
                         if (dept.value === '') return true;
-                        if (!apiBranches[index]) return false;
+                        if (!apiBranches[index]) return true;
                         const valMatch = String(dept.value || '').trim().toLowerCase();
                         const fullDept = departments?.find(d => String(d.name || d.departmentName || d.title || '').trim().toLowerCase() === valMatch) || dept;
                         return isBranchMatch(apiBranches[index], fullDept);
@@ -1038,7 +1039,12 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
                 <div>
                   <label>Branch</label>
-                  <input name="branch" value={apiBranches[index] || ''} disabled />
+                  <input
+                    name="branch"
+                    value={participant.branch || ''}
+                    onChange={(e) => handleParticipantChange(index, e)}
+                    disabled={index === 0 || participant.college !== 'Other College'}
+                  />
                 </div>
 
 

@@ -121,7 +121,7 @@ export default function StudentDashboard({ onNavigate }) {
               let venueStr = item.venue || item.location || item.venueLocation || '';
               if (!venueStr && item.building && item.roomNo) {
                 const floorName = item.floor && item.floor.name ? item.floor.name : '';
-                venueStr = `Room No: ${item.roomNo}, ${item.building.name || ''}${floorName ? ' - ' + floorName : ''}`;
+                venueStr = `${item.building.name || ''}${floorName ? ' - ' + floorName : ''}, Room No: ${item.roomNo}`;
               }
               if (name && venueStr) {
                 venueMap[name.toLowerCase().trim()] = venueStr;
@@ -1282,7 +1282,7 @@ export default function StudentDashboard({ onNavigate }) {
                                 'scitech model': 'Ramanujan Hall, Science Block',
                                 'biz pitch': 'MBA Seminar Hall, Newton Bhavan'
                               };
-                              return selectedPass.venue || eventVenues[eventIdKey] || eventVenues[lookupKey] || SUB_EVENT_VENUES_FALLBACK[lookupKey] || 'Room No: 021, Bill Gates Bhavan - GROUND FLOOR';
+                              return selectedPass.venue || eventVenues[eventIdKey] || eventVenues[lookupKey] || SUB_EVENT_VENUES_FALLBACK[lookupKey] || 'Bill Gates Bhavan - GROUND FLOOR, Room No: 021';
                             })()}
                           </span>
                         </div>
