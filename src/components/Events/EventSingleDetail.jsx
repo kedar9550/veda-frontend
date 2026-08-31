@@ -226,7 +226,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
     return (
       <div style={{ padding: '6rem 2rem', textAlign: 'center' }}>
         <p style={{ color: 'var(--text-muted)' }}>Event not found.</p>
-        <button className="event-detail-back" onClick={() => navigate(`/events/${schoolId}`)} style={{ position: 'static', marginTop: '1rem' }}>
+        <button className="event-detail-back" onClick={() => navigate(schoolId === 'featured-events' ? '/events' : `/events/${schoolId}`)} style={{ position: 'static', marginTop: '1rem' }}>
           <i className="bi bi-arrow-left" /> Go Back
         </button>
       </div>
@@ -275,7 +275,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
             <button
               type="button"
               className="esingle-back-pill"
-              onClick={() => navigate(`/events/${schoolId}`)}
+              onClick={() => navigate(schoolId === 'featured-events' ? '/events' : `/events/${schoolId}`)}
               aria-label="Go back"
             >
               <i className="bi bi-arrow-left" />
