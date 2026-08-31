@@ -140,7 +140,7 @@ export default function Contact() {
               </div>
               <div className="contact-info-item">
                 <i className="bi bi-telephone"></i>
-                <span>+91 9876543210</span>
+                <span>+91 7780291499</span>
               </div>
               <div className="contact-info-item">
                 <i className="bi bi-envelope"></i>
