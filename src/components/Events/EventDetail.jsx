@@ -64,7 +64,7 @@ function SubEventCard({ event, cardRef, school }) {
     >
       <div className="event-card__img-container-tech" style={{ margin: '0 auto 1rem', width: '220px', height: '220px', position: 'relative' }}>
         <img src={event.image || 'https://placehold.co/600x400/1e293b/94a3b8?text=Event+Image'} alt={event.title} className="event-card__img-tech" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-        <div className="event-card__date-badge-tech" style={{ position: 'absolute', top: '10px', left: '-10px', background: '#001f3f', color: '#fff', padding: '0.4rem 0.8rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+        <div className="event-card__date-badge-tech" style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', background: '#001f3f', color: '#fff', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 'bold', zIndex: 2, whiteSpace: 'nowrap', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
           <i className="bi bi-calendar-event"></i> {dateStr}
         </div>
         <div className="event-card__icon-badge-tech" style={{ position: 'absolute', bottom: '10px', left: '10px', background: '#0055ff', color: '#fff', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
