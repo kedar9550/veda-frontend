@@ -9,7 +9,7 @@ const faqData = {
     },
     {
       question: "When and where is the event taking place?",
-      answer: "The event will be held on September 11, 2026, at the Aditya University from 10 AM to 5 PM."
+      answer: "The event will be held on September 11, 2k26, at the Aditya University from 10 AM to 5 PM."
     },
     {
       question: "Can I participate if I am not a student at this university/college?",
@@ -18,16 +18,16 @@ const faqData = {
   ],
   "Registration": [
     {
-      question: "How do I register for the event?",
-      answer: "You can register for the event online through our registration portal on the college website. Registration will be open until March 10, 2024."
+      question: "How do I Sign Up for the event?",
+      answer: "You can Sign Up for the event online through our registration portal on the college website. Registration will be open until March 10, 2024."
     },
     {
       question: "Is there a registration fee?",
       answer: "Yes, registration for the event is according to the particular event. However, early registration is recommended to secure your spot."
     },
     {
-      question: "Can I register on the day of the event?",
-      answer: "On-the-day registration is subject to availability. We recommend registering in advance to ensure your participation and receive all event materials."
+      question: "Can I Sign Up on the day of the event?",
+      answer: "On-the-day registration is subject to availability. We recommend Sign Up in advance to ensure your participation and receive all event materials."
     }
   ],
   "Miscellaneous": [

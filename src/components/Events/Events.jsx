@@ -107,7 +107,7 @@ function FeaturedEventCard({ event }) {
     ? 'All Departments'
     : (event.organizer || event.category || event.groupName || 'Event');
 
-  const dateStr = event.raw?.startDate ? new Date(event.raw.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase().replace(' ', ' - ') : (import.meta.env.VITE_EVENT_DATE || '11 - 12 SEP, 2026');
+  const dateStr = event.raw?.startDate ? new Date(event.raw.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase().replace(' ', ' - ') : (import.meta.env.VITE_EVENT_DATE || '11 - 12 SEP, 2k26');
 
   return (
     <div

@@ -52,7 +52,7 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
       for (const targetRoll of candidates) {
         // Tier 1: Try Backend Proxy (/api/event-students/studentdata/:roll)
         try {
-          const proxyUrl = import.meta.env.VITE_API_BASE_URL 
+          const proxyUrl = import.meta.env.VITE_API_BASE_URL
             ? `${import.meta.env.VITE_API_BASE_URL}/api/event-students/studentdata/${encodeURIComponent(targetRoll)}`
             : `/api/event-students/studentdata/${encodeURIComponent(targetRoll)}`;
           const res = await fetch(proxyUrl);
@@ -187,7 +187,7 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    
+
     setLoading(true);
     try {
       const response = await fetch(import.meta.env.VITE_API_BASE_URL ? `${import.meta.env.VITE_API_BASE_URL}/api/event-students/register` : '/api/event-students/register', {
@@ -201,7 +201,7 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to register');
       }
-      
+
       // Instead of logging in automatically, switch to Login
       setIsLogin(true);
       setLoginForm({ email: form.email, password: '' });
@@ -253,12 +253,12 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
 
   return (
     <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-      backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', 
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
       alignItems: 'center', justifyContent: 'center', zIndex: 9999, overflow: 'auto'
     }}>
       <div style={{
-        background: '#fff', padding: '1.5rem', borderRadius: '8px', 
+        background: '#fff', padding: '1.5rem', borderRadius: '8px',
         width: '100%', maxWidth: '500px', maxHeight: '95vh', overflowY: 'auto',
         color: '#333', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
       }}>
@@ -272,7 +272,7 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
         {isLogin ? (
           <form onSubmit={handleLoginSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {errors.login && <div style={{ color: 'red', fontSize: '0.8rem', textAlign: 'center' }}>{errors.login}</div>}
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
               <label style={{ fontSize: '0.9rem', color: '#444' }}>Email</label>
               <input type="email" name="email" value={loginForm.email} onChange={handleLoginChange} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem' }} />
@@ -282,10 +282,10 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
               <label style={{ fontSize: '0.9rem', color: '#444' }}>Password</label>
               <input type="password" name="password" value={loginForm.password} onChange={handleLoginChange} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', fontSize: '0.95rem' }} />
             </div>
-            
+
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
               <button type="button" onClick={() => { setIsLogin(false); setErrors({}); }} style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline' }}>
-                Need to register?
+                Need to Sign Up?
               </button>
               <button type="submit" disabled={loading} style={{ padding: '0.6rem 1.2rem', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem' }}>
                 {loading ? 'Logging in...' : 'Login'}
@@ -294,7 +294,7 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
           </form>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label style={{ fontSize: '0.9rem', color: '#444' }}>Roll Number</label>
@@ -401,10 +401,10 @@ export default function StudentRegistrationPopup({ onClose, onSuccess }) {
               />
               {errors.email && <div style={{ color: 'red', fontSize: '0.8rem' }}>{errors.email}</div>}
             </div>
-            
+
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
               <button type="button" onClick={() => { setIsLogin(true); setErrors({}); }} style={{ background: 'none', border: 'none', color: '#007bff', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline' }}>
-                Already registered? Login
+                Already Signed Up? Login
               </button>
               <button type="submit" disabled={loading} style={{ padding: '0.6rem 1.2rem', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem' }}>
                 {loading ? 'Submitting...' : 'Submit'}

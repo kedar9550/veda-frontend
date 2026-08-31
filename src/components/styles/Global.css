@@ -5109,7 +5109,7 @@ textarea.form-input-custom {
   font-size: 1.02rem;
   color: var(--text-muted);
   line-height: 1.6;
-  max-width: 800px;
+  max-width: 100%;
   margin: 0 0 1.25rem 0;
 }
 

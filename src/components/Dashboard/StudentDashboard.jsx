@@ -369,7 +369,7 @@ export default function StudentDashboard({ onNavigate }) {
             </div>
 
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.25rem', fontSize: '0.95rem', lineHeight: '1.5' }}>
-              Here is a quick snapshot of your event registrations, participant details, and payment histories for VEDA 2026.
+              Here is a quick snapshot of your event registrations, participant details, and payment histories for VEDA 2k26.
             </p>
 
             <div className="user-badges">
@@ -445,7 +445,7 @@ export default function StudentDashboard({ onNavigate }) {
       {/* Overview Content showing both Event and Payment Cards Side by Side (Always visible below the main content) */}
       {!loading && (
         <div className="dashboard-grid-two-col" style={{ marginTop: '2rem' }}>
-          {/* Card 1: Registered Events */}
+          {/* Card 1: Sign Up Events */}
           <div
             className="profile-card"
             style={{
@@ -491,7 +491,7 @@ export default function StudentDashboard({ onNavigate }) {
                   <div className="empty-state">
                     <i className="bi bi-journal-x"></i>
                     <h4>No Event Registrations Found</h4>
-                    <p>When you register for events, participant details will be listed here.</p>
+                    <p>When you Sign Up for events, participant details will be listed here.</p>
                   </div>
                 ) : (
                   registrations.map((reg, index) => {
@@ -902,7 +902,7 @@ export default function StudentDashboard({ onNavigate }) {
           <div className="receipt-modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="receipt-header">
               <div style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '2px', color: '#007bff' }}>
-                VEDA 2026 OFFICIAL RECEIPT
+                VEDA 2k26 OFFICIAL RECEIPT
               </div>
               <h2>Payment Summary</h2>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0.3rem 0 0 0' }}>
@@ -1103,7 +1103,7 @@ export default function StudentDashboard({ onNavigate }) {
                       <i className="bi bi-calendar-month-fill" style={{ color: '#fff', fontSize: 28, marginRight: '8px' }}></i>
                       <div>
                         <div style={{ color: '#fff', fontSize: '14px', fontWeight: 700, letterSpacing: '0.5px', lineHeight: 1.2 }}>EVENT DATE</div>
-                        <div style={{ color: '#c69a37', fontSize: '15px', fontWeight: 800, lineHeight: 1.2, marginTop: '2.4px' }}>SEP. 2026</div>
+                        <div style={{ color: '#c69a37', fontSize: '15px', fontWeight: 800, lineHeight: 1.2, marginTop: '2.4px' }}>SEP. 2k26</div>
                       </div>
                     </div>
                   </div>

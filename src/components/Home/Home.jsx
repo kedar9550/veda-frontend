@@ -36,7 +36,7 @@ const TIMELINE_DATA = [
     stage: 'Workshops & Exhibitions',
     title: 'Learn and Showcase',
     icon: 'bi-lightbulb',
-    desc: 'Enhance your skills by attending hands-on workshops and expert seminars. Showcase your innovative hardware and software projects to industry experts and peers.',
+    desc: 'Enhance your skills by attending hands-on workshops and expert seminars. Showcase your innovative technical and scientific projects to industry experts and peers.',
   },
   {
     id: 5,
@@ -50,7 +50,7 @@ const TIMELINE_DATA = [
     stage: 'Results Announcement',
     title: 'Claim Your Prizes',
     icon: 'bi-trophy',
-    desc: 'Stay updated with live leaderboards and result announcements. Check the dashboard to see if your team made it to the podium and claim your well-deserved prizes.',
+    desc: 'Stay updated with live leaderboards and result announcements. Check your dashboard to see if you or your team made it to the podium and claim your well-deserved prizes.',
   }
 ];
 
@@ -372,7 +372,7 @@ export default function Home({ loadingComplete = true }) {
               <span className="veda-char">E</span>
               <span className="veda-char">D</span>
               <span className="veda-char">A</span>
-              <span className="veda-char veda-year-block">2K26</span>
+              <span className="veda-char veda-year-block">2k26</span>
             </h1>
           </div>
         </div>
@@ -442,7 +442,7 @@ export default function Home({ loadingComplete = true }) {
             <div ref={leftColRef} className="col-lg-6">
               <span className="sdgs-header-tag">Event Highlights</span>
               <h2 className="sdgs-title text-gradient">
-                Experience Engineering Across Every Discipline
+                Experience Innovation Across Every Discipline
               </h2>
               <p className="sdgs-desc">
                 VEDA brings together students from diverse engineering and science disciplines
@@ -456,7 +456,7 @@ export default function Home({ loadingComplete = true }) {
                   <div>
                     <h4 className="sdg-goal-name">Technical Symposiums</h4>
                     <p className="sdg-goal-details">
-                      Intra-department hackathons, coding face-offs, and tech quizzes testing core knowledge.
+                      Intra-department hackathons, technical challenges, and tech quizzes testing core knowledge.
                     </p>
                   </div>
                 </div>

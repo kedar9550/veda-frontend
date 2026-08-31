@@ -286,9 +286,55 @@ export default function EventSingleDetail({ schoolId, eventId }) {
           {event.tagline && <p className="esingle-page-subtitle">{event.tagline}</p>}
 
           {eventId === 'medhamanthan' && (
-            <div style={{ marginBottom: '1rem', fontWeight: 600 }}>
-              click for <a href="/MM2026.html" style={{ color: 'orange', textDecoration: 'underline' }}>
-                MedhaManthan Themes and Problem Statements
+            <div style={{
+              background: 'linear-gradient(135deg, #c69a37 0%, #a8812c 100%)',
+              borderRadius: '16px',
+              padding: '1.5rem 2rem',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '2rem',
+              color: 'white',
+              boxShadow: '0 10px 25px -5px rgba(198, 154, 55, 0.4)',
+              border: '1px solid rgba(255,255,255,0.2)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                <div style={{ background: 'rgba(255,255,255,0.25)', padding: '1rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
+                  <i className="bi bi-lightbulb-fill" style={{ fontSize: '1.75rem', color: '#fff', lineHeight: 1 }}></i>
+                </div>
+                <div>
+                  <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.35rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>
+                    Themes & Problem Statements
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>
+                    Explore the official challenges for MedhaManthan 2k26
+                  </p>
+                </div>
+              </div>
+              <a
+                href="/MM2k26.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  background: 'white',
+                  color: '#c69a37',
+                  padding: '0.85rem 1.75rem',
+                  borderRadius: '99px',
+                  fontWeight: 800,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  whiteSpace: 'nowrap'
+                }}
+                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)'; }}
+                onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'; }}
+              >
+                View Now <i className="bi bi-arrow-right-circle-fill" style={{ fontSize: '1.1rem' }}></i>
               </a>
             </div>
           )}
@@ -332,11 +378,55 @@ export default function EventSingleDetail({ schoolId, eventId }) {
               </ul>
             )}
             {eventId === 'medhamanthan' && (
-
-              <div style={{ marginBottom: '1rem', fontWeight: 600 }}>
-                click for &nbsp;
-                <a href="/MM_Rules.html" style={{ color: 'orange', textDecoration: 'underline' }}>
-                  Rules and Regulations
+              <div style={{
+                background: 'linear-gradient(135deg, #c69a37 0%, #a8812c 100%)',
+                borderRadius: '16px',
+                padding: '1.5rem 2rem',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '1rem',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '1rem',
+                color: 'white',
+                boxShadow: '0 10px 25px -5px rgba(198, 154, 55, 0.4)',
+                border: '1px solid rgba(255,255,255,0.2)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.25)', padding: '1rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
+                    <i className="bi bi-file-earmark-text-fill" style={{ fontSize: '1.75rem', color: '#fff', lineHeight: 1 }}></i>
+                  </div>
+                  <div>
+                    <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.35rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>
+                      Rules & Regulations
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>
+                      Review the official guidelines for MedhaManthan 2k26
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href="/MM_Rules.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    background: 'white',
+                    color: '#c69a37',
+                    padding: '0.85rem 1.75rem',
+                    borderRadius: '99px',
+                    fontWeight: 800,
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    whiteSpace: 'nowrap'
+                  }}
+                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)'; }}
+                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'; }}
+                >
+                  View Now <i className="bi bi-arrow-right-circle-fill" style={{ fontSize: '1.1rem' }}></i>
                 </a>
               </div>
             )}
@@ -428,7 +518,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
               style={{ background: '#28a745', color: '#fff', border: 'none', cursor: 'pointer' }}
               onClick={() => navigate('/dashboard', { state: { activeTab: 'events' } })}
             >
-              <i className="bi bi-check-circle" style={{ marginRight: '8px' }} /> Already Registered
+              <i className="bi bi-check-circle" style={{ marginRight: '8px' }} /> Already Signed Up
             </button>
           ) : (
             <button
@@ -439,7 +529,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
                 navigate(`/register/${schoolId}/${eventId}`);
               }}
             >
-              {event.isOpen ? 'Register' : 'Closed'}
+              {event.isOpen ? 'Sign Up' : 'Closed'}
               {event.isOpen && <i className="bi bi-arrow-right" />}
             </button>
           )}

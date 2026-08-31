@@ -20,7 +20,7 @@ export default function LoginPage() {
     password: '',
     confirmPassword: ''
   });
-  
+
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -68,7 +68,7 @@ export default function LoginPage() {
       for (const targetRoll of candidates) {
         // Tier 1: Try Backend Proxy (/api/event-students/studentdata/:roll)
         try {
-          const proxyUrl = import.meta.env.VITE_API_BASE_URL 
+          const proxyUrl = import.meta.env.VITE_API_BASE_URL
             ? `${import.meta.env.VITE_API_BASE_URL}/api/event-students/studentdata/${encodeURIComponent(targetRoll)}`
             : `/api/event-students/studentdata/${encodeURIComponent(targetRoll)}`;
           const res = await fetch(proxyUrl);
@@ -220,7 +220,7 @@ export default function LoginPage() {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (!validateRegister()) return;
-    
+
     setLoading(true);
     try {
       const response = await fetch(import.meta.env.VITE_API_BASE_URL ? `${import.meta.env.VITE_API_BASE_URL}/api/event-students/register` : '/api/event-students/register', {
@@ -234,7 +234,7 @@ export default function LoginPage() {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to register');
       }
-      
+
       // Auto switch to login with email filled
       setIsLogin(true);
       setLoginForm({ email: form.email, password: '' });
@@ -265,12 +265,12 @@ export default function LoginPage() {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to login');
       }
-      
+
       // Save student
       localStorage.setItem('eventStudent', JSON.stringify(data.student));
       window.dispatchEvent(new Event('studentLoggedIn'));
       toast.success('Logged in successfully!');
-      
+
       // Handle redirect back if there was one
       const redirect = sessionStorage.getItem('authRedirect');
       if (redirect) {
@@ -324,24 +324,24 @@ export default function LoginPage() {
           {isLogin ? 'Student Login' : 'Student Registration'}
         </h2>
         <p style={{ textAlign: 'center', marginBottom: '32px', color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-          {isLogin ? 'Please log in to manage registrations and view receipts' : 'Create an account to participate in events'}
+          {isLogin ? 'Please log in to manage registrations and view receipts' : 'Create your profile seamlessly using the Sign Up/Login link at the top right, and get ready to participate in an array of technical and non-technical events.'}
         </p>
 
         {isLogin ? (
           <form onSubmit={handleLoginSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {errors.login && (
-              <div style={{ 
-                color: errors.login.includes('successful') ? '#10b981' : '#dc3545', 
-                fontSize: '0.85rem', 
-                textAlign: 'center', 
-                background: errors.login.includes('successful') ? 'rgba(16, 185, 129, 0.1)' : 'rgba(220, 53, 69, 0.1)', 
-                padding: '10px', 
-                borderRadius: '8px' 
+              <div style={{
+                color: errors.login.includes('successful') ? '#10b981' : '#dc3545',
+                fontSize: '0.85rem',
+                textAlign: 'center',
+                background: errors.login.includes('successful') ? 'rgba(16, 185, 129, 0.1)' : 'rgba(220, 53, 69, 0.1)',
+                padding: '10px',
+                borderRadius: '8px'
               }}>
                 {errors.login}
               </div>
             )}
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <label style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)' }}>Email Address</label>
               <input
@@ -365,15 +365,15 @@ export default function LoginPage() {
                 required
               />
             </div>
-            
+
             <div style={{ display: 'flex', gap: '16px', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={() => { setIsLogin(false); setErrors({}); }}
-                  className="login-switch-btn"
-                >
-                  Need to register?
-                </button>
+              <button
+                type="button"
+                onClick={() => { setIsLogin(false); setErrors({}); }}
+                className="login-switch-btn"
+              >
+                Need to Sign Up?
+              </button>
               <button
                 type="submit"
                 disabled={loading}
@@ -386,7 +386,7 @@ export default function LoginPage() {
           </form>
         ) : (
           <form onSubmit={handleRegisterSubmit} noValidate className="row g-4">
-            
+
             <div className="col-md-6 col-12 d-flex flex-column gap-2">
               <div className="d-flex justify-content-between align-items-center">
                 <label style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)', marginBottom: 0 }}>Roll Number</label>
@@ -609,14 +609,14 @@ export default function LoginPage() {
               />
               {errors.confirmPassword && <div style={{ color: '#dc3545', fontSize: '0.8rem' }}>{errors.confirmPassword}</div>}
             </div>
-            
+
             <div className="col-12 d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
               <button
                 type="button"
                 onClick={() => { setIsLogin(true); setErrors({}); }}
                 className="login-switch-btn"
               >
-                Already registered? Login
+                Already Signed Up? Login
               </button>
               <button
                 type="submit"
@@ -624,7 +624,7 @@ export default function LoginPage() {
                 className="btn-admissions"
                 style={{ background: 'var(--gradient-primary)', color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '30px', cursor: 'pointer', fontWeight: '600' }}
               >
-                {loading ? 'Submitting...' : 'Register'}
+                {loading ? 'Submitting...' : 'Sign Up'}
               </button>
             </div>
           </form>

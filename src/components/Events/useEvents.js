@@ -150,6 +150,7 @@ const fetchAll = async () => {
             eventCount: groupEventCounts[g._id] || 0,
             accentColor: '#7c3aed',
             coordinator: g.coordinator || g.eventCoordinator || null,
+            coordinators: g.coordinators || (g.coordinator ? [g.coordinator] : (g.eventCoordinator ? [g.eventCoordinator] : [])),
             isActive: !g.status || g.status.toLowerCase() === 'active' || g.isActive !== false,
             participants: gStat.partCount || g.participants || g.usersRegistered || 0,
             usersRegistered: gStat.partCount || g.usersRegistered || 0,

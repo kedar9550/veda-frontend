@@ -139,7 +139,7 @@ export function useSubEvents(schoolId, groupId) {
                 isOpen: event.isOpen !== false,
                 overview: event.overview || `A premier event coordinated by ${coordinatorInfo?.name || 'faculty'}. Test your skills against the best minds in the country.`,
                 rules: event.rules || [
-                  'Participants must register in advance.',
+                  'Participants must Sign Up in advance.',
                   'Strict adherence to schedule is required.',
                   'Decisions of the judges and coordinators are final.'
                 ],

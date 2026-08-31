@@ -49,7 +49,7 @@ function SubEventCard({ event, cardRef, school }) {
     ? 'All Departments'
     : (event.organizer || event.category || event.groupName || 'Event');
 
-  const dateStr = event.raw?.startDate ? new Date(event.raw.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase().replace(' ', ' - ') : (import.meta.env.VITE_EVENT_DATE || '11 - 12 SEP, 2026');
+  const dateStr = event.raw?.startDate ? new Date(event.raw.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase().replace(' ', ' - ') : (import.meta.env.VITE_EVENT_DATE || '11 - 12 SEP, 2k26');
 
   return (
     <div
@@ -235,7 +235,7 @@ export default function EventDetail({ schoolId }) {
               <i className="bi bi-arrow-left" />
             </button>
             <span className="esingle-category-badge">
-              {school.category || 'VEDA 2026'}
+              {school.category || 'VEDA 2k26'}
             </span>
           </div>
           <h1 className="esingle-page-title">

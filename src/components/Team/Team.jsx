@@ -102,8 +102,14 @@ export default function Team() {
         const coordsMap = new Map();
 
         rawSchoolGroups.filter(g => !g.status || g.status.toLowerCase() === 'active').forEach(group => {
-          const c = group.coordinator || group.eventCoordinator;
-          if (c) {
+          const coordsToProcess = [];
+          if (group.coordinators && Array.isArray(group.coordinators)) {
+            coordsToProcess.push(...group.coordinators);
+          } else if (group.coordinator || group.eventCoordinator) {
+            coordsToProcess.push(group.coordinator || group.eventCoordinator);
+          }
+
+          coordsToProcess.forEach(c => {
             const id = c.institutionId || c.employeeId || c.employeeCode;
             if (id) {
               if (!coordsMap.has(id)) {
@@ -118,7 +124,8 @@ export default function Team() {
                 coordsMap.get(id).roles.push(group.name);
               }
             }
-          }
+          });
+
         });
 
         setCoordinators(Array.from(coordsMap.values()));
@@ -221,7 +228,7 @@ export default function Team() {
       <div className="container-premium text-center" style={{ marginBottom: '4rem' }}>
         <span className="testimonials-header-tag">Team</span>
         {/* <h2 className="testimonials-title text-gradient">
-          VEDA Conveners 2026
+          VEDA Conveners 2k26
         </h2> */}
 
         {loading ? (
@@ -263,7 +270,7 @@ export default function Team() {
       <div className="container-premium text-center" style={{ marginBottom: '4rem' }}>
         <span className="testimonials-header-tag">Members</span>
         {/* <h2 className="testimonials-title text-gradient">
-          VEDA Members 2026
+          VEDA Members 2k26
         </h2> */}
 
         {loading ? (
@@ -307,7 +314,7 @@ export default function Team() {
       <div className="container-premium text-center" style={{ marginTop: '8rem', marginBottom: '4rem' }}>
         <span className="testimonials-header-tag">Student Leads</span>
         {/* <h2 className="testimonials-title text-gradient">
-          VEDA Student Co-Ordinators 2026
+          VEDA Student Co-Ordinators 2k26
         </h2> */}
 
         {loading ? (
