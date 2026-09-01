@@ -490,12 +490,12 @@ export default function Home({ loadingComplete = true }) {
               </div>
             </div>
 
-            <div ref={rightColRef} className="col-lg-6 sdg-interactive-wrap">
-              <div className="sdg-center-glow"></div>
-              <div className="sdg-svg-ring">
-                <GoldLogo className="sdg-gold-logo logo-dark-only" />
-                <LightLogo className="sdg-gold-logo logo-light-only" />
-              </div>
+            <div ref={rightColRef} className="col-lg-6 d-flex justify-content-center align-items-center">
+              <img 
+                src="/about_campus_building.jpeg" 
+                alt="VEDA Student Symposium" 
+                style={{ width: '100%', maxWidth: '600px', borderRadius: '16px', boxShadow: '0 15px 35px rgba(0,0,0,0.1)' }} 
+              />
             </div>
 
           </div>
