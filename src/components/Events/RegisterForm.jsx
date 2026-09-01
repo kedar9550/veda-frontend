@@ -1121,7 +1121,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                 type="button"
                 onClick={processRegistration}
                 className="esingle-cta"
-                style={{ padding: '0.6rem 1.5rem', opacity: 0.6, cursor: 'not-allowed' }}
+                style={{ padding: '0.6rem 1.5rem' }}
               >
                 Proceed to Payment
               </button>

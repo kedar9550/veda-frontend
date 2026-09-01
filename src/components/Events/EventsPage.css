@@ -161,10 +161,11 @@
 /* --- FEATURED EVENTS --- */
 .featured-events-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   max-width: 1200px;
   margin: 0 auto 1.5rem auto;
+  position: relative;
 }
 
 .featured-events-title {
@@ -173,9 +174,12 @@
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--text-light);
+  text-align: center;
 }
 
 .view-all-events {
+  position: absolute;
+  right: 0;
   color: var(--text-muted);
   font-size: 0.9rem;
   text-decoration: none;
