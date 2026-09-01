@@ -302,7 +302,7 @@ export default function ChatbotWidget() {
     setTimeout(() => {
       if (type === 'action') {
         if (option === 'Search Event') {
-          setMessages(prev => [...prev, { type: 'bot', text: 'Please type any event name (e.g., TECH NOVA) to see its details.' }]);
+          setMessages(prev => [...prev, { type: 'bot', text: 'Please type any event name (e.g., CODE CHAMP) to see its details.' }]);
         } else if (option === 'Get Participant Pass') {
           setMessages(prev => [...prev, { type: 'bot', text: 'Please enter your Roll Number to retrieve your pass.' }]);
         } else if (option === 'Get Team Info') {
@@ -394,7 +394,7 @@ export default function ChatbotWidget() {
     // Parse Venue
     let venueStr = 'Main Campus';
     if (ev.venueType === 'Indoor' && (ev.building || ev.floor)) {
-      venueStr = `${ev.roomNo ? `Room ${ev.roomNo}, ` : ''}${ev.building?.name || ev.building || ''} ${ev.floor?.name ? `(${ev.floor.name})` : ''}`;
+      venueStr = `${ev.building?.name || ev.building || ''}${ev.floor?.name ? ` ${ev.floor.name}` : ''}${ev.roomNo ? `, Room: ${ev.roomNo}` : ''}`;
     } else if (ev.venueType === 'Outdoor' && ev.ground) {
       venueStr = ev.ground?.name || ev.ground || 'Outdoor Ground';
     } else if (ev.venue) {
@@ -405,6 +405,38 @@ export default function ChatbotWidget() {
     const coordinators = ev.facultyCoordinators && ev.facultyCoordinators.length > 0
       ? ev.facultyCoordinators
       : (ev.facultyCoordinator && ev.facultyCoordinator.employeeName ? [ev.facultyCoordinator] : []);
+
+    // Parse Date
+    let dateStr = 'TBA';
+    if (ev.startDate && ev.endDate) {
+      const sDate = new Date(ev.startDate);
+      const eDate = new Date(ev.endDate);
+      if (!isNaN(sDate) && !isNaN(eDate)) {
+        const sDay = sDate.getDate();
+        const eDay = eDate.getDate();
+        const sMonth = sDate.toLocaleString('default', { month: 'short' }).toUpperCase();
+        const eMonth = eDate.toLocaleString('default', { month: 'short' }).toUpperCase();
+        const sYear = sDate.getFullYear();
+        const eYear = eDate.getFullYear();
+
+        if (sMonth === eMonth && sYear === eYear) {
+          dateStr = sDay === eDay ? `${sDay} ${sMonth}, ${sYear}` : `${sDay} - ${eDay} ${sMonth}, ${sYear}`;
+        } else if (sYear === eYear) {
+          dateStr = `${sDay} ${sMonth} - ${eDay} ${eMonth}, ${sYear}`;
+        } else {
+          dateStr = `${sDay} ${sMonth}, ${sYear} - ${eDay} ${eMonth}, ${eYear}`;
+        }
+      } else {
+        dateStr = ev.startDate;
+      }
+    } else if (ev.date || ev.startDate) {
+      const d = new Date(ev.date || ev.startDate);
+      if (!isNaN(d)) {
+        dateStr = `${d.getDate()} ${d.toLocaleString('default', { month: 'short' }).toUpperCase()}, ${d.getFullYear()}`;
+      } else {
+        dateStr = ev.date || ev.startDate;
+      }
+    }
 
     return (
       <div className="dynamic-bot-card event-card">
@@ -429,8 +461,8 @@ export default function ChatbotWidget() {
               <span>{venueStr}</span>
             </div>
             <div className="ev-info-item">
-              <i className="bi bi-clock"></i>
-              <span>{ev.date ? new Date(ev.date).toLocaleDateString() : 'TBA'}</span>
+              <i className={dateStr !== 'TBA' ? "bi bi-calendar3" : "bi bi-clock"}></i>
+              <span>{dateStr}</span>
             </div>
           </div>
 

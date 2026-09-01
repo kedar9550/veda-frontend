@@ -1,17 +1,14 @@
 import React from 'react';
+import './Footer.css';
 
 export default function Footer() {
   return (
-    <footer className="footer-custom">
-      <div className="container-premium">
-        <div className="footer-content-wrap text-center">
-          <div className="footer-accent-line" />
-          <p className="footer-dev-text">
-            Designed &amp; Developed by
-          </p>
-          <p className="footer-brand-highlight">
-            IT Applications
-          </p>
+    <footer className="footer-professional">
+      <div className="footer-container">
+        <div className="footer-divider"></div>
+        <div className="footer-text">
+          <span className="footer-light-text">Designed &amp; Developed by</span>
+          <span className="footer-bold-text">IT Applications</span>
         </div>
       </div>
     </footer>

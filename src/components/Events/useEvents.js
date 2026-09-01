@@ -186,7 +186,7 @@ const fetchAll = async () => {
           venue: (evt.venueType || evt.venue || 'Campus') + (evt.roomNo ? ` - Room ${evt.roomNo}` : ''),
           category: evt.school?.name || evt.eventSchool?.name || evt.group?.name || 'Event',
           categoryColor: '#7c3aed',
-          isOpen: evt.isOpen !== false,
+          isOpen: evt.isOpen !== false && String(evt.registrationStop || '').toLowerCase() !== 'yes',
           isActive: evt.status ? evt.status.toLowerCase() === 'active' : true,
           rules: evt.rules || [],
           coordinator: evt.facultyCoordinator || evt.coordinator || evt.eventCoordinator || (evt.facultyCoordinators && evt.facultyCoordinators[0]) || null,

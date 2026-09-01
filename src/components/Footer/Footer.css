@@ -1,0 +1,38 @@
+.footer-professional {
+  padding: 40px 0;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-divider {
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, #001f3f 0%, #003366 100%);
+  border-radius: 2px;
+}
+
+.footer-text {
+  font-family: var(--font-family, 'Stem', system-ui, -apple-system, sans-serif);
+  font-size: 15px;
+  color: #1a202c;
+}
+
+.footer-light-text {
+  font-weight: 400;
+  color: #334155;
+  margin-right: 6px;
+}
+
+.footer-bold-text {
+  font-weight: 700;
+  color: #0f172a;
+}

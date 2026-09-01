@@ -518,7 +518,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
               style={{ background: '#28a745', color: '#fff', border: 'none', cursor: 'pointer' }}
               onClick={() => navigate('/dashboard', { state: { activeTab: 'events' } })}
             >
-              <i className="bi bi-check-circle" style={{ marginRight: '8px' }} /> Already Signed Up
+              <i className="bi bi-check-circle" style={{ marginRight: '8px' }} /> Already Registered
             </button>
           ) : (
             <button
@@ -529,7 +529,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
                 navigate(`/register/${schoolId}/${eventId}`);
               }}
             >
-              {event.isOpen ? 'Sign Up' : 'Closed'}
+              {event.isOpen ? 'Register' : 'Registration Closed'}
               {event.isOpen && <i className="bi bi-arrow-right" />}
             </button>
           )}

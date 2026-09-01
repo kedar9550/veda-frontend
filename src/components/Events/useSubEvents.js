@@ -13,7 +13,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { SUB_EVENTS_DATA } from './subEventsData';
+
 
 function getApiBaseUrl() {
   const configuredUrl = import.meta.env.VITE_API_URL?.trim();
@@ -136,7 +136,7 @@ export function useSubEvents(schoolId, groupId) {
                 category: event.category || 'Competition',
                 categoryColor: event.categoryColor || '#3b82f6',
                 registrationLink: event.registrationLink || '#',
-                isOpen: event.isOpen !== false,
+                isOpen: event.isOpen !== false && String(event.registrationStop || '').toLowerCase() !== 'yes',
                 overview: event.overview || `A premier event coordinated by ${coordinatorInfo?.name || 'faculty'}. Test your skills against the best minds in the country.`,
                 rules: event.rules || [
                   'Participants must Sign Up in advance.',
