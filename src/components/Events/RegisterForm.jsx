@@ -367,7 +367,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
         if (studentData && Array.isArray(studentData) && studentData.length > 0 && !studentData[0].error && studentData[0].studentname) {
           const info = studentData[0];
-          
+
           if (info.branch) {
             setApiBranches(prev => ({ ...prev, [index]: info.branch }));
           }
@@ -1121,7 +1121,6 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                 type="button"
                 onClick={processRegistration}
                 className="esingle-cta"
-                disabled={true}
                 style={{ padding: '0.6rem 1.5rem', opacity: 0.6, cursor: 'not-allowed' }}
               >
                 Proceed to Payment
