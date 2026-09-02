@@ -3807,6 +3807,7 @@ textarea.form-input-custom {
   flex-direction: column !important;
   align-items: flex-start !important;
   gap: 0.5rem !important;
+  flex-grow: 1 !important;
 }
 
 .event-card__badge-modern {
