@@ -34,7 +34,7 @@ function CoordinatorPhoto({ employeeCode, name }) {
     }
   };
 
-  return <img src={imgSrc} alt={name || 'Photo'} onError={handleError} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
+  return <img src={imgSrc} alt={name || 'Photo'} onError={handleError} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />;
 }
 
 function StudentPhoto({ rollNo, name }) {
@@ -63,7 +63,7 @@ function StudentPhoto({ rollNo, name }) {
         }
       }}
       loading="lazy"
-      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
     />
   );
 }

@@ -52,6 +52,7 @@ function CoordinatorPhoto({ employeeCode, name, className }) {
       alt={`Photo of ${name || 'Coordinator'}`}
       className={className}
       onError={handleError}
+      style={{ objectPosition: 'center top' }}
     />
   );
 }
@@ -70,6 +71,7 @@ function StudentCoordinatorPhoto({ rollNo, name, className }) {
       alt={`Photo of ${name || 'Coordinator'}`}
       className={className}
       onError={() => setHasError(true)}
+      style={{ objectPosition: 'center top' }}
     />
   );
 }
@@ -208,9 +210,9 @@ export default function EventSingleDetail({ schoolId, eventId }) {
     if (!heroRef.current) return;
 
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    tl.fromTo(heroRef.current, { opacity: 0 }, { opacity: 1, duration: 0.5 })
-      .fromTo(statsRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5 }, '-=0.2')
-      .fromTo(bodyRef.current, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.2');
+    if (heroRef.current) tl.fromTo(heroRef.current, { opacity: 0 }, { opacity: 1, duration: 0.5 });
+    if (statsRef.current) tl.fromTo(statsRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5 }, '-=0.2');
+    if (bodyRef.current) tl.fromTo(bodyRef.current, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6 }, '-=0.2');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]);
 
