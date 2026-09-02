@@ -1,8 +1,16 @@
 /* EventsPage.css */
 
 .events-page-container {
-  padding: 4rem 1rem;
+  padding: 7rem 1rem 4rem 1rem;
+  margin-top: -96px;
   min-height: 100vh;
+}
+
+@media (max-width: 991px) {
+  .events-page-container {
+    padding-top: 5rem;
+    margin-top: -65px;
+  }
 }
 
 .events-section-title {
@@ -161,11 +169,13 @@
 /* --- FEATURED EVENTS --- */
 .featured-events-header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   max-width: 1200px;
   margin: 0 auto 1.5rem auto;
   position: relative;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .featured-events-title {
@@ -174,16 +184,14 @@
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--text-light);
-  text-align: center;
+  margin: 0;
 }
 
 .view-all-events {
-  position: absolute;
-  right: 0;
   color: var(--text-muted);
   font-size: 0.9rem;
   text-decoration: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   transition: color 0.2s ease;
@@ -191,6 +199,29 @@
 
 .view-all-events:hover {
   color: var(--text-light);
+}
+
+@media (max-width: 768px) {
+  .featured-events-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    margin-bottom: 1.25rem !important;
+    width: 100% !important;
+  }
+
+  .featured-events-title {
+    font-size: 1.25rem !important;
+    text-align: center !important;
+    width: 100% !important;
+  }
+
+  .view-all-events {
+    font-size: 0.85rem !important;
+    align-self: flex-end !important;
+    margin-left: auto !important;
+  }
 }
 
 .featured-grid {
