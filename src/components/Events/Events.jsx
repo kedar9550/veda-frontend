@@ -23,8 +23,7 @@ function SchoolCard({ group }) {
 
       {/* Top Header Section */}
       <div className="event-card__header-modern">
-        {/* Category badge */}
-        <span className="event-card__badge-modern">{group.shortName || group.title || group.name}</span>
+        {/* Category badge removed as requested */}
 
         <h3 className="event-card__title-modern">{group.title || group.name}</h3>
         <div className="event-card__divider-modern" style={{ background: `linear-gradient(90deg, ${accentColor} 0%, transparent 100%)` }} />
