@@ -757,7 +757,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       }
 
       // 3. Upload pending photos for Other College participants
-      const photoUploadBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+      const photoUploadBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:9022';
       let currentParticipants = [...form.participants];
 
       for (let i = 0; i < currentParticipants.length; i++) {

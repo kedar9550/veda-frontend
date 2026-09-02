@@ -369,16 +369,16 @@ export default function EventSingleDetail({ schoolId, eventId }) {
             <h2 className="esingle-section-title">
               <span>Rules</span><span className="esingle-section-colon"> :</span>
             </h2>
-            {eventId != 'medhamanthan' && (
-              <ul className="esingle-rules-list">
-                {event.rules.map((rule, i) => (
-                  <li key={i} className="esingle-rule-item">
-                    <span className="esingle-rule-bullet">•</span>
-                    <span>{rule}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
+
+            <ul className="esingle-rules-list">
+              {event.rules.map((rule, i) => (
+                <li key={i} className="esingle-rule-item">
+                  <span className="esingle-rule-bullet">•</span>
+                  <span>{rule}</span>
+                </li>
+              ))}
+            </ul>
+
             {eventId === 'medhamanthan' && (
               <div style={{
                 background: 'linear-gradient(135deg, #c69a37 0%, #a8812c 100%)',
@@ -392,7 +392,8 @@ export default function EventSingleDetail({ schoolId, eventId }) {
                 marginBottom: '1rem',
                 color: 'white',
                 boxShadow: '0 10px 25px -5px rgba(198, 154, 55, 0.4)',
-                border: '1px solid rgba(255,255,255,0.2)'
+                border: '1px solid rgba(255,255,255,0.2)',
+                marginTop: '10px',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
                   <div style={{ background: 'rgba(255,255,255,0.25)', padding: '1rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
