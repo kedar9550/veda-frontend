@@ -244,16 +244,18 @@ export default function Home({ loadingComplete = true }) {
         }
 
         // 2. Timeline Section: Animate progress line scaleY along scroll
-        gsap.to(progressLineRef.current, {
-          scaleY: 1,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: 'top 30%',
-            end: 'bottom 70%',
-            scrub: true,
-          },
-        });
+        if (progressLineRef.current && containerRef.current) {
+          gsap.to(progressLineRef.current, {
+            scaleY: 1,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: containerRef.current,
+              start: 'top 30%',
+              end: 'bottom 70%',
+              scrub: true,
+            },
+          });
+        }
 
         // 3. Timeline Section: Sequential animation per item (dot -> connector -> card)
         itemsRef.current.forEach((item, index) => {
@@ -263,6 +265,7 @@ export default function Home({ loadingComplete = true }) {
           const card = item.querySelector('.timeline-card');
           const connector = item.querySelector('.timeline-connector');
           const dot = dotsRef.current[index];
+          if (!card || !connector || !dot) return;
 
           const tl = gsap.timeline({
             scrollTrigger: {
@@ -307,39 +310,43 @@ export default function Home({ loadingComplete = true }) {
         });
 
         // 4. SDGs Section left detail reveal
-        gsap.fromTo(
-          leftColRef.current.children,
-          { opacity: 0, x: -50 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 1,
-            stagger: 0.2,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: leftColRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
+        if (leftColRef.current && leftColRef.current.children && leftColRef.current.children.length > 0) {
+          gsap.fromTo(
+            leftColRef.current.children,
+            { opacity: 0, x: -50 },
+            {
+              opacity: 1,
+              x: 0,
+              duration: 1,
+              stagger: 0.2,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: leftColRef.current,
+                start: 'top 80%',
+                toggleActions: 'play none none reverse',
+              },
+            }
+          );
+        }
 
         // 5. SDGs Section right logo reveal
-        gsap.fromTo(
-          rightColRef.current,
-          { opacity: 0, scale: 0.8 },
-          {
-            opacity: 1,
-            scale: 1,
-            duration: 1.2,
-            ease: 'back.out(1.2)',
-            scrollTrigger: {
-              trigger: rightColRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none reverse',
-            },
-          }
-        );
+        if (rightColRef.current) {
+          gsap.fromTo(
+            rightColRef.current,
+            { opacity: 0, scale: 0.8 },
+            {
+              opacity: 1,
+              scale: 1,
+              duration: 1.2,
+              ease: 'back.out(1.2)',
+              scrollTrigger: {
+                trigger: rightColRef.current,
+                start: 'top 80%',
+                toggleActions: 'play none none reverse',
+              },
+            }
+          );
+        }
       }, heroRef);
     }, 180);
 
