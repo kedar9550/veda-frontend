@@ -105,11 +105,13 @@ export default function StudentDashboard({ onNavigate }) {
 
   const [eventVenues, setEventVenues] = useState({});
 
+
+
   // Fetch all event venues to map registration names to venues
   useEffect(() => {
     const fetchVenues = async () => {
       try {
-        const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:9022';
         const res = await fetch(`${baseUrl}/api/events`);
         if (res.ok) {
           const data = await res.json();
@@ -556,13 +558,12 @@ export default function StudentDashboard({ onNavigate }) {
                                         <td>{pIdx + 1}</td>
                                         <td>
                                           {(() => {
+                                            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:9022';
                                             let computedUrl = p.photoUrl;
-                                            if (computedUrl && computedUrl.includes('localhost:9022')) {
-                                              computedUrl = computedUrl.replace('localhost:9022', 'localhost:4000');
-                                            } else if (!computedUrl && p.college === 'Other College' && p.roll) {
-                                              computedUrl = `http://localhost:4000/othercollegephotos/${p.roll}.jpg`;
+                                            if (!computedUrl && p.college === 'Other College' && p.roll) {
+                                              computedUrl = `${baseUrl}/api/razorpay/registrations/photo/${p.roll}/image`;
                                             } else if (!computedUrl && p.roll) {
-                                              computedUrl = `https://info.aec.edu.in/aec/employeephotos/${p.roll}.jpg`;
+                                              computedUrl = `${baseUrl}/api/proxy/student-photo/${p.roll}`;
                                             }
                                             return (
                                               <div
@@ -1189,13 +1190,12 @@ export default function StudentDashboard({ onNavigate }) {
                       position: 'relative'
                     }}>
                       {(() => {
+                        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:9022';
                         let computedUrl = selectedPass.photoUrl;
-                        if (computedUrl && computedUrl.includes('localhost:9022')) {
-                          computedUrl = computedUrl.replace('localhost:9022', 'localhost:4000');
-                        } else if (!computedUrl && selectedPass.college === 'Other College' && selectedPass.roll) {
-                          computedUrl = `http://localhost:4000/othercollegephotos/${selectedPass.roll}.jpg`;
+                        if (!computedUrl && selectedPass.college === 'Other College' && selectedPass.roll) {
+                          computedUrl = `${baseUrl}/api/razorpay/registrations/photo/${selectedPass.roll}/image`;
                         } else if (!computedUrl && selectedPass.roll) {
-                          computedUrl = `https://info.aec.edu.in/aec/employeephotos/${selectedPass.roll}.jpg`;
+                          computedUrl = `${baseUrl}/api/proxy/student-photo/${selectedPass.roll}`;
                         }
                         return (
                           <>

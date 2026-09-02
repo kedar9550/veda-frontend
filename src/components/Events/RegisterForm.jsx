@@ -401,6 +401,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
             }
 
             updatedParticipant.college = 'Aditya University';
+            updatedParticipant.isAutoPopulated = true;
 
             newParticipants[index] = updatedParticipant;
             return { ...prev, participants: newParticipants };
@@ -442,6 +443,19 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     setForm((prev) => {
       const participants = [...prev.participants];
       participants[index] = { ...participants[index], [name]: value };
+      
+      if (name === 'roll') {
+        participants[index].isAutoPopulated = false;
+      }
+
+      if (name === 'college') {
+        if (value === 'Other College') {
+          participants[index].branch = 'others';
+        } else {
+          participants[index].branch = '';
+        }
+      }
+      
       return { ...prev, participants };
     });
   };
@@ -449,6 +463,11 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   const handlePhotoChange = (index, e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 200 * 1024) {
+        alert("Uploading image size must be 200kb below only");
+        e.target.value = '';
+        return;
+      }
       setForm((prev) => {
         const participants = [...prev.participants];
         participants[index] = {
@@ -622,7 +641,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     return data?.orderId || data?.id || data?.order_id;
   };
 
-  const submitRegistration = async (paymentDetails, teamId) => {
+  const submitRegistration = async (paymentDetails, teamId, finalParticipants = form.participants) => {
     const verifyUrl = getRazorpayVerifyUrl();
     const amountInPaisa = Number(paymentDetails.amountInPaisa ?? parseAmountToPaisa(form.amount));
     const amountInRupees = Number(paymentDetails.amountInRupees ?? (amountInPaisa / 100));
@@ -640,7 +659,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
         amountInRupees,
         currency: 'INR',
         teamSize: (Number(form.teamSize) || 1) + (Number(form.extraTeamSize) || 0),
-        participants: form.participants,
+        participants: finalParticipants,
         receipt: `event-${event?.id || schoolId || 'registration'}-${Date.now()}`,
         order_id: paymentDetails.orderId,
         payment_id: paymentDetails.paymentId,
@@ -738,9 +757,11 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       }
 
       // 3. Upload pending photos for Other College participants
-      const photoUploadBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:9022';
-      for (let i = 0; i < form.participants.length; i++) {
-        const p = form.participants[i];
+      const photoUploadBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+      let currentParticipants = [...form.participants];
+
+      for (let i = 0; i < currentParticipants.length; i++) {
+        const p = currentParticipants[i];
         if (p.college === 'Other College' && p.photo) {
           const formData = new FormData();
           formData.append('rollnumber', p.roll); // Appended before photo so multer can read it first
@@ -754,13 +775,11 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               throw new Error('Failed to upload photo for ' + p.name);
             }
             const uploadData = await uploadRes.json();
-            setForm(prev => {
-              const newParticipants = [...prev.participants];
-              if (newParticipants[i]) {
-                newParticipants[i] = { ...newParticipants[i], photoUrl: photoUploadBaseUrl + '/uploads/othercollegephotos/' + uploadData.filename, photo: null };
-              }
-              return { ...prev, participants: newParticipants };
-            });
+            currentParticipants[i] = { 
+               ...currentParticipants[i], 
+               photoUrl: photoUploadBaseUrl + '/uploads/othercollegephotos/' + uploadData.filename, 
+               photo: null 
+            };
           } catch (err) {
             console.error('Error uploading photo:', err);
             setPaymentMessage(`Error uploading photo for participant ${i + 1}. Please try again.`);
@@ -769,6 +788,8 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
           }
         }
       }
+      
+      setForm(prev => ({ ...prev, participants: currentParticipants }));
 
       const razorpayKeyId = getRazorpayKeyId();
       if (!razorpayKeyId) {
@@ -804,7 +825,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               amountInPaisa,
               amountInRupees: amountInPaisa / 100,
               razorpayResponse: response,
-            }, teamId);
+            }, teamId, currentParticipants);
             completeRegistration({
               paymentId: response.razorpay_payment_id,
               orderId: response.razorpay_order_id,
@@ -936,7 +957,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
                 <div>
                   <label>College</label>
-                  <select name="college" value={participant.college} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0}>
+                  <select name="college" value={participant.college} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0 || participant.isAutoPopulated}>
                     {colleges.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                   {errors.participants?.[index]?.college && <div className="field-error">{errors.participants[index].college}</div>}
@@ -970,6 +991,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                       ) : (
                         <div>
                           <input type="file" accept="image/*" onChange={(e) => handlePhotoChange(index, e)} />
+                          <div style={{ fontSize: '0.8rem', color: '#aaa', marginTop: '5px' }}>Uploading image size must be 200kb below only</div>
                         </div>
                       )}
                       {errors.participants?.[index]?.photo && <div className="field-error">{errors.participants[index].photo}</div>}
