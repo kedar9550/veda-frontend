@@ -496,8 +496,9 @@ export default function ChatbotWidget() {
       {/* Chat Window */}
       <div className={`chatbot-window ${isOpen ? 'open' : ''}`}>
         <div className="chatbot-header">
-          <div className="chatbot-title">
-            <i className="bi bi-robot"></i> VEDA Assistant
+          <div className="chatbot-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="/AI-Assist.webp" alt="AI Assist" style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover' }} />
+            VEDA Assistant
           </div>
           <button className="chatbot-close" onClick={toggleChat}>
             <i className="bi bi-x-lg"></i>
@@ -555,7 +556,7 @@ export default function ChatbotWidget() {
 
       {/* Floating Action Button */}
       <button className={`chatbot-fab ${isOpen ? 'hidden' : ''}`} onClick={toggleChat}>
-        <img src="/waving_robot_icon.png" alt="Chatbot Icon" className="chatbot-icon-img" />
+        <img src="/AI-Assist.webp" alt="AI Assist Icon" className="chatbot-icon-img" />
       </button>
     </div>
   );

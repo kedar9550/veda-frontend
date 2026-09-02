@@ -4,7 +4,7 @@ import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router
 import { Toaster } from 'sonner';
 import Loader from './components/Loader/Loader';
 import Cursor from './components/Cursor/Cursor';
-import Navbar from './components/navbar/Navbar';
+import Header from './components/navbar/Header';
 import MobileNav from './components/navbar/MobileNav';
 import Home from './components/Home/Home';
 import Events from './components/Events/Events';
@@ -73,7 +73,7 @@ export default function App() {
       {!loadingComplete && <Loader onComplete={() => setLoadingComplete(true)} />}
 
       {/* 2. Main page content rendered in background */}
-      <Navbar activePage={activePage} onNavigate={navigateTo} />
+      <Header activePage={activePage} onNavigate={navigateTo} />
       <main style={{ minHeight: '80vh' }}>
         <Routes>
           <Route path="/" element={<Home loadingComplete={loadingComplete} />} />
@@ -93,7 +93,7 @@ export default function App() {
       </main>
       <Footer onNavigate={navigateTo} />
       <MobileNav activePage={activePage} onNavigate={navigateTo} />
-      
+
       {/* Global Floating AI Chatbot */}
       <ChatbotWidget />
 
