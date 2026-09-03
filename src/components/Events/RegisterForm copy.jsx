@@ -546,7 +546,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     document.body.appendChild(script);
   });
 
-  const createRazorpayOrder = async (amountInPaisa) => {
+  const createRazorpayOrder = async (amountInPaisa, participants, teamId) => {
     const orderUrl = getRazorpayOrderUrl();
     const response = await fetch(orderUrl, {
       method: 'POST',
@@ -554,10 +554,14 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       body: JSON.stringify({
         amount: amountInPaisa,
         eventId: event?.id,
-        teamSize: Number(form.teamSize) || 1,
-        extraTeamSize: Number(form.extraTeamSize) || 0,
+        schoolId: event?.groupId || schoolId,
+        category: form.category,
+        eventName: form.eventName,
+        teamSize: (Number(form.teamSize) || 1) + (Number(form.extraTeamSize) || 0),
         currency: 'INR',
         receipt: `event-${event?.id || schoolId || 'registration'}-${Date.now()}`,
+        participants: participants,
+        teamId: teamId
       }),
     });
 
@@ -731,9 +735,9 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       }
 
       await loadRazorpayScript();
-      const orderId = await createRazorpayOrder(amountInPaisa);
-
+      
       const teamId = `VD26-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      const orderId = await createRazorpayOrder(amountInPaisa, currentParticipants, teamId);
 
       const options = {
         key: razorpayKeyId,
