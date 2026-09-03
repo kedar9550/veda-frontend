@@ -21,37 +21,40 @@ function SchoolCard({ group }) {
       {/* Decorative Dots Pattern */}
       <div className="event-card__dots" />
 
+      {/* Banner Image */}
+      {group.image && (
+        <div style={{ width: '100%', height: '160px', overflow: 'hidden', borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}>
+          <img 
+            src={group.image} 
+            alt={group.title || group.name} 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
+        </div>
+      )}
+
       {/* Main Content Area */}
-      <div className="event-card__header-modern" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', padding: '3rem 1.5rem 1.5rem 1.5rem' }}>
+      <div className="event-card__header-modern" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', padding: group.image ? '1.5rem' : '3rem 1.5rem 1.5rem 1.5rem' }}>
         
         <h3 className="event-card__title-modern" style={{ fontSize: '1.15rem', marginBottom: '1rem', textAlign: 'center', lineHeight: '1.4', fontWeight: '700', letterSpacing: '0.5px' }}>
           {group.title || group.name}
         </h3>
         
-        <div className="event-card__divider-modern" style={{ background: `linear-gradient(90deg, transparent 0%, ${accentColor} 50%, transparent 100%)`, margin: '0 auto 2rem auto', width: '60%' }} />
-        
-        <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          background: 'rgba(255,255,255,0.03)',
-          padding: '8px 20px',
-          borderRadius: '99px',
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-        }}>
-          <i className="bi bi-calendar-event" style={{ fontSize: '1.1rem', color: accentColor }} />
-          <span style={{ fontWeight: '700', fontSize: '1.1rem', color: 'var(--text-light)' }}>
-            {group.eventCount || 0} <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500' }}>Events</span>
-          </span>
-        </div>
+        <div className="event-card__divider-modern" style={{ background: `linear-gradient(90deg, transparent 0%, ${accentColor} 50%, transparent 100%)`, margin: '0 auto 0 auto', width: '60%' }} />
       </div>
 
       {/* Footer */}
-      <div className="event-card__footer-modern">
+      <div className="event-card__footer-modern" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1rem', borderTop: '1px solid rgba(255,255,255,0.05)', gap: '0.5rem' }}>
+        
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+          <i className="bi bi-calendar-event" style={{ fontSize: '1.1rem', color: accentColor }} />
+          <span style={{ fontWeight: '700', fontSize: '1.1rem', color: 'var(--text-light)', whiteSpace: 'nowrap' }}>
+            {group.eventCount || 0} <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500' }}>Events</span>
+          </span>
+        </div>
+
         <button
           className="event-card__cta"
+          style={{ whiteSpace: 'nowrap', padding: '0.5rem 1rem' }}
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/events/${group.slug}`);
@@ -59,7 +62,7 @@ function SchoolCard({ group }) {
           aria-label={`View ${group.title || group.name} events`}
         >
           View Events
-          <i className="bi bi-arrow-right" />
+          <i className="bi bi-arrow-right" style={{ marginLeft: '4px' }} />
         </button>
       </div>
     </div>
