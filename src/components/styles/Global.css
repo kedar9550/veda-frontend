@@ -3842,7 +3842,8 @@ textarea.form-input-custom {
 }
 
 .event-card__title-modern {
-  font-size: 1.5rem !important;
+  /* font-size: 1.5rem !important; */
+  font-size: 1.0rem !important;
   font-weight: 900 !important;
   color: var(--text-light) !important;
   margin: 0 0 0.25rem 0 !important;

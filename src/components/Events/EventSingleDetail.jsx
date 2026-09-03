@@ -262,10 +262,10 @@ export default function EventSingleDetail({ schoolId, eventId }) {
             <span className="esingle-stat__number">{event.feeText || String(event.feeAmount)}</span>
             <span className="esingle-stat__label">Rupees</span>
           </div>
-          <div className="esingle-stat">
+          {/* <div className="esingle-stat">
             <span className="esingle-stat__number">{event.realParticipantsCount || event.participants || 0}</span>
             <span className="esingle-stat__label">Participation</span>
-          </div>
+          </div> */}
         </div>
       </div>
 

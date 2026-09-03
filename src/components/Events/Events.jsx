@@ -12,7 +12,7 @@ function SchoolCard({ group }) {
   return (
     <div
       className="event-card event-card--modern"
-      style={{ '--event-accent': accentColor, cursor: 'pointer' }}
+      style={{ '--event-accent': accentColor, cursor: 'pointer', display: 'flex', flexDirection: 'column', height: '100%', minHeight: '320px' }}
       role="button"
       tabIndex={0}
       onClick={() => navigate(`/events/${group.slug}`)}
@@ -21,56 +21,32 @@ function SchoolCard({ group }) {
       {/* Decorative Dots Pattern */}
       <div className="event-card__dots" />
 
-      {/* Top Header Section */}
-      <div className="event-card__header-modern">
-        {/* Category badge removed as requested */}
-
-        <h3 className="event-card__title-modern">{group.title || group.name}</h3>
-        <div className="event-card__divider-modern" style={{ background: `linear-gradient(90deg, ${accentColor} 0%, transparent 100%)` }} />
-      </div>
-
-      <div className="event-card__stats-row">
-        {/* Stat Item: Events */}
-        <div className="event-card__stat-col stat-events">
-          <div className="event-card__stat-icon-wrap">
-            <i className="bi bi-calendar-event" />
-          </div>
-          <span className="event-card__stat-label">Events</span>
-          <span className="event-card__stat-val">{group.eventCount || 0}</span>
-        </div>
-
-        {/* Stat Item: Participants */}
-        <div className="event-card__stat-col stat-participants">
-          <div className="event-card__stat-icon-wrap" style={{ color: '#4dabf7' }}>
-            <i className="bi bi-people" />
-          </div>
-          <span className="event-card__stat-label">Participants</span>
-          <span className="event-card__stat-val" style={{ color: '#4dabf7' }}>
-            {group.participants || group.usersRegistered || 0}
+      {/* Main Content Area */}
+      <div className="event-card__header-modern" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', padding: '3rem 1.5rem 1.5rem 1.5rem' }}>
+        
+        <h3 className="event-card__title-modern" style={{ fontSize: '1.15rem', marginBottom: '1rem', textAlign: 'center', lineHeight: '1.4', fontWeight: '700', letterSpacing: '0.5px' }}>
+          {group.title || group.name}
+        </h3>
+        
+        <div className="event-card__divider-modern" style={{ background: `linear-gradient(90deg, transparent 0%, ${accentColor} 50%, transparent 100%)`, margin: '0 auto 2rem auto', width: '60%' }} />
+        
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          background: 'rgba(255,255,255,0.03)',
+          padding: '8px 20px',
+          borderRadius: '99px',
+          border: '1px solid rgba(255,255,255,0.08)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+        }}>
+          <i className="bi bi-calendar-event" style={{ fontSize: '1.1rem', color: accentColor }} />
+          <span style={{ fontWeight: '700', fontSize: '1.1rem', color: 'var(--text-light)' }}>
+            {group.eventCount || 0} <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: '500' }}>Events</span>
           </span>
         </div>
       </div>
-
-      {/* Organizer Row */}
-      {/* <div className="event-card__organizer-row-modern">
-        <div className="event-card__organizer-info-modern">
-          <div className="event-card__organizer-icon-modern" style={{ color: accentColor }}>
-            {group.groupLogo || group.image ? (
-              <img
-                src={group.groupLogo || group.image}
-                alt={group.organizer || group.title || group.name}
-                className="event-card__organizer-logo-img"
-              />
-            ) : (
-              <i className={`bi ${group.organizerIcon || 'bi-grid'}`} />
-            )}
-          </div>
-          <div className="event-card__organizer-text-modern">
-            <span className="event-card__organizer-label-modern">Organized By</span>
-            <span className="event-card__organizer-name-modern">{group.organizer || group.name || 'VEDA'}</span>
-          </div>
-        </div>
-      </div> */}
 
       {/* Footer */}
       <div className="event-card__footer-modern">
@@ -161,7 +137,7 @@ function FeaturedEventCard({ event }) {
         </div>
 
         {/* Stat Item: Participants */}
-        <div className="event-card__stat-col stat-participants">
+        {/* <div className="event-card__stat-col stat-participants">
           <div className="event-card__stat-icon-wrap" style={{ color: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.12)' }}>
             <i className="bi bi-person-check-fill" />
           </div>
@@ -169,7 +145,7 @@ function FeaturedEventCard({ event }) {
           <span className="event-card__stat-val" style={{ color: '#3b82f6' }}>
             {event.realParticipantsCount || event.participants || 0}
           </span>
-        </div>
+        </div> */}
       </div>
 
       {/* Organizer Row */}

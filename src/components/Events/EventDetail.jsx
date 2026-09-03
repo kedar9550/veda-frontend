@@ -106,7 +106,7 @@ function SubEventCard({ event, cardRef, school }) {
         </div>
 
         {/* Stat Item: Participants */}
-        <div className="event-card__stat-col stat-participants">
+        {/* <div className="event-card__stat-col stat-participants">
           <div className="event-card__stat-icon-wrap" style={{ color: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.12)' }}>
             <i className="bi bi-person-check-fill" />
           </div>
@@ -114,7 +114,7 @@ function SubEventCard({ event, cardRef, school }) {
           <span className="event-card__stat-val" style={{ color: '#3b82f6' }}>
             {event.realParticipantsCount || event.participants || 0}
           </span>
-        </div>
+        </div> */}
       </div>
 
       {/* Organizer Row */}
@@ -213,10 +213,10 @@ export default function EventDetail({ schoolId }) {
             <span className="esingle-stat__number">{school.eventCount}</span>
             <span className="esingle-stat__label">Events</span>
           </div>
-          <div className="esingle-stat">
+          {/* <div className="esingle-stat">
             <span className="esingle-stat__number">{schoolParticipants}</span>
             <span className="esingle-stat__label">Total Participation</span>
-          </div>
+          </div> */}
         </div>
       </div>
 

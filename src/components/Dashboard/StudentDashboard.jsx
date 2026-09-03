@@ -518,7 +518,7 @@ export default function StudentDashboard({ onNavigate }) {
                               {reg.eventName || 'Event Registration'}
                             </h4>
                             <div className="event-sub-info" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1rem', fontSize: '0.8rem', marginTop: '0.25rem', paddingLeft: '1.25rem' }}>
-                              {reg.category && <span className="tag-category" style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.08)' }}>{reg.category}</span>}
+                              {/* {reg.category && <span className="tag-category" style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.08)' }}>{reg.category}</span>} */}
                               {/* {reg.schoolId && <span className="tag-school" style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.08)' }}>School: {reg.schoolId}</span>} */}
                               <span><i className="bi bi-people"></i> Team: {reg.teamSize}</span>
                             </div>
@@ -915,10 +915,10 @@ export default function StudentDashboard({ onNavigate }) {
               <span className="label">Event Name</span>
               <span className="val">{selectedReceipt.eventName || 'N/A'}</span>
             </div>
-            <div className="receipt-row">
+            {/* <div className="receipt-row">
               <span className="label">Group / Category</span>
               <span className="val">{selectedReceipt.schoolId} ({selectedReceipt.category})</span>
-            </div>
+            </div> */}
             <div className="receipt-row">
               <span className="label">Razorpay Payment ID</span>
               <span className="val" style={{ fontFamily: 'monospace' }}>{selectedReceipt.razorpayPaymentId}</span>
