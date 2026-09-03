@@ -369,16 +369,56 @@ export default function EventSingleDetail({ schoolId, eventId }) {
             <h2 className="esingle-section-title">
               <span>Rules</span><span className="esingle-section-colon"> :</span>
             </h2>
-
-            <ul className="esingle-rules-list">
-              {event.rules.map((rule, i) => (
-                <li key={i} className="esingle-rule-item">
-                  <span className="esingle-rule-bullet">•</span>
-                  <span>{rule}</span>
-                </li>
-              ))}
-            </ul>
-
+            {eventId === 'medhamanthan' ? (
+              <ul style={{
+                listStyle: 'none',
+                padding: '1.5rem',
+                margin: '1rem 0',
+                background: 'rgba(198, 154, 55, 0.05)',
+                borderLeft: '4px solid #c69a37',
+                borderRadius: '0 12px 12px 0',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                {event.rules.map((rule, i) => (
+                  <li key={i} style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.75rem',
+                    color: 'var(--text-color, #333)',
+                    fontSize: '1rem',
+                    lineHeight: '1.6'
+                  }}>
+                    <div style={{
+                      marginTop: '4px',
+                      color: '#c69a37',
+                      fontSize: '1.25rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'rgba(198, 154, 55, 0.15)',
+                      borderRadius: '50%',
+                      width: '24px',
+                      height: '24px',
+                      flexShrink: 0
+                    }}>
+                      <i className="bi bi-check" style={{ fontSize: '1rem' }}></i>
+                    </div>
+                    <span style={{ flex: 1 }}>{rule}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ul className="esingle-rules-list">
+                {event.rules.map((rule, i) => (
+                  <li key={i} className="esingle-rule-item">
+                    <span className="esingle-rule-bullet">•</span>
+                    <span>{rule}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
             {eventId === 'medhamanthan' && (
               <div style={{
                 background: 'linear-gradient(135deg, #c69a37 0%, #a8812c 100%)',
