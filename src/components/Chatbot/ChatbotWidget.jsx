@@ -19,7 +19,7 @@ const faqData = {
   "Registration": [
     {
       question: "How do I Sign Up for the event?",
-      answer: "You can Sign Up for the event online through our registration portal on the college website. Registration will be open until March 10, 2024."
+      answer: "You can Sign Up for the event online through our registration portal. Registrations already started."
     },
     {
       question: "Is there a registration fee?",
