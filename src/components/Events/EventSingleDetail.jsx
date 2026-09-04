@@ -364,104 +364,247 @@ export default function EventSingleDetail({ schoolId, eventId }) {
         )}
 
         {/* ── RULES ── */}
-        {event.rules && event.rules.length > 0 && (
+        {(eventId === 'medhamanthan' || (event.rules && event.rules.length > 0)) && (
           <div className="esingle-section">
             <h2 className="esingle-section-title">
               <span>Rules</span><span className="esingle-section-colon"> :</span>
             </h2>
-            <ul style={{
-              listStyle: 'none',
-              padding: '1.5rem',
-              margin: '1rem 0',
-              background: 'rgba(198, 154, 55, 0.05)',
-              borderLeft: '4px solid #c69a37',
-              borderRadius: '0 12px 12px 0',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '1rem'
-            }}>
-              {event.rules.map((rule, i) => (
-                <li key={i} style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '0.75rem',
-                  color: 'var(--text-color, #333)',
-                  fontSize: '1rem',
-                  lineHeight: '1.6'
+
+            {eventId === 'medhamanthan' ? (
+              <>
+                {/* Prize Pool Cards */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  gap: '1.25rem',
+                  margin: '1.25rem 0 1.5rem',
                 }}>
+                  {/* 1st Prize */}
                   <div style={{
-                    marginTop: '4px',
-                    color: '#c69a37',
-                    fontSize: '1.25rem',
+                    background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(198, 154, 55, 0.05) 100%)',
+                    border: '1px solid rgba(255, 215, 0, 0.4)',
+                    borderRadius: '14px',
+                    padding: '1.25rem',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'rgba(198, 154, 55, 0.15)',
-                    borderRadius: '50%',
-                    width: '24px',
-                    height: '24px',
-                    flexShrink: 0
+                    gap: '1rem',
+                    boxShadow: '0 4px 15px rgba(198, 154, 55, 0.1)'
                   }}>
-                    <i className="bi bi-check" style={{ fontSize: '1rem' }}></i>
+                    <div style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.4rem',
+                      boxShadow: '0 4px 10px rgba(255, 215, 0, 0.4)'
+                    }}>
+                      🥇
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#c69a37', fontWeight: 700 }}>First Prize</div>
+                      <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-color, #222)' }}>₹7,500</div>
+                    </div>
                   </div>
-                  <span style={{ flex: 1 }}>{rule}</span>
-                </li>
-              ))}
-            </ul>
 
-            {eventId === 'medhamanthan' && (
-              <div style={{
-                background: 'linear-gradient(135deg, #c69a37 0%, #a8812c 100%)',
-                borderRadius: '16px',
-                padding: '1.5rem 2rem',
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '1rem',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '1rem',
-                color: 'white',
-                boxShadow: '0 10px 25px -5px rgba(198, 154, 55, 0.4)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                marginTop: '10px',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.25)', padding: '1rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
-                    <i className="bi bi-file-earmark-text-fill" style={{ fontSize: '1.75rem', color: '#fff', lineHeight: 1 }}></i>
+                  {/* 2nd Prize */}
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(192, 192, 192, 0.15) 0%, rgba(160, 160, 160, 0.05) 100%)',
+                    border: '1px solid rgba(192, 192, 192, 0.4)',
+                    borderRadius: '14px',
+                    padding: '1.25rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.05)'
+                  }}>
+                    <div style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #E0E0E0 0%, #9E9E9E 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.4rem',
+                      boxShadow: '0 4px 10px rgba(160, 160, 160, 0.3)'
+                    }}>
+                      🥈
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#777', fontWeight: 700 }}>Second Prize</div>
+                      <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-color, #222)' }}>₹5,000</div>
+                    </div>
                   </div>
-                  <div>
-                    <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.35rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>
-                      Rules & Regulations
-                    </h3>
-                    <p style={{ margin: 0, fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>
-                      Review the official guidelines for MedhaManthan 2k26
-                    </p>
+
+                  {/* 3rd Prize */}
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(205, 127, 50, 0.12) 0%, rgba(180, 100, 40, 0.05) 100%)',
+                    border: '1px solid rgba(205, 127, 50, 0.4)',
+                    borderRadius: '14px',
+                    padding: '1.25rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    boxShadow: '0 4px 15px rgba(205, 127, 50, 0.1)'
+                  }}>
+                    <div style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #CD7F32 0%, #8B4513 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.4rem',
+                      boxShadow: '0 4px 10px rgba(205, 127, 50, 0.3)'
+                    }}>
+                      🥉
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#b35d25', fontWeight: 700 }}>Third Prize</div>
+                      <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-color, #222)' }}>₹2,500</div>
+                    </div>
                   </div>
                 </div>
-                <a
-                  href="/MM_Rules.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    background: 'white',
-                    color: '#c69a37',
-                    padding: '0.85rem 1.75rem',
-                    borderRadius: '99px',
-                    fontWeight: 800,
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                    whiteSpace: 'nowrap'
-                  }}
-                  onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)'; }}
-                  onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'; }}
-                >
-                  View Now <i className="bi bi-arrow-right-circle-fill" style={{ fontSize: '1.1rem' }}></i>
-                </a>
-              </div>
+
+                <ul style={{
+                  listStyle: 'none',
+                  padding: '1.5rem',
+                  margin: '1rem 0',
+                  background: 'rgba(198, 154, 55, 0.05)',
+                  borderLeft: '4px solid #c69a37',
+                  borderRadius: '0 12px 12px 0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem'
+                }}>
+                  {[
+                    'Prize Money: <b>First Prize ₹7,500</b>, <b>Second Prize ₹5,000</b>, <b>Third Prize ₹2,500</b>'
+                  ].map((rule, i) => (
+                    <li key={i} style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '0.75rem',
+                      color: 'var(--text-color, #333)',
+                      fontSize: '1rem',
+                      lineHeight: '1.6'
+                    }}>
+                      <div style={{
+                        marginTop: '4px',
+                        color: '#c69a37',
+                        fontSize: '1.25rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        background: 'rgba(198, 154, 55, 0.15)',
+                        borderRadius: '50%',
+                        width: '24px',
+                        height: '24px',
+                        flexShrink: 0
+                      }}>
+                        <i className="bi bi-check" style={{ fontSize: '1rem' }}></i>
+                      </div>
+                      <span style={{ flex: 1 }} dangerouslySetInnerHTML={{ __html: rule }} />
+                    </li>
+                  ))}
+                </ul>
+
+                <div style={{
+                  background: 'linear-gradient(135deg, #c69a37 0%, #a8812c 100%)',
+                  borderRadius: '16px',
+                  padding: '1.5rem 2rem',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '1rem',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '1rem',
+                  color: 'white',
+                  boxShadow: '0 10px 25px -5px rgba(198, 154, 55, 0.4)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  marginTop: '10px',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                    <div style={{ background: 'rgba(255,255,255,0.25)', padding: '1rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
+                      <i className="bi bi-file-earmark-text-fill" style={{ fontSize: '1.75rem', color: '#fff', lineHeight: 1 }}></i>
+                    </div>
+                    <div>
+                      <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.35rem', fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>
+                        Rules & Regulations
+                      </h3>
+                      <p style={{ margin: 0, fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>
+                        Review the official guidelines for MedhaManthan 2k26
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href="/MM_Rules.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      background: 'white',
+                      color: '#c69a37',
+                      padding: '0.85rem 1.75rem',
+                      borderRadius: '99px',
+                      fontWeight: 800,
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                      whiteSpace: 'nowrap'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'; }}
+                  >
+                    View Now <i className="bi bi-arrow-right-circle-fill" style={{ fontSize: '1.1rem' }}></i>
+                  </a>
+                </div>
+              </>
+            ) : (
+              <ul style={{
+                listStyle: 'none',
+                padding: '1.5rem',
+                margin: '1rem 0',
+                background: 'rgba(198, 154, 55, 0.05)',
+                borderLeft: '4px solid #c69a37',
+                borderRadius: '0 12px 12px 0',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem'
+              }}>
+                {event.rules.map((rule, i) => (
+                  <li key={i} style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '0.75rem',
+                    color: 'var(--text-color, #333)',
+                    fontSize: '1rem',
+                    lineHeight: '1.6'
+                  }}>
+                    <div style={{
+                      marginTop: '4px',
+                      color: '#c69a37',
+                      fontSize: '1.25rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'rgba(198, 154, 55, 0.15)',
+                      borderRadius: '50%',
+                      width: '24px',
+                      height: '24px',
+                      flexShrink: 0
+                    }}>
+                      <i className="bi bi-check" style={{ fontSize: '1rem' }}></i>
+                    </div>
+                    <span style={{ flex: 1 }} dangerouslySetInnerHTML={{ __html: rule }} />
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         )}
