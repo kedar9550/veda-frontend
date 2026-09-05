@@ -186,6 +186,7 @@ export default function StudentDashboard({ onNavigate }) {
         const queryParams = new URLSearchParams();
         if (student.email) queryParams.append('email', student.email);
         if (student.roll) queryParams.append('roll', student.roll);
+        queryParams.append('paymentStatus', 'PAID');
 
         const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
         const res = await fetch(`${baseUrl}/api/razorpay/registrations?${queryParams.toString()}`);
@@ -193,7 +194,11 @@ export default function StudentDashboard({ onNavigate }) {
           throw new Error('Failed to load registrations');
         }
         const data = await res.json();
-        setRegistrations(data.payments || []);
+        const paidRegistrations = (data.payments || []).filter(reg => {
+          const status = (reg.paymentStatus || reg.payment || '').toString().trim().toUpperCase();
+          return status === 'PAID';
+        });
+        setRegistrations(paidRegistrations);
       } catch (err) {
         console.error('Error fetching registrations:', err);
         setError('Could not fetch payment and event details. Please try again.');
@@ -215,13 +220,17 @@ export default function StudentDashboard({ onNavigate }) {
           const queryParams = new URLSearchParams();
           if (student.email) queryParams.append('email', student.email);
           if (student.roll) queryParams.append('roll', student.roll);
+          queryParams.append('paymentStatus', 'PAID');
           queryParams.append('_t', Date.now()); // Prevent caching
 
           const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
           const res = await fetch(`${baseUrl}/api/razorpay/registrations?${queryParams.toString()}`);
           if (res.ok) {
             const data = await res.json();
-            const currentRegistrations = data.payments || [];
+            const currentRegistrations = (data.payments || []).filter(reg => {
+              const status = (reg.paymentStatus || reg.payment || '').toString().trim().toUpperCase();
+              return status === 'PAID';
+            });
 
             // Check if the current selected pass is still valid and if it's verified
             let isVerified = false;
@@ -1108,10 +1117,14 @@ export default function StudentDashboard({ onNavigate }) {
                   {/* Left Sidebar Bottom Details */}
                   <div style={{ position: 'absolute', top: 190, left: 15, zIndex: 2, display: 'flex', flexDirection: 'column' }}>
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                      <i className="bi bi-calendar-month-fill" style={{ color: '#fff', fontSize: 28, marginRight: '8px' }}></i>
+                      <svg width="26" height="26" viewBox="0 0 16 16" fill="#fff" style={{ marginRight: '8px', flexShrink: 0 }}>
+                        <path d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4z" />
+                        <path d="M16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2" />
+                        <text x="8" y="10.6" fill="#061638" fontSize="4.8" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif" textAnchor="middle" dominantBaseline="central" letterSpacing="-0.2px">SEP</text>
+                      </svg>
                       <div>
                         <div style={{ color: '#fff', fontSize: '14px', fontWeight: 700, letterSpacing: '0.5px', lineHeight: 1.2 }}>EVENT DATE</div>
-                        <div style={{ color: '#c69a37', fontSize: '15px', fontWeight: 800, lineHeight: 1.2, marginTop: '2.4px' }}>SEP. 2k26</div>
+                        <div style={{ color: '#c69a37', fontSize: '14px', fontWeight: 800, lineHeight: 1.2, marginTop: '2.4px' }}>SEP 11-12, 2k26</div>
                       </div>
                     </div>
                   </div>
