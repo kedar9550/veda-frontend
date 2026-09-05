@@ -380,7 +380,8 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
             if (info.emailid) updatedParticipant.email = info.emailid.toLowerCase();
 
             const mob = info.mobilenumber || info.fathermobilenumber || info.mothermobilenumber;
-            if (mob) updatedParticipant.mobile = mob;
+            // Removed auto-population of mobile number to allow manual entry
+            // if (mob) updatedParticipant.mobile = mob;
 
             if (info.gender) {
               const rawGender = info.gender.trim().toLowerCase();
@@ -1014,7 +1015,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
                 <div>
                   <label>Mobile</label>
-                  <input name="mobile" value={participant.mobile} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0} />
+                  <input name="mobile" value={participant.mobile} onChange={(e) => handleParticipantChange(index, e)} />
                   {errors.participants?.[index]?.mobile && <div className="field-error">{errors.participants[index].mobile}</div>}
                 </div>
 

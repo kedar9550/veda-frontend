@@ -522,6 +522,13 @@ export default function StudentDashboard({ onNavigate }) {
                               {/* {reg.schoolId && <span className="tag-school" style={{ padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem', background: 'rgba(255,255,255,0.08)' }}>School: {reg.schoolId}</span>} */}
                               <span><i className="bi bi-people"></i> Team: {reg.teamSize}</span>
                             </div>
+                            {reg.eventName === 'MedhaManthan' && (
+                              <div style={{ marginTop: '0.5rem', paddingLeft: '1.25rem' }}>
+                                <a href={reg.rawEventData?.whatsappLink || "https://chat.whatsapp.com/Cb71lvBggyoGVwqfLYrOFq"} target="_blank" rel="noopener noreferrer" style={{ color: '#25D366', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.85rem', fontWeight: '600' }} onClick={(e) => e.stopPropagation()}>
+                                  <i className="bi bi-whatsapp"></i> Join WhatsApp Group
+                                </a>
+                              </div>
+                            )}
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                             <span className="tag-paid" style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '4px' }}>
