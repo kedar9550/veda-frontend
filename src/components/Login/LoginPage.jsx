@@ -228,7 +228,11 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify({
+          ...form,
+          roll: form.roll.trim().toUpperCase(),
+          email: form.email.trim().toLowerCase()
+        })
       });
       const data = await response.json();
       if (!response.ok) {
@@ -237,7 +241,7 @@ export default function LoginPage() {
 
       // Auto switch to login with email filled
       setIsLogin(true);
-      setLoginForm({ email: form.email, password: '' });
+      setLoginForm({ email: form.email.trim().toLowerCase(), password: '' });
       setErrors({ login: 'Registration successful! Please login with your password.' });
       toast.success('Registration successful! Please login with your password.');
     } catch (err) {
@@ -259,7 +263,10 @@ export default function LoginPage() {
       const response = await fetch(import.meta.env.VITE_API_BASE_URL ? `${import.meta.env.VITE_API_BASE_URL}/api/event-students/login` : '/api/event-students/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(loginForm)
+        body: JSON.stringify({
+          email: loginForm.email.trim().toLowerCase(),
+          password: loginForm.password
+        })
       });
       const data = await response.json();
       if (!response.ok) {
