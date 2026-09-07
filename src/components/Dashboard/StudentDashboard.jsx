@@ -1158,6 +1158,7 @@ export default function StudentDashboard({ onNavigate }) {
                     </div>
                   </div>
 
+
                   {/* Center Header (VEDA, EVENT PASS, CODE CHAMP) */}
                   <div style={{ position: 'absolute', top: 20, left: 180, right: 180, display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
