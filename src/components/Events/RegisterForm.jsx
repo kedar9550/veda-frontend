@@ -178,6 +178,9 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     if (savedStudentStr) {
       try {
         const student = JSON.parse(savedStudentStr);
+        if (student.branch) {
+          setApiBranches(prev => ({ ...prev, 0: student.branch }));
+        }
         setForm(prev => {
           const newParticipants = [...prev.participants];
           if (newParticipants.length > 0) {
@@ -401,7 +404,10 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               }
             }
 
-            updatedParticipant.college = 'Aditya University';
+            // Do NOT auto-set college on API population; let participant select college name
+            if (updatedParticipant.college === 'Choose...') {
+              updatedParticipant.college = '';
+            }
             updatedParticipant.isAutoPopulated = true;
 
             newParticipants[index] = updatedParticipant;
@@ -452,8 +458,8 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       if (name === 'college') {
         if (value === 'Other College') {
           participants[index].branch = 'others';
-        } else {
-          participants[index].branch = '';
+        } else if (participants[index].branch === 'others' || !participants[index].branch) {
+          participants[index].branch = apiBranches[index] || '';
         }
       }
       
@@ -962,8 +968,15 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
                 <div>
                   <label>College</label>
-                  <select name="college" value={participant.college} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0 || participant.isAutoPopulated}>
-                    {colleges.map(c => <option key={c} value={c}>{c}</option>)}
+                  <select
+                    name="college"
+                    value={participant.college || ''}
+                    onChange={(e) => handleParticipantChange(index, e)}
+                  >
+                    <option value="">Choose...</option>
+                    <option value="Aditya University">Aditya University</option>
+                    <option value="ACET">ACET</option>
+                    <option value="Other College">Other College</option>
                   </select>
                   {errors.participants?.[index]?.college && <div className="field-error">{errors.participants[index].college}</div>}
                 </div>
@@ -972,7 +985,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                   <>
                     <div>
                       <label>Other College Name</label>
-                      <input name="otherCollege" value={participant.otherCollege} onChange={(e) => handleParticipantChange(index, e)} disabled={index === 0} />
+                      <input name="otherCollege" value={participant.otherCollege} onChange={(e) => handleParticipantChange(index, e)} />
                       {errors.participants?.[index]?.otherCollege && <div className="field-error">{errors.participants[index].otherCollege}</div>}
                     </div>
                     <div>
@@ -1074,7 +1087,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                     name="branch"
                     value={participant.branch || ''}
                     onChange={(e) => handleParticipantChange(index, e)}
-                    disabled={index === 0 || participant.college !== 'Other College'}
+                    disabled={participant.college !== 'Other College'}
                   />
                 </div>
 

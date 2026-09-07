@@ -310,6 +310,11 @@ export default function StudentDashboard({ onNavigate }) {
       return;
     }
 
+    if (editForm.college === 'Other College' && !editForm.otherCollege?.trim()) {
+      toast.warning('Please provide your college name');
+      return;
+    }
+
     setSavingProfile(true);
     try {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
@@ -334,6 +339,25 @@ export default function StudentDashboard({ onNavigate }) {
       localStorage.setItem('eventStudent', JSON.stringify(updatedStudent));
       window.dispatchEvent(new Event('studentLoggedIn'));
       setStudent(updatedStudent);
+
+      // Also update college in local registrations state so UI updates immediately
+      setRegistrations(prev => prev.map(reg => {
+        if (!reg.participants) return reg;
+        return {
+          ...reg,
+          participants: reg.participants.map(p => {
+            if (p.roll?.toUpperCase() === updatedStudent.roll?.toUpperCase()) {
+              return {
+                ...p,
+                college: updatedStudent.college,
+                otherCollege: updatedStudent.otherCollege
+              };
+            }
+            return p;
+          })
+        };
+      }));
+
       setIsEditingProfile(false);
       setActiveTab('overview');
       navigate('/dashboard', { state: { activeTab: 'overview', isEditingProfile: false }, replace: true });
@@ -820,8 +844,12 @@ export default function StudentDashboard({ onNavigate }) {
                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>College</label>
                 <select
                   value={editForm.college}
-                  disabled
-                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem', opacity: 0.6, cursor: 'not-allowed' }}
+                  onChange={(e) => setEditForm(prev => ({
+                    ...prev,
+                    college: e.target.value,
+                    otherCollege: e.target.value === 'Other College' ? prev.otherCollege : ''
+                  }))}
+                  style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
                 >
                   <option value="Aditya University">Aditya University</option>
                   <option value="ACET">ACET</option>
@@ -834,9 +862,10 @@ export default function StudentDashboard({ onNavigate }) {
                   <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'block' }}>College Name</label>
                   <input
                     type="text"
-                    value={editForm.otherCollege}
-                    disabled
-                    style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem', opacity: 0.6, cursor: 'not-allowed' }}
+                    value={editForm.otherCollege || ''}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, otherCollege: e.target.value }))}
+                    placeholder="Enter College Name"
+                    style={{ padding: '0.6rem 0.8rem', border: '1px solid var(--glass-border)', borderRadius: '8px', background: 'var(--bg-dark)', color: 'var(--text-light)', width: '100%', fontSize: '0.9rem' }}
                   />
                 </div>
               )}
