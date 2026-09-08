@@ -179,6 +179,7 @@ export default function StudentDashboard({ onNavigate }) {
       return;
     }
 
+
     const fetchRegistrations = async () => {
       setLoading(true);
       setError('');
