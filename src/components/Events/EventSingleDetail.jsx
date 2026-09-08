@@ -448,7 +448,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
                     </div>
                     <div>
                       <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#c69a37', fontWeight: 700 }}>First Prize</div>
-                      <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-color, #222)' }}>₹7,500</div>
+                      <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-color, #222)' }}>₹10,000</div>
                     </div>
                   </div>
 
@@ -478,7 +478,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
                     </div>
                     <div>
                       <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#777', fontWeight: 700 }}>Second Prize</div>
-                      <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-color, #222)' }}>₹5,000</div>
+                      <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-color, #222)' }}>₹7,500</div>
                     </div>
                   </div>
 
@@ -508,7 +508,7 @@ export default function EventSingleDetail({ schoolId, eventId }) {
                     </div>
                     <div>
                       <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#b35d25', fontWeight: 700 }}>Third Prize</div>
-                      <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-color, #222)' }}>₹2,500</div>
+                      <div style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-color, #222)' }}>₹5,000</div>
                     </div>
                   </div>
                 </div>
