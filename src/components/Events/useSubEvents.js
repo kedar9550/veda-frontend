@@ -87,7 +87,7 @@ export function useSubEvents(schoolId, groupId) {
                 pList.forEach(p => {
                   if (p.paymentStatus && p.paymentStatus !== 'PAID') return;
                   const eSlug = String(p.eventId || p.eventName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                  const count = (p.participants && p.participants.length) || Number(p.teamSize) || 1;
+                  const count = Array.isArray(p.participants) ? p.participants.length : 0;
                   if (eSlug) {
                     const cur = regStatsMap.get(eSlug) || { regCount: 0, partCount: 0 };
                     cur.regCount += 1;

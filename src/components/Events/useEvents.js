@@ -98,12 +98,7 @@ const fetchAll = async () => {
           return;
         }
 
-        let partCount = 1;
-        if (Array.isArray(p.participants) && p.participants.length > 0) {
-          partCount = p.participants.length;
-        } else if (p.teamSize && !isNaN(Number(p.teamSize)) && Number(p.teamSize) > 0) {
-          partCount = Number(p.teamSize);
-        }
+        const partCount = Array.isArray(p.participants) ? p.participants.length : 0;
 
         const teamIdStr = p.teamId ? String(p.teamId).trim() : '';
 
