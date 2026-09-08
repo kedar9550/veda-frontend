@@ -119,17 +119,28 @@ function FeaturedEventCard({ event }) {
       </div>
 
       <div className="event-card__stats-row">
-        {/* Stat Item: Teams Registered */}
+        {/* Stat Item: Teams */}
         <div className="event-card__stat-col stat-events">
           <div className="event-card__stat-icon-wrap" style={{ color: '#7c3aed', backgroundColor: 'rgba(124, 58, 237, 0.12)' }}>
             <i className="bi bi-people-fill" />
           </div>
           <span className="event-card__stat-label">Teams</span>
-          <span className="event-card__stat-val">{event.realRegistrationsCount || event.registeredStudents || 0}</span>
+          <span className="event-card__stat-val">{event.realTeamsCount ?? event.registeredTeams ?? 0}</span>
+        </div>
+
+        {/* Stat Item: Participants */}
+        <div className="event-card__stat-col stat-participants">
+          <div className="event-card__stat-icon-wrap" style={{ color: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.12)' }}>
+            <i className="bi bi-person-check-fill" />
+          </div>
+          <span className="event-card__stat-label">Participants</span>
+          <span className="event-card__stat-val" style={{ color: '#3b82f6' }}>
+            {event.realParticipantsCount ?? event.participants ?? 0}
+          </span>
         </div>
 
         {/* Stat Item: Fee */}
-        <div className="event-card__stat-col stat-participants">
+        <div className="event-card__stat-col stat-fee">
           <div className="event-card__stat-icon-wrap" style={{ color: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.12)' }}>
             <i className="bi bi-currency-rupee" />
           </div>
@@ -138,17 +149,6 @@ function FeaturedEventCard({ event }) {
             {event.feeAmount ? '₹' + event.feeAmount : 'Free'}
           </span>
         </div>
-
-        {/* Stat Item: Participants */}
-        {/* <div className="event-card__stat-col stat-participants">
-          <div className="event-card__stat-icon-wrap" style={{ color: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.12)' }}>
-            <i className="bi bi-person-check-fill" />
-          </div>
-          <span className="event-card__stat-label">Participants</span>
-          <span className="event-card__stat-val" style={{ color: '#3b82f6' }}>
-            {event.realParticipantsCount || event.participants || 0}
-          </span>
-        </div> */}
       </div>
 
       {/* Organizer Row */}
@@ -191,7 +191,7 @@ function FeaturedEventCard({ event }) {
 }
 
 export default function Events() {
-  const { groups, events, loading, error } = useEvents();
+  const { groups, events, loading, error, totalPaidTeams, totalPaidParticipants, totalPaidRegistrations } = useEvents();
 
   // Find the FEATURED EVENTS group
   const universityGroup = groups.find(
@@ -211,6 +211,22 @@ export default function Events() {
     <div className="events-page-container">
       {/* EXPLORE EVENTS Section */}
       <h2 className="events-section-title">EXPLORE EVENTS</h2>
+
+      {!loading && !error && (
+        <div className="esingle-stats-bar" style={{ borderRadius: '16px', maxWidth: '900px', margin: '0 auto 3rem auto', overflow: 'hidden' }}>
+          <div className="esingle-stats-bar__inner">
+            <div className="esingle-stat">
+              <span className="esingle-stat__number">{totalPaidTeams || 0}</span>
+              <span className="esingle-stat__label">Teams Count</span>
+            </div>
+            <div className="esingle-stats-divider" />
+            <div className="esingle-stat">
+              <span className="esingle-stat__number">{totalPaidParticipants || 0}</span>
+              <span className="esingle-stat__label">Participants Count</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div style={{ color: '#ff6b6b', textAlign: 'center', marginBottom: '2rem' }}>

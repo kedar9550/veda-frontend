@@ -5,6 +5,9 @@ let globalGroups = [];
 let globalEvents = [];
 let globalLoading = true;
 let globalError = null;
+let globalTotalPaidTeams = 0;
+let globalTotalPaidParticipants = 0;
+let globalTotalPaidRegistrations = 0;
 let subscribers = new Set();
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:9022';
@@ -24,7 +27,10 @@ function updateSubscribers() {
     groups: globalGroups,
     events: globalEvents,
     loading: globalLoading,
-    error: globalError
+    error: globalError,
+    totalPaidTeams: globalTotalPaidTeams,
+    totalPaidParticipants: globalTotalPaidParticipants,
+    totalPaidRegistrations: globalTotalPaidRegistrations
   }));
 }
 
@@ -33,7 +39,7 @@ const fetchAll = async () => {
     const [groupsSettled, eventsSettled, regSettled] = await Promise.allSettled([
       fetch(`${API_URL}/api/event-schools`),
       fetch(`${API_URL}/api/events`),
-      fetch(`${API_URL}/api/razorpay/registrations`)
+      fetch(`${API_URL}/api/razorpay/registrations?paymentStatus=PAID`)
     ]);
 
     let groupsData = null;
@@ -68,8 +74,13 @@ const fetchAll = async () => {
         : (regData?.payments || regData?.data || regData?.registrations || []);
 
       // Calculate statistics per event and school from registrations
-      const eventStats = {}; // eventKey -> { regCount, partCount }
-      const groupStats = {}; // groupId -> { regCount, partCount }
+      const eventStats = {}; // eventKey -> { regCount, partCount, teams: Set(), noTeamCount: 0 }
+      const groupStats = {}; // groupId -> { regCount, partCount, teams: Set(), noTeamCount: 0 }
+
+      let overallPaidRegistrations = 0;
+      let overallPaidParticipants = 0;
+      const overallPaidTeamsSet = new Set();
+      let overallNoTeamCount = 0;
 
       // Map rawEvents lookup helpers
       const eventLookup = rawEvents.map(evt => {
@@ -81,9 +92,9 @@ const fetchAll = async () => {
       });
 
       pList.forEach(p => {
-        // Exclude failed or cancelled payments if status is specified
-        const status = String(p.paymentStatus || p.status || '').toUpperCase();
-        if (['FAILED', 'FAILURE', 'CANCELLED'].includes(status)) {
+        // Exclusively include registrations with payment status "PAID"
+        const status = String(p.paymentStatus || p.status || '').toUpperCase().trim();
+        if (status !== 'PAID') {
           return;
         }
 
@@ -92,6 +103,16 @@ const fetchAll = async () => {
           partCount = p.participants.length;
         } else if (p.teamSize && !isNaN(Number(p.teamSize)) && Number(p.teamSize) > 0) {
           partCount = Number(p.teamSize);
+        }
+
+        const teamIdStr = p.teamId ? String(p.teamId).trim() : '';
+
+        overallPaidRegistrations += 1;
+        overallPaidParticipants += partCount;
+        if (teamIdStr) {
+          overallPaidTeamsSet.add(teamIdStr);
+        } else {
+          overallNoTeamCount += 1;
         }
 
         const pEventId = String(p.eventId || p.event?._id || p.event?.id || (typeof p.event === 'string' ? p.event : '') || '').trim();
@@ -108,20 +129,34 @@ const fetchAll = async () => {
         if (matched) {
           const key = matched.id;
           if (!eventStats[key]) {
-            eventStats[key] = { regCount: 0, partCount: 0 };
+            eventStats[key] = { regCount: 0, partCount: 0, teams: new Set(), noTeamCount: 0 };
           }
           eventStats[key].regCount += 1;
           eventStats[key].partCount += partCount;
+          if (teamIdStr) {
+            eventStats[key].teams.add(teamIdStr);
+          } else {
+            eventStats[key].noTeamCount += 1;
+          }
 
           if (matched.schoolId) {
             if (!groupStats[matched.schoolId]) {
-              groupStats[matched.schoolId] = { regCount: 0, partCount: 0 };
+              groupStats[matched.schoolId] = { regCount: 0, partCount: 0, teams: new Set(), noTeamCount: 0 };
             }
             groupStats[matched.schoolId].regCount += 1;
             groupStats[matched.schoolId].partCount += partCount;
+            if (teamIdStr) {
+              groupStats[matched.schoolId].teams.add(teamIdStr);
+            } else {
+              groupStats[matched.schoolId].noTeamCount += 1;
+            }
           }
         }
       });
+
+      globalTotalPaidRegistrations = overallPaidRegistrations;
+      globalTotalPaidParticipants = overallPaidParticipants;
+      globalTotalPaidTeams = overallPaidTeamsSet.size + overallNoTeamCount;
 
       const groupEventCounts = {};
       rawEvents.forEach(evt => {
@@ -135,7 +170,9 @@ const fetchAll = async () => {
         .filter(g => !g.status || g.status.toLowerCase() === 'active' || g.isActive !== false)
         .map(g => {
           const groupSlug = (g.shortName || g.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-          const gStat = groupStats[g._id] || { regCount: 0, partCount: 0 };
+          const gStat = groupStats[g._id] || { regCount: 0, partCount: 0, teams: new Set(), noTeamCount: 0 };
+          const gTeamsCount = (gStat.teams ? gStat.teams.size : 0) + (gStat.noTeamCount || 0);
+
           return {
             id: g._id,
             _id: g._id,
@@ -152,9 +189,12 @@ const fetchAll = async () => {
             coordinator: g.coordinator || g.eventCoordinator || null,
             coordinators: g.coordinators || (g.coordinator ? [g.coordinator] : (g.eventCoordinator ? [g.eventCoordinator] : [])),
             isActive: !g.status || g.status.toLowerCase() === 'active' || g.isActive !== false,
-            participants: gStat.partCount || g.participants || g.usersRegistered || 0,
-            usersRegistered: gStat.partCount || g.usersRegistered || 0,
-            registeredTeams: gStat.regCount || 0,
+            participants: gStat.partCount || 0,
+            usersRegistered: gStat.regCount || 0,
+            registeredTeams: gTeamsCount,
+            realTeamsCount: gTeamsCount,
+            realParticipantsCount: gStat.partCount || 0,
+            realRegistrationsCount: gStat.regCount || 0,
             raw: g
           };
         });
@@ -164,10 +204,11 @@ const fetchAll = async () => {
         const parentGroup = globalGroups.find(g => g._id === groupId || g.id === groupId);
         const eventSlug = (evt.eventName || evt.name || evt.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
         const groupSlug = parentGroup?.slug || (evt.school?.name || evt.eventSchool?.name || evt.group?.name || evt.schoolName || evt.groupName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-        const eStat = eventStats[evt._id] || { regCount: 0, partCount: 0 };
+        const eStat = eventStats[evt._id] || { regCount: 0, partCount: 0, teams: new Set(), noTeamCount: 0 };
 
         const realRegistrationsCount = eStat.regCount || 0;
         const realParticipantsCount = eStat.partCount || 0;
+        const realTeamsCount = (eStat.teams ? eStat.teams.size : 0) + (eStat.noTeamCount || 0);
 
         return {
           id: evt._id,
@@ -193,10 +234,12 @@ const fetchAll = async () => {
           coordinators: evt.facultyCoordinators || (evt.facultyCoordinator ? [evt.facultyCoordinator] : (evt.coordinator ? [evt.coordinator] : (evt.eventCoordinator ? [evt.eventCoordinator] : []))),
           groupId: groupId,
           groupName: parentGroup?.title || evt.school?.name || evt.eventSchool?.name || evt.group?.name || '',
-          realRegistrationsCount,
+          realTeamsCount,
           realParticipantsCount,
+          realRegistrationsCount,
           registeredStudents: realRegistrationsCount,
           participants: realParticipantsCount,
+          registeredTeams: realTeamsCount,
           raw: evt
         };
       });
@@ -220,7 +263,10 @@ export function useEvents() {
     groups: globalGroups,
     events: globalEvents,
     loading: globalLoading,
-    error: globalError
+    error: globalError,
+    totalPaidTeams: globalTotalPaidTeams,
+    totalPaidParticipants: globalTotalPaidParticipants,
+    totalPaidRegistrations: globalTotalPaidRegistrations
   });
 
   useEffect(() => {
@@ -242,5 +288,3 @@ export function useEvents() {
 
   return { ...state, refetch };
 }
-
-

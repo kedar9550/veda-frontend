@@ -85,17 +85,28 @@ function SubEventCard({ event, cardRef, school }) {
       </div>
 
       <div className="event-card__stats-row">
-        {/* Stat Item: Teams Registered */}
+        {/* Stat Item: Teams */}
         <div className="event-card__stat-col stat-events">
           <div className="event-card__stat-icon-wrap" style={{ color: '#7c3aed', backgroundColor: 'rgba(124, 58, 237, 0.12)' }}>
             <i className="bi bi-people-fill" />
           </div>
           <span className="event-card__stat-label">Teams</span>
-          <span className="event-card__stat-val">{event.realRegistrationsCount || event.registeredStudents || 0}</span>
+          <span className="event-card__stat-val">{event.realTeamsCount ?? event.registeredTeams ?? 0}</span>
+        </div>
+
+        {/* Stat Item: Participants */}
+        <div className="event-card__stat-col stat-participants">
+          <div className="event-card__stat-icon-wrap" style={{ color: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.12)' }}>
+            <i className="bi bi-person-check-fill" />
+          </div>
+          <span className="event-card__stat-label">Participants</span>
+          <span className="event-card__stat-val" style={{ color: '#3b82f6' }}>
+            {event.realParticipantsCount ?? event.participants ?? 0}
+          </span>
         </div>
 
         {/* Stat Item: Fee */}
-        <div className="event-card__stat-col stat-participants">
+        <div className="event-card__stat-col stat-fee">
           <div className="event-card__stat-icon-wrap" style={{ color: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.12)' }}>
             <i className="bi bi-currency-rupee" />
           </div>
@@ -104,17 +115,6 @@ function SubEventCard({ event, cardRef, school }) {
             {event.feeAmount ? '₹' + event.feeAmount : 'Free'}
           </span>
         </div>
-
-        {/* Stat Item: Participants */}
-        {/* <div className="event-card__stat-col stat-participants">
-          <div className="event-card__stat-icon-wrap" style={{ color: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.12)' }}>
-            <i className="bi bi-person-check-fill" />
-          </div>
-          <span className="event-card__stat-label">Participants</span>
-          <span className="event-card__stat-val" style={{ color: '#3b82f6' }}>
-            {event.realParticipantsCount || event.participants || 0}
-          </span>
-        </div> */}
       </div>
 
       {/* Organizer Row */}
@@ -170,7 +170,9 @@ export default function EventDetail({ schoolId }) {
   const school = groups.find((g) => g.slug === schoolId) || null;
   const subEvents = school ? events.filter((e) => e.groupSlug === school.slug) : [];
 
-  const schoolParticipants = subEvents.reduce((acc, curr) => acc + (curr.realParticipantsCount || curr.participants || 0), 0);
+  const schoolParticipants = subEvents.reduce((acc, curr) => acc + (curr.realParticipantsCount || 0), 0);
+  const schoolTeams = subEvents.reduce((acc, curr) => acc + (curr.realTeamsCount || 0), 0);
+  const schoolRegistrations = subEvents.reduce((acc, curr) => acc + (curr.realRegistrationsCount || 0), 0);
 
   // Hero entrance
   useEffect(() => {
@@ -213,10 +215,16 @@ export default function EventDetail({ schoolId }) {
             <span className="esingle-stat__number">{school.eventCount}</span>
             <span className="esingle-stat__label">Events</span>
           </div>
-          {/* <div className="esingle-stat">
+          <div className="esingle-stats-divider" />
+          <div className="esingle-stat">
+            <span className="esingle-stat__number">{schoolTeams}</span>
+            <span className="esingle-stat__label">Teams Count</span>
+          </div>
+          <div className="esingle-stats-divider" />
+          <div className="esingle-stat">
             <span className="esingle-stat__number">{schoolParticipants}</span>
-            <span className="esingle-stat__label">Total Participation</span>
-          </div> */}
+            <span className="esingle-stat__label">Participants Count</span>
+          </div>
         </div>
       </div>
 

@@ -255,17 +255,19 @@ export default function EventSingleDetail({ schoolId, eventId }) {
       <div className="esingle-stats-bar">
         <div className="esingle-stats-bar__inner">
           <div className="esingle-stat">
-            <span className="esingle-stat__number">{event.realRegistrationsCount || event.registeredStudents || 0}</span>
-            <span className="esingle-stat__label">Teams Registered</span>
+            <span className="esingle-stat__number">{event.realTeamsCount ?? event.registeredTeams ?? 0}</span>
+            <span className="esingle-stat__label">Teams Count</span>
           </div>
+          <div className="esingle-stats-divider" />
           <div className="esingle-stat">
-            <span className="esingle-stat__number">{event.feeText || String(event.feeAmount)}</span>
+            <span className="esingle-stat__number">{event.realParticipantsCount ?? event.participants ?? 0}</span>
+            <span className="esingle-stat__label">Participants Count</span>
+          </div>
+          <div className="esingle-stats-divider" />
+          <div className="esingle-stat">
+            <span className="esingle-stat__number">{event.feeText || (event.feeAmount ? '₹' + event.feeAmount : 'Free')}</span>
             <span className="esingle-stat__label">Rupees</span>
           </div>
-          {/* <div className="esingle-stat">
-            <span className="esingle-stat__number">{event.realParticipantsCount || event.participants || 0}</span>
-            <span className="esingle-stat__label">Participation</span>
-          </div> */}
         </div>
       </div>
 
