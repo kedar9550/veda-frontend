@@ -419,6 +419,22 @@ export default function StudentDashboard({ onNavigate }) {
                 <i className="bi bi-envelope"></i> {student.email}
               </span>
             </div>
+
+            <div className="payment-queries-banner">
+              <div className="payment-queries-text-wrap">
+                <i className="bi bi-info-circle-fill"></i>
+                <span>Any payment related queries share your payment data into this link:</span>
+              </div>
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSfYIT6_SEmGDi0UwhwXUC08R1xuAvcJcFRxKkX--pQeFS3ZjQ/viewform?usp=header"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="payment-queries-btn"
+                title="Payment Queries Form"
+              >
+                Payment Queries <i className="bi bi-box-arrow-up-right"></i>
+              </a>
+            </div>
           </div>
         </div>
       </div>
