@@ -423,7 +423,7 @@ export default function StudentDashboard({ onNavigate }) {
             <div className="payment-queries-banner">
               <div className="payment-queries-text-wrap">
                 <i className="bi bi-info-circle-fill"></i>
-                <span>Any payment related queries share your payment data into this link:</span>
+                <span>Have a payment-related query? Submit your payment details here.</span>
               </div>
               <a
                 href="https://docs.google.com/forms/d/e/1FAIpQLSfYIT6_SEmGDi0UwhwXUC08R1xuAvcJcFRxKkX--pQeFS3ZjQ/viewform?usp=header"
