@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useEvents } from './useEvents';
@@ -132,6 +132,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   });
   const [apiBranches, setApiBranches] = useState({});
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const isSubmittingRef = useRef(false); // synchronous guard, survives re-render timing
   const [paymentMessage, setPaymentMessage] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -450,7 +451,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
     setForm((prev) => {
       const participants = [...prev.participants];
       participants[index] = { ...participants[index], [name]: value };
-      
+
       if (name === 'roll') {
         participants[index].isAutoPopulated = false;
       }
@@ -462,7 +463,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
           participants[index].branch = apiBranches[index] || '';
         }
       }
-      
+
       return { ...prev, participants };
     });
   };
@@ -593,6 +594,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
 
   const handleSuccessClose = () => {
     setShowSuccessModal(false);
+    isSubmittingRef.current = false;
     navigate('/dashboard');
   };
 
@@ -708,11 +710,16 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
   };
 
   const processRegistration = async () => {
+    if (isSubmittingRef.current) {
+      return; // already in flight — ignore this click entirely
+    }
+    isSubmittingRef.current = true;
     setShowConfirmModal(false);
     const amountInPaisa = parseAmountToPaisa(form.amount);
 
     if (amountInPaisa <= 0) {
       setIsProcessingPayment(false);
+      isSubmittingRef.current = false;
       completeRegistration();
       return;
     }
@@ -786,10 +793,10 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
               throw new Error('Failed to upload photo for ' + p.name);
             }
             const uploadData = await uploadRes.json();
-            currentParticipants[i] = { 
-               ...currentParticipants[i], 
-               photoUrl: photoUploadBaseUrl + '/uploads/othercollegephotos/' + uploadData.filename, 
-               photo: null 
+            currentParticipants[i] = {
+              ...currentParticipants[i],
+              photoUrl: photoUploadBaseUrl + '/uploads/othercollegephotos/' + uploadData.filename,
+              photo: null
             };
           } catch (err) {
             console.error('Error uploading photo:', err);
@@ -799,7 +806,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
           }
         }
       }
-      
+
       setForm(prev => ({ ...prev, participants: currentParticipants }));
 
       const razorpayKeyId = getRazorpayKeyId();
@@ -808,7 +815,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       }
 
       await loadRazorpayScript();
-      
+
       const teamId = `VD26-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       const orderId = await createRazorpayOrder(amountInPaisa, currentParticipants, teamId);
 
@@ -851,6 +858,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
             const message = error?.message || 'Unable to verify payment and save registration. Please try again.';
             setPaymentMessage(message);
             toast.error(message);
+            isSubmittingRef.current = false; // allow retry only after a real failure
           } finally {
             setIsProcessingPayment(false);
           }
@@ -865,6 +873,7 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
       setPaymentMessage(message);
       toast.error(message);
       setIsProcessingPayment(false);
+      isSubmittingRef.current = false;
     }
   };
 
@@ -1161,9 +1170,14 @@ export default function RegisterForm({ schoolId, eventId, onCancel }) {
                 type="button"
                 onClick={processRegistration}
                 className="esingle-cta"
-                style={{ padding: '0.6rem 1.5rem' }}
+                disabled={isProcessingPayment}
+                style={{
+                  padding: '0.6rem 1.5rem',
+                  opacity: isProcessingPayment ? 0.6 : 1,
+                  cursor: isProcessingPayment ? 'not-allowed' : 'pointer'
+                }}
               >
-                Proceed to Payment
+                {isProcessingPayment ? 'Processing...' : 'Proceed to Payment'}
               </button>
             </div>
           </div>
