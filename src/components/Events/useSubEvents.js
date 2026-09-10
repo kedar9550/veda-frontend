@@ -13,6 +13,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { getGlobalEvents } from './useEvents';
 
 
 function getApiBaseUrl() {
@@ -75,51 +76,22 @@ export function useSubEvents(schoolId, groupId) {
           const events = extractEventItems(payload);
 
           if (events.length > 0) {
-            let regStatsMap = new Map();
-            try {
-              const regRes = await fetch(`${API_URL}/api/razorpay/registrations`, {
-                headers: getAuthHeaders(),
-                credentials: 'include',
-              });
-              if (regRes.ok) {
-                const regData = await regRes.json();
-                const pList = regData.payments || [];
-                pList.forEach(p => {
-                  if (p.paymentStatus && p.paymentStatus !== 'PAID') return;
-                  const eSlug = String(p.eventId || p.eventName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                  const count = Array.isArray(p.participants) ? p.participants.length : 0;
-                  if (eSlug) {
-                    const cur = regStatsMap.get(eSlug) || { regCount: 0, partCount: 0 };
-                    cur.regCount += 1;
-                    cur.partCount += count;
-                    regStatsMap.set(eSlug, cur);
-                  }
-                });
-              }
-            } catch (rErr) {
-              console.warn('Failed to fetch /api/payments/registrations:', rErr);
-            }
+            const globalList = getGlobalEvents() || [];
 
             const mapped = events.map(event => {
               const eventName = event.eventName || event.name || event.title || 'Event';
               const eventKey = String(eventName).toLowerCase().replace(/[^a-z0-9]+/g, '-');
-              const eventIdSlug = String(event._id || event.id || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-              const rStats = regStatsMap.get(eventKey) || regStatsMap.get(eventIdSlug) || { regCount: 0, partCount: 0 };
+              const eventId = String(event._id || event.id || '').trim();
+              const eventIdSlug = eventId.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-              const rawFee = event.registrationFee ?? event.fee ?? event.feeAmount ?? event.fees ?? event.price ?? '';
-              const feeTextStr = typeof rawFee === 'number' ? `₹${rawFee}` : String(rawFee || '');
-              const feeText = feeTextStr ? (feeTextStr.startsWith('₹') ? feeTextStr : `₹${feeTextStr}`) : '₹0';
+              const matchedGlobal = globalList.find(ge =>
+                (eventId && (ge.id === eventId || ge._id === eventId)) ||
+                (ge.slug && (ge.slug === eventKey || ge.slug === eventIdSlug)) ||
+                (ge.title && ge.title.toLowerCase() === eventName.toLowerCase())
+              );
 
-              const coordinatorInfo = event.coordinator ? {
-                name: event.coordinator.employeeName || event.coordinator.name,
-                department: event.coordinator.department,
-                designation: event.coordinator.designation,
-                role: event.coordinator.roleAssigned || event.coordinator.role,
-                employeeCode: event.coordinator.employeeCode || event.coordinator.employeeId || event.coordinator.id || event.coordinator._id || ''
-              } : null;
-
-              const realRegistrationsCount = rStats.regCount || 0;
-              const realParticipantsCount = rStats.partCount || 0;
+              const realRegistrationsCount = matchedGlobal?.realRegistrationsCount || 0;
+              const realParticipantsCount = matchedGlobal?.realParticipantsCount || 0;
 
               return {
                 id: eventKey,

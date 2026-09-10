@@ -213,20 +213,26 @@ export default function StudentDashboard({ onNavigate }) {
 
   // Polling for pass verification when a pass is open
   useEffect(() => {
-    let intervalId;
+    let timeoutId;
+    let isCancelled = false;
+    let isRequestPending = false;
 
     if (selectedPass && selectedPass.barcode && student) {
-      intervalId = setInterval(async () => {
+      const pollPassStatus = async () => {
+        if (isCancelled || isRequestPending) return;
+        isRequestPending = true;
+
         try {
           const queryParams = new URLSearchParams();
           if (student.email) queryParams.append('email', student.email);
           if (student.roll) queryParams.append('roll', student.roll);
           queryParams.append('paymentStatus', 'PAID');
+          queryParams.append('barcode', selectedPass.barcode);
           queryParams.append('_t', Date.now()); // Prevent caching
 
           const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
           const res = await fetch(`${baseUrl}/api/razorpay/registrations?${queryParams.toString()}`);
-          if (res.ok) {
+          if (res.ok && !isCancelled) {
             const data = await res.json();
             const currentRegistrations = (data.payments || []).filter(reg => {
               const status = (reg.paymentStatus || reg.payment || '').toString().trim().toUpperCase();
@@ -257,6 +263,7 @@ export default function StudentDashboard({ onNavigate }) {
               });
               setSelectedPass(null);
               setRegistrations(currentRegistrations);
+              return;
             } else if (isVerified) {
               const prevScanAttempt = selectedPass.lastScanAttempt || 0;
               const currScanAttempt = dbParticipant.lastScanAttempt || 0;
@@ -273,6 +280,7 @@ export default function StudentDashboard({ onNavigate }) {
                 }
                 setSelectedPass(null);
                 setRegistrations(currentRegistrations);
+                return;
               } else if (!selectedPass.attended) {
                 // Fallback for old data where lastScanAttempt isn't updating
                 toast.success('pass verfied', {
@@ -280,6 +288,7 @@ export default function StudentDashboard({ onNavigate }) {
                 });
                 setSelectedPass(null);
                 setRegistrations(currentRegistrations);
+                return;
               } else {
                 setRegistrations(currentRegistrations);
               }
@@ -289,13 +298,23 @@ export default function StudentDashboard({ onNavigate }) {
           }
         } catch (err) {
           console.error('Error polling pass status:', err);
+        } finally {
+          isRequestPending = false;
+          if (!isCancelled) {
+            // Schedule next poll only AFTER current request is fully done (wait 5 seconds)
+            timeoutId = setTimeout(pollPassStatus, 5000);
+          }
         }
-      }, 1000); // Poll every 1 second
+      };
+
+      // Poll after initial 4 seconds of opening the pass
+      timeoutId = setTimeout(pollPassStatus, 4000);
     }
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
+      isCancelled = true;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
     };
   }, [selectedPass, student]);
