@@ -8,13 +8,18 @@ export default function Gallery() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
 
   const images = [
-    'DSC_2229.JPG', 'DSC_2231.JPG', 'DSC_2253.JPG', 'DSC_2254.JPG',
-    'DSC_2262.JPG', 'DSC_2312.JPG', 'DSC_2318.JPG', 'DSC_2327.JPG',
-    'DSC_2346.JPG', 'DSC_2353.JPG', 'DSC_2395.JPG', 'DSC_2401.JPG',
-    'DSC_2510.JPG', 'DSC_2514.JPG', 'DSC_2519.JPG', 'DSC_2544.JPG',
-    'DSC_2559.JPG', 'DSC_2567.JPG', 'DSC_2576.JPG', 'DSC_2614.JPG',
-    'DSC_2641.JPG', 'DSC_2663.JPG', 'DSC_2698.JPG', 'DSC_2778.JPG',
-    'DSC_2804.JPG'
+    'DSC_2254_result.webp',
+    'DSC_2312_result.webp',
+    'DSC_2327_result.webp',
+    'DSC_2514_result.webp',
+    'DSC_2544_result.webp',
+    'DSC_2559_result.webp',
+    'DSC_2567_result.webp',
+    'DSC_2576_result.webp',
+    'DSC_2614_result.webp',
+    'DSC_2663_result.webp',
+    'DSC_2698_result.webp',
+    'DSC_2778_result.webp'
   ];
 
   useEffect(() => {
@@ -46,6 +51,13 @@ export default function Gallery() {
     }
   }, [selectedImageIndex]);
 
+  const handleImageError = (e) => {
+    const currentSrc = e.target.src;
+    if (!currentSrc.includes('_result.webp')) {
+      e.target.src = currentSrc.replace(/\.(JPG|jpg|jpeg|png)$/i, '_result.webp');
+    }
+  };
+
   const nextImage = (e) => {
     e.stopPropagation();
     setSelectedImageIndex((prev) => (prev + 1) % images.length);
@@ -58,12 +70,12 @@ export default function Gallery() {
 
   return (
     <section ref={sectionRef} id="gallery" className="campus-section gallery-page-section">
-      <div className="container-premium text-center">
-        <span className="campus-header-tag">Memories & Highlights</span>
-        <h2 className="campus-title text-gradient" style={{ marginTop: '0.5rem' }}>
+      <div className="container-premium text-center" style={{ textAlign: 'center' }}>
+        <span className="campus-header-tag" style={{ textAlign: 'center' }}>Memories & Highlights</span>
+        <h2 className="campus-title text-gradient" style={{ marginTop: '0.5rem', textAlign: 'center' }}>
           Veda Event Gallery
         </h2>
-        <p className="gallery-subtitle">
+        <p className="gallery-subtitle" style={{ textAlign: 'center' }}>
           Relive the best moments of ideas, talent, and excellence.
         </p>
       </div>
@@ -72,7 +84,12 @@ export default function Gallery() {
         <div className="gallery-grid">
           {images.map((img, idx) => (
             <div key={idx} className="gallery-item" onClick={() => setSelectedImageIndex(idx)}>
-              <img src={`/Gallery/${img}`} alt={`Veda Gallery ${idx + 1}`} loading="lazy" />
+              <img
+                src={`/Gallery/${img}`}
+                alt={`Veda Gallery ${idx + 1}`}
+                loading="lazy"
+                onError={handleImageError}
+              />
               <div className="gallery-overlay">
                 <i className="bi bi-arrows-fullscreen"></i>
               </div>
@@ -96,6 +113,7 @@ export default function Gallery() {
             src={`/Gallery/${images[selectedImageIndex]}`}
             alt={`Enlarged Gallery ${selectedImageIndex + 1}`}
             className="lightbox-img"
+            onError={handleImageError}
             onClick={(e) => e.stopPropagation()}
           />
 
