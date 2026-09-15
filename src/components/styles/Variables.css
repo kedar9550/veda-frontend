@@ -35,7 +35,7 @@
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.08);
 
   /* Fonts */
-  --font-family: 'Stem', sans-serif;
+  --font-family: 'Poppins', sans-serif;
 
   /* Transitions */
   --transition-fast: 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);

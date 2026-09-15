@@ -33,7 +33,7 @@
 }
 
 .footer-text {
-  font-family: var(--font-family, 'Stem', system-ui, -apple-system, sans-serif);
+  font-family: var(--font-family, 'Poppins', system-ui, -apple-system, sans-serif);
   font-size: 15px;
   color: #1a202c;
   transition: color 0.3s ease;
