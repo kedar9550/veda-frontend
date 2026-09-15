@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import StudentRegistrationPopup from '../Events/StudentRegistrationPopup';
@@ -6,7 +6,155 @@ import Barcode from 'react-barcode';
 import GoldLogo from '../SDGs/GoldLogo';
 import adityaLogo from '../../assets/Aditya University Gold Logo.png';
 import adityaCircleLogo from '../../assets/Circle_Gold.svg';
+import { QRCodeSVG } from 'qrcode.react';
 import './StudentDashboard.css';
+
+// Ornate Victorian Corner Flourish (Matching Reference Certificate Design)
+const CertificateCornerFlourish = ({ position = 'top-left' }) => {
+  let style = {
+    position: 'absolute',
+    width: '11cqh',
+    height: '11cqh',
+    pointerEvents: 'none',
+    zIndex: 4,
+    objectFit: 'contain',
+    display: 'block',
+  };
+
+  if (position === 'top-right') {
+    style.top = '2.5cqh';
+    style.right = '2.5cqh';
+    style.transform = 'scale(-1, -1)';
+  } else if (position === 'bottom-left') {
+    style.bottom = '2.5cqh';
+    style.left = '2.5cqh';
+  } else if (position === 'bottom-right') {
+    style.bottom = '2.5cqh';
+    style.right = '2.5cqh';
+    style.transform = 'scaleX(-1)';
+  } else {
+    style.top = '2.5cqh';
+    style.left = '2.5cqh';
+    style.transform = 'scaleY(-1)';
+  }
+
+  return (
+    <img
+      src="/corner_design.png"
+      alt="Certificate corner flourish"
+      style={style}
+    />
+  );
+};
+
+// Auto-fitting participant name & roll number on the dotted line
+const AutoFitParticipantName = ({ name, roll }) => {
+  const containerRef = useRef(null);
+  const textRef = useRef(null);
+
+  useEffect(() => {
+    if (!containerRef.current || !textRef.current) return;
+
+    const calculateSize = () => {
+      const container = containerRef.current;
+      const text = textRef.current;
+      if (!container || !text) return;
+
+      const containerWidth = container.clientWidth;
+      let currentSize = 2.8;
+      text.style.fontSize = `${currentSize}cqh`;
+      let textWidth = text.scrollWidth;
+
+      while (textWidth > containerWidth && currentSize > 2.0) {
+        currentSize -= 0.1;
+        currentSize = Math.round(currentSize * 10) / 10;
+        text.style.fontSize = `${currentSize}cqh`;
+        textWidth = text.scrollWidth;
+      }
+
+      if (currentSize < 2.0) {
+        text.style.fontSize = '2.0cqh';
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      calculateSize();
+    });
+
+    resizeObserver.observe(containerRef.current);
+    calculateSize();
+
+    return () => resizeObserver.disconnect();
+  }, [name, roll]);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        flex: 1,
+        position: 'relative',
+        borderBottom: '0.2cqh dotted #154487',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'baseline',
+        paddingBottom: '0.3cqh',
+        minWidth: 0,
+        marginRight: '12px'
+      }}
+    >
+      <span
+        ref={textRef}
+        style={{
+          fontFamily: '"Google Sans", "Montserrat", sans-serif',
+          fontWeight: 800,
+          fontSize: '2.8cqh',
+          color: '#E75A24',
+          letterSpacing: '1px',
+          textTransform: 'uppercase',
+          lineHeight: 1,
+          whiteSpace: 'nowrap'
+        }}
+      >
+        {name || 'Participant Name'}
+        {roll && (
+          <span style={{ fontSize: '2.0cqh', fontWeight: 700, marginLeft: '0.4cqh' }}>
+            ({roll})
+          </span>
+        )}
+      </span>
+    </div>
+  );
+};
+
+// Helper to check attended status
+const isParticipantAttended = (part) => {
+  if (!part) return false;
+  if (part.attended === true || part.attended === 1) return true;
+  if (typeof part.attended === 'string') {
+    const s = part.attended.trim().toLowerCase();
+    return s === 'true' || s === 'yes' || s === '1' || s === 'present';
+  }
+  return false;
+};
+
+// Helper to check if participant or registration is a winner
+const isTeamOrParticipantWinner = (reg, part) => {
+  if (!reg && !part) return false;
+  if (reg) {
+    if (reg.isFirstWinner || reg.isSecondWinner || reg.isThirdWinner) return true;
+    if (reg.winner || reg.isWinner || reg.prize || reg.winnerPosition) return true;
+  }
+  if (part) {
+    if (part.isFirstWinner || part.isSecondWinner || part.isThirdWinner) return true;
+    if (part.winner || part.isWinner || part.prize || part.winnerPosition) return true;
+  }
+  return false;
+};
+
+// Only attended AND non-winners are eligible for participation certificate
+const isEligibleForParticipationCertificate = (reg, part) => {
+  return isParticipantAttended(part) && !isTeamOrParticipantWinner(reg, part);
+};
 
 export default function StudentDashboard({ onNavigate }) {
   const navigate = useNavigate();
@@ -90,11 +238,113 @@ export default function StudentDashboard({ onNavigate }) {
   const [error, setError] = useState('');
   const [selectedReceipt, setSelectedReceipt] = useState(null);
   const [selectedPass, setSelectedPass] = useState(null);
+  const [selectedCertificate, setSelectedCertificate] = useState(null);
+  const [isPrintingCert, setIsPrintingCert] = useState(false);
+  const [isDownloadingCert, setIsDownloadingCert] = useState(false);
   const [zoomedPhoto, setZoomedPhoto] = useState(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [expandedEvents, setExpandedEvents] = useState({});
   const [paymentsExpanded, setPaymentsExpanded] = useState(false);
   const [eventsCardExpanded, setEventsCardExpanded] = useState(false);
+
+  const generateCertificatePdf = async () => {
+    const element = document.getElementById('participation-certificate-card');
+    if (!element) return null;
+
+    const html2canvasModule = await import('html2canvas');
+    const html2canvas = html2canvasModule.default || html2canvasModule;
+
+    const canvas = await html2canvas(element, {
+      scale: 3,
+      useCORS: true,
+      allowTaint: true,
+      scrollX: 0,
+      scrollY: 0,
+      backgroundColor: '#ffffff'
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const jsPDFModule = await import('jspdf');
+    const jsPDF = jsPDFModule.default || jsPDFModule.jsPDF || jsPDFModule;
+
+    // Standard ISO 216 A4 landscape page: 297mm x 210mm
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4',
+      compress: true
+    });
+
+    const pageWidth = 297;
+    const pageHeight = 210;
+
+    const marginY = 6;
+    const certHeight = pageHeight - (marginY * 2);
+    const certWidth = certHeight * (canvas.width / canvas.height);
+    const marginX = (pageWidth - certWidth) / 2;
+
+    pdf.addImage(imgData, 'PNG', marginX, marginY, certWidth, certHeight, undefined, 'FAST');
+    return pdf;
+  };
+
+  const handleDownloadCertPDF = async () => {
+    try {
+      setIsDownloadingCert(true);
+      toast.info('Generating A4 Certificate PDF, please wait...', { duration: 3000 });
+
+      const pdf = await generateCertificatePdf();
+      if (!pdf) {
+        toast.error('Certificate element not found');
+        return;
+      }
+
+      const participantName = selectedCertificate?.participant?.name?.replace(/\s+/g, '_') || 'Participant';
+      pdf.save(`Participation_Certificate_${participantName}.pdf`);
+      toast.success('A4 Certificate downloaded successfully!');
+    } catch (error) {
+      console.error('Certificate PDF Error:', error);
+      toast.error('Failed to generate PDF. Check console.');
+    } finally {
+      setIsDownloadingCert(false);
+    }
+  };
+
+  const handlePrintCert = async () => {
+    try {
+      setIsPrintingCert(true);
+      toast.info('Preparing certificate for printing...', { duration: 2500 });
+
+      const pdf = await generateCertificatePdf();
+      if (!pdf) {
+        toast.error('Certificate element not found');
+        return;
+      }
+
+      pdf.autoPrint();
+      const blobUrl = pdf.output('bloburl');
+      const printWindow = window.open(blobUrl, '_blank');
+      if (!printWindow) {
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = 'none';
+        iframe.src = blobUrl;
+        document.body.appendChild(iframe);
+        iframe.onload = () => {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        };
+      }
+    } catch (error) {
+      console.error('Print Error:', error);
+      toast.error('Failed to prepare print document.');
+    } finally {
+      setIsPrintingCert(false);
+    }
+  };
 
   const toggleEventExpand = (index) => {
     setExpandedEvents(prev => ({
@@ -624,69 +874,103 @@ export default function StudentDashboard({ onNavigate }) {
                                     <th>Name</th>
                                     <th>Roll No</th>
                                     <th>College</th>
+                                    <th>Attended</th>
                                     <th>Pass</th>
+                                    <th>Certificate</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {reg.participants && reg.participants.length > 0 ? (
-                                    reg.participants.map((p, pIdx) => (
-                                      <tr key={pIdx}>
-                                        <td>{pIdx + 1}</td>
-                                        <td>
-                                          {(() => {
-                                            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:9022';
-                                            let computedUrl = p.photoUrl;
-                                            if (!computedUrl && p.college === 'Other College' && p.roll) {
-                                              computedUrl = `${baseUrl}/api/razorpay/registrations/photo/${p.roll}/image`;
-                                            } else if (!computedUrl && p.roll) {
-                                              computedUrl = `${baseUrl}/api/proxy/student-photo/${p.roll}`;
-                                            }
-                                            return (
-                                              <div
-                                                style={{ position: 'relative', width: '36px', height: '36px', cursor: computedUrl ? 'pointer' : 'default' }}
-                                                onClick={() => {
-                                                  if (computedUrl) setZoomedPhoto(computedUrl);
-                                                }}
-                                              >
-                                                <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: p.gender?.toLowerCase() === 'female' ? 'rgba(219, 39, 119, 0.1)' : 'rgba(37, 99, 235, 0.1)', color: p.gender?.toLowerCase() === 'female' ? '#db2777' : '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                                  <i className="bi bi-person-fill" style={{ fontSize: '18px' }}></i>
+                                    reg.participants.map((p, pIdx) => {
+                                      const isAttended = isParticipantAttended(p);
+                                      const isEligibleCert = isEligibleForParticipationCertificate(reg, p);
+                                      const isWinner = isTeamOrParticipantWinner(reg, p);
+
+                                      return (
+                                        <tr key={pIdx}>
+                                          <td>{pIdx + 1}</td>
+                                          <td>
+                                            {(() => {
+                                              const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:9022';
+                                              let computedUrl = p.photoUrl;
+                                              if (!computedUrl && p.college === 'Other College' && p.roll) {
+                                                computedUrl = `${baseUrl}/api/razorpay/registrations/photo/${p.roll}/image`;
+                                              } else if (!computedUrl && p.roll) {
+                                                computedUrl = `${baseUrl}/api/proxy/student-photo/${p.roll}`;
+                                              }
+                                              return (
+                                                <div
+                                                  style={{ position: 'relative', width: '36px', height: '36px', cursor: computedUrl ? 'pointer' : 'default' }}
+                                                  onClick={() => {
+                                                    if (computedUrl) setZoomedPhoto(computedUrl);
+                                                  }}
+                                                >
+                                                  <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: p.gender?.toLowerCase() === 'female' ? 'rgba(219, 39, 119, 0.1)' : 'rgba(37, 99, 235, 0.1)', color: p.gender?.toLowerCase() === 'female' ? '#db2777' : '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                                    <i className="bi bi-person-fill" style={{ fontSize: '18px' }}></i>
+                                                  </div>
+                                                  {computedUrl && (
+                                                    <img
+                                                      src={computedUrl}
+                                                      alt={p.name || 'Participant'}
+                                                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }}
+                                                      onError={(e) => { e.target.style.display = 'none'; }}
+                                                    />
+                                                  )}
                                                 </div>
-                                                {computedUrl && (
-                                                  <img
-                                                    src={computedUrl}
-                                                    alt={p.name || 'Participant'}
-                                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(255,255,255,0.1)' }}
-                                                    onError={(e) => { e.target.style.display = 'none'; }}
-                                                  />
-                                                )}
+                                              );
+                                            })()}
+                                          </td>
+                                          <td style={{ fontWeight: '600' }}>{p.name || 'N/A'}</td>
+                                          <td>{p.roll || 'N/A'}</td>
+                                          <td>{p.college === 'Other College' ? p.otherCollege : (p.college || 'N/A')}</td>
+                                          <td>
+                                            {isAttended ? (
+                                              <span className="badge-attended">
+                                                <i className="bi bi-check-circle-fill"></i> Attended
+                                              </span>
+                                            ) : (
+                                              <span className="badge-not-attended">
+                                                <i className="bi bi-x-circle-fill"></i> Not Attended
+                                              </span>
+                                            )}
+                                          </td>
+                                          <td>
+                                            {p.barcode ? (
+                                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <button className="btn-receipt" style={{ padding: '0.15rem 0.4rem', fontSize: '0.75rem' }} onClick={(e) => { e.stopPropagation(); setSelectedPass({ ...p, eventId: reg.eventId, eventName: reg.eventName, teamId: reg.teamId, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) }); }}>
+                                                  <i className="bi bi-upc-scan"></i> Pass
+                                                </button>
                                               </div>
-                                            );
-                                          })()}
-                                        </td>
-                                        <td style={{ fontWeight: '600' }}>{p.name || 'N/A'}</td>
-                                        <td>{p.roll || 'N/A'}</td>
-                                        <td>{p.college === 'Other College' ? p.otherCollege : (p.college || 'N/A')}</td>
-                                        <td>
-                                          {p.barcode ? (
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                              <button className="btn-receipt" style={{ padding: '0.15rem 0.4rem', fontSize: '0.75rem' }} onClick={(e) => { e.stopPropagation(); setSelectedPass({ ...p, eventId: reg.eventId, eventName: reg.eventName, teamId: reg.teamId, venue: reg.venue || reg.eventVenue || (reg.rawEventData && reg.rawEventData.venue) }); }}>
-                                                <i className="bi bi-upc-scan"></i> Pass
+                                            ) : (
+                                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No Pass</span>
+                                            )}
+                                          </td>
+                                          <td>
+                                            {isEligibleCert ? (
+                                              <button
+                                                className="btn-cert-view"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  setSelectedCertificate({ participant: p, payment: reg });
+                                                }}
+                                                title="View Participation Certificate"
+                                              >
+                                                <i className="bi bi-eye"></i> View
                                               </button>
-                                              {p.attended && (
-                                                <span style={{ color: '#22c55e', fontSize: '1rem' }} title="Verified">
-                                                  <i className="bi bi-check-circle-fill"></i>
-                                                </span>
-                                              )}
-                                            </div>
-                                          ) : (
-                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No Pass</span>
-                                          )}
-                                        </td>
-                                      </tr>
-                                    ))
+                                            ) : isWinner ? (
+                                              <span style={{ fontSize: '0.75rem', color: '#eab308', fontWeight: '600' }} title="Winner certificate issued separately">
+                                                Winner
+                                              </span>
+                                            ) : (
+                                              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>-</span>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })
                                   ) : (
                                     <tr>
-                                      <td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+                                      <td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
                                         No specific participant list attached.
                                       </td>
                                     </tr>
@@ -1380,6 +1664,360 @@ export default function StudentDashboard({ onNavigate }) {
                 </div>
               </div>
             </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Participation Certificate Modal */}
+      {selectedCertificate && (
+        <div className="cert-modal-overlay" onClick={() => setSelectedCertificate(null)}>
+          <div className="cert-modal-container" onClick={(e) => e.stopPropagation()}>
+
+            {/* Top Right Floating Action Buttons */}
+            <div className="cert-action-bar no-print">
+              <button
+                className="btn-cert-action"
+                onClick={handlePrintCert}
+                disabled={isPrintingCert || isDownloadingCert}
+                title="Print Certificate (A4)"
+              >
+                {isPrintingCert ? (
+                  <span className="spinner-border spinner-border-sm text-primary" style={{ width: '16px', height: '16px' }} />
+                ) : (
+                  <i className="bi bi-printer" style={{ color: '#154487' }}></i>
+                )}
+              </button>
+              <button
+                className="btn-cert-action"
+                onClick={handleDownloadCertPDF}
+                disabled={isPrintingCert || isDownloadingCert}
+                title="Download PDF"
+              >
+                {isDownloadingCert ? (
+                  <span className="spinner-border spinner-border-sm text-primary" style={{ width: '16px', height: '16px' }} />
+                ) : (
+                  <i className="bi bi-download" style={{ color: '#154487' }}></i>
+                )}
+              </button>
+              <button
+                className="btn-cert-action close-btn"
+                onClick={() => setSelectedCertificate(null)}
+                title="Close"
+              >
+                <i className="bi bi-x-lg"></i>
+              </button>
+            </div>
+
+            {(() => {
+              const rawBarcode = (
+                selectedCertificate.participant?.barcode ||
+                selectedCertificate.payment?.receipt ||
+                selectedCertificate.payment?.teamId ||
+                `VD26-${selectedCertificate.participant?.roll || 'PART'}`
+              ).toString().toUpperCase().replace(/[^A-Z0-9-]/g, '');
+              const barcodeValue = rawBarcode.length > 0 ? rawBarcode : 'VD26-CERT';
+              const certVerifyUrl = `${window.location.origin}/verify/certificate/${selectedCertificate.payment?.receipt || selectedCertificate.payment?.teamId || 'CERT'}/${selectedCertificate.participant?.roll || 'STUDENT'}`;
+
+              return (
+                <div
+                  id="participation-certificate-card"
+                  className="certificate-box"
+                  style={{
+                    height: '78vh',
+                    maxHeight: '78vh',
+                    maxWidth: '95vw',
+                    aspectRatio: '3508 / 2480',
+                    containerType: 'size',
+                    background: '#ffffff',
+                    position: 'relative',
+                    padding: 0,
+                    borderRadius: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxSizing: 'border-box',
+                    overflow: 'hidden',
+                    fontFamily: '"Montserrat", "Segoe UI", Arial, sans-serif'
+                  }}
+                >
+                  {/* Outer Royal Blue Thick Frame */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      border: '2.5cqh solid #154487',
+                      borderRadius: 0,
+                      boxSizing: 'border-box',
+                      zIndex: 2,
+                      pointerEvents: 'none'
+                    }}
+                  />
+
+                  {/* 4 Ornate Victorian Filigree Corner Flourishes */}
+                  <CertificateCornerFlourish position="top-left" />
+                  <CertificateCornerFlourish position="top-right" />
+                  <CertificateCornerFlourish position="bottom-left" />
+                  <CertificateCornerFlourish position="bottom-right" />
+
+                  {/* Certificate Main Inner Content Container */}
+                  <div
+                    style={{
+                      position: 'relative',
+                      zIndex: 3,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      paddingTop: '1cqh',
+                      paddingLeft: '5cqh',
+                      paddingRight: '5cqh',
+                      paddingBottom: '3.5cqh',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    {/* Top Header: Aditya University Long Logo with Ranking */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '8px', marginBottom: '2.5cqh' }}>
+                      <img
+                        src="/longlogowith ranking.png"
+                        style={{ height: '20cqh', maxWidth: '95%', objectFit: 'contain' }}
+                        alt="Aditya University Logo"
+                      />
+                    </div>
+
+                    {/* VEDA Student Symposium Logo & Certificate Title */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3.5cqh', marginBottom: '5cqh' }}>
+                      <img
+                        src="/veda_2026.png"
+                        style={{ height: '14cqh', objectFit: 'contain' }}
+                        alt="VEDA Logo"
+                      />
+                      <div
+                        style={{
+                          fontFamily: '"Dulcelin", "Alex Brush", "Great Vibes", cursive',
+                          fontSize: '6.1cqh',
+                          color: '#154487',
+                          whiteSpace: 'nowrap',
+                          lineHeight: 1,
+                          letterSpacing: '0.5px'
+                        }}
+                      >
+                        Certificate of Participation
+                      </div>
+                    </div>
+
+                    {/* Certificate Body Paragraphs */}
+                    <div style={{ paddingLeft: '3cqh', paddingRight: '3cqh', textAlign: 'left', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      {/* Line 1: Certify that Mr./Ms. [Participant Name] on dotted line */}
+                      <div style={{ display: 'flex', alignItems: 'baseline', width: '100%', marginBottom: '2.5cqh' }}>
+                        <span style={{ fontSize: '2.25cqh', color: '#154487', fontWeight: 500, whiteSpace: 'nowrap', marginRight: '12px' }}>
+                          This is to certify that Mr./Ms.
+                        </span>
+                        <AutoFitParticipantName
+                          name={selectedCertificate.participant?.name}
+                          roll={selectedCertificate.participant?.roll}
+                        />
+                      </div>
+
+                      {/* Line 2: has actively participated [Event Name] on dotted line, VEDA-2K26 organized by */}
+                      <div style={{ display: 'flex', alignItems: 'baseline', width: '100%', marginBottom: '2.5cqh' }}>
+                        <span style={{ fontSize: '2.25cqh', color: '#154487', fontWeight: 500, whiteSpace: 'nowrap', marginRight: '12px' }}>
+                          has actively participated
+                        </span>
+                        <div
+                          style={{
+                            flex: 1,
+                            position: 'relative',
+                            borderBottom: '0.2cqh dotted #154487',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'baseline',
+                            paddingBottom: '0.3cqh',
+                            marginRight: '12px'
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: '"Google Sans", "Montserrat", sans-serif',
+                              fontWeight: 800,
+                              fontSize: '2.1cqh',
+                              color: '#E75A24',
+                              letterSpacing: '0.5px',
+                              lineHeight: 1,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              maxWidth: '44cqw'
+                            }}
+                          >
+                            {selectedCertificate.payment?.eventName || 'Technical Competition'}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: '2.25cqh', whiteSpace: 'nowrap' }}>
+                          <span style={{ color: '#E75A24', fontWeight: 500 }}>VEDA-2K26</span>{' '}
+                          <span style={{ color: '#154487', fontWeight: 500 }}>organized by</span>
+                        </span>
+                      </div>
+
+                      {/* Line 3: Aditya University, held on 11th and 12th September 2026 */}
+                      <div style={{ textAlign: 'center', marginBottom: '2.2cqh' }}>
+                        <span style={{ fontSize: '2.25cqh', color: '#154487', fontWeight: 500 }}>
+                          Aditya University, held on <span style={{ fontWeight: 700 }}>11<sup>th</sup> and 12<sup>th</sup> September 2026</span>.
+                        </span>
+                      </div>
+
+                      {/* Lines 4-5: Appreciation italic cursive message */}
+                      <div style={{ textAlign: 'center', padding: 0, marginBottom: '4cqh' }}>
+                        <div
+                          style={{
+                            fontFamily: '"Dulcelin", "Alex Brush", "Dancing Script", cursive',
+                            fontSize: '2.68cqh',
+                            color: '#154487',
+                            lineHeight: 1.5,
+                            letterSpacing: '0.3px'
+                          }}
+                        >
+                          The participant has demonstrated enthusiasm, dedication, and a sincere interest in contributing to the success of the event. Their involvement and cooperation are highly appreciated.
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Signatures & Barcode Verification Row */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-end',
+                        paddingLeft: '7cqh',
+                        paddingRight: '7cqh',
+                        marginBottom: '6.5cqh',
+                        zIndex: 10,
+                        position: 'relative'
+                      }}
+                    >
+                      {/* Left: Convener */}
+                      <div style={{ textAlign: 'center', width: '22cqh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <img
+                          src="/dr_kishore_signature.png?v=2"
+                          alt="Dr. D. Kishore Digital Signature"
+                          style={{
+                            height: '3.8cqh',
+                            maxWidth: '16cqh',
+                            objectFit: 'contain',
+                            marginBottom: '0.4cqh'
+                          }}
+                        />
+                        <div style={{ color: '#E75A24', fontWeight: 800, fontSize: '2.2cqh', letterSpacing: '0.2px', lineHeight: 1.2 }}>
+                          Dr. D. Kishore
+                        </div>
+                        <div style={{ color: '#154487', fontWeight: 600, fontSize: '1.7cqh', marginTop: '0.3cqh', lineHeight: 1.2 }}>
+                          Convener
+                        </div>
+                      </div>
+
+                      {/* Center: Verification QR Code */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <div
+                          style={{
+                            background: '#fff',
+                            padding: '0.8cqh',
+                            borderRadius: '0.4cqh',
+                            border: '0.12cqh solid #cbd5e1',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+                          }}
+                        >
+                          <QRCodeSVG
+                            value={certVerifyUrl}
+                            size={56}
+                            level="H"
+                            fgColor="#154487"
+                            bgColor="#ffffff"
+                          />
+                          <div
+                            style={{
+                              fontSize: '1.05cqh',
+                              fontWeight: 800,
+                              fontFamily: 'monospace',
+                              letterSpacing: '1px',
+                              color: '#154487',
+                              marginTop: '0.4cqh'
+                            }}
+                          >
+                            {barcodeValue}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: '0.85cqh', fontWeight: 700, color: '#64748b', marginTop: '0.35cqh', letterSpacing: '0.4px' }}>
+                          VERIFIED PARTICIPATION CERTIFICATE
+                        </div>
+                      </div>
+
+                      {/* Right: Registrar */}
+                      <div style={{ textAlign: 'center', width: '22cqh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <img
+                          src="/dr_suresh_signature.png?v=2"
+                          alt="Dr. G. Suresh Digital Signature"
+                          style={{
+                            height: '9.5cqh',
+                            maxWidth: '20cqh',
+                            objectFit: 'contain',
+                            marginBottom: '0.4cqh'
+                          }}
+                        />
+                        <div style={{ color: '#E75A24', fontWeight: 800, fontSize: '2.2cqh', letterSpacing: '0.2px', lineHeight: 1.2 }}>
+                          Dr. G. Suresh
+                        </div>
+                        <div style={{ color: '#154487', fontWeight: 600, fontSize: '1.7cqh', marginTop: '0.3cqh', lineHeight: 1.2 }}>
+                          Registrar
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Royal Blue Address Bar */}
+                    <div
+                      style={{
+                        background: '#154487',
+                        color: '#ffffff',
+                        paddingTop: '0.80cqh',
+                        paddingBottom: '0.80cqh',
+                        textAlign: 'center',
+                        position: 'absolute',
+                        bottom: '3cqh',
+                        left: '25cqh',
+                        right: '25cqh',
+                        zIndex: 10,
+                        borderRadius: 0
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontFamily: '"Google Sans", "Arial", sans-serif',
+                          fontSize: '2cqh',
+                          fontWeight: 200,
+                          letterSpacing: '0.5px',
+                          color: '#ffffff',
+                          lineHeight: 1.2
+                        }}
+                      >
+                        Aditya Nagar, ADB Road, Surampalem - 533 437, Kakinada Dist., Andhra Pradesh.
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              );
+            })()}
 
           </div>
         </div>

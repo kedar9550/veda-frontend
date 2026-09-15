@@ -593,3 +593,193 @@
     gap: 2rem !important;
   }
 }
+
+/* ==========================================================================
+   Participation Certificate & Attendance Badges Styling
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Dulcelin';
+  src: url('/fonts/Dulcelin.otf') format('opentype');
+  font-display: swap;
+}
+
+/* Attendance Status Badges */
+.badge-attended {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  white-space: nowrap;
+}
+
+.badge-not-attended {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  white-space: nowrap;
+}
+
+/* View Certificate Button */
+.btn-cert-view {
+  background: rgba(21, 68, 135, 0.12);
+  color: #154487;
+  border: 1px solid rgba(21, 68, 135, 0.3);
+  padding: 0.22rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-cert-view:hover {
+  background: #154487;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(21, 68, 135, 0.3);
+}
+
+body.dark-theme .btn-cert-view {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+body.dark-theme .btn-cert-view:hover {
+  background: #38bdf8;
+  color: #0f172a;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.4);
+}
+
+/* Certificate Modal & Backdrop */
+.cert-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.cert-modal-container {
+  position: relative;
+  background: #ffffff;
+  border-radius: 0px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  max-width: 95vw;
+  width: fit-content;
+  margin: auto;
+  overflow: hidden;
+}
+
+.cert-action-bar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-cert-action {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #154487;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.btn-cert-action:hover {
+  background: #ffffff;
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+}
+
+.btn-cert-action.close-btn {
+  color: #ef4444;
+}
+
+.btn-cert-action.close-btn:hover {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+/* Print Styles */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 6mm 8.5mm;
+  }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .no-print,
+  .dashboard-container > *:not(.cert-modal-overlay),
+  header,
+  nav,
+  aside,
+  button {
+    display: none !important;
+  }
+  .cert-modal-overlay {
+    position: static !important;
+    display: block !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+  .cert-modal-container {
+    box-shadow: none !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    background: transparent !important;
+  }
+  .certificate-box {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
