@@ -777,6 +777,18 @@ body.dark-theme .btn-cert-view:hover {
 }
 
 /* Print Styles */
+.cert-participant-name,
+#participation-certificate-card .cert-participant-name,
+#participation-certificate-card .cert-participant-name * {
+  font-family: 'Google Sans Flex', 'Google Sans', 'Google Sans Flex Variable', sans-serif !important;
+}
+
+.cert-event-name,
+#participation-certificate-card .cert-event-name,
+#participation-certificate-card .cert-event-name * {
+  font-family: 'Google Sans Flex', 'Google Sans', 'Google Sans Flex Variable', sans-serif !important;
+}
+
 @media print {
   @page {
     size: A4 landscape;

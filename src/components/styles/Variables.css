@@ -1,3 +1,30 @@
+@font-face {
+  font-family: 'Google Sans Flex';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 1000;
+  src: url('/fonts/google-sans-flex-latin.woff2') format('woff2-variations'),
+       url('/fonts/google-sans-flex-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 1000;
+  src: url('/fonts/google-sans-flex-latin.woff2') format('woff2-variations'),
+       url('/fonts/google-sans-flex-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Google Sans Flex Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 1000;
+  src: url('/fonts/google-sans-flex-latin.woff2') format('woff2-variations'),
+       url('/fonts/google-sans-flex-latin.woff2') format('woff2');
+}
+
 :root {
   color-scheme: light;
   /* Monochromatic Premium Color System (Light Mode by Default) */

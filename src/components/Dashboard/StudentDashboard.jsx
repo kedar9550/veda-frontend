@@ -84,6 +84,12 @@ const AutoFitParticipantName = ({ name, roll }) => {
     resizeObserver.observe(containerRef.current);
     calculateSize();
 
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        calculateSize();
+      });
+    }
+
     return () => resizeObserver.disconnect();
   }, [name, roll]);
 
@@ -104,10 +110,10 @@ const AutoFitParticipantName = ({ name, roll }) => {
     >
       <span
         ref={textRef}
+        className="cert-participant-name"
         style={{
-          fontFamily: '"Google Sans", "Montserrat", sans-serif',
-          fontWeight: 900,
-          WebkitTextStroke: '0.6px #E75A24',
+          fontFamily: "'Google Sans Flex', 'Google Sans', 'Google Sans Flex Variable', sans-serif",
+          fontWeight: 700,
           fontSize: '2.8cqh',
           color: '#E75A24',
           letterSpacing: '1px',
@@ -118,7 +124,14 @@ const AutoFitParticipantName = ({ name, roll }) => {
       >
         {name || 'Participant Name'}
         {roll && (
-          <span style={{ fontSize: '2.0cqh', fontWeight: 700, marginLeft: '0.4cqh' }}>
+          <span
+            style={{
+              fontSize: '2.0cqh',
+              fontWeight: 700,
+              marginLeft: '0.4cqh',
+              fontFamily: "'Google Sans Flex', 'Google Sans', 'Google Sans Flex Variable', sans-serif"
+            }}
+          >
             ({roll})
           </span>
         )}
@@ -164,6 +177,12 @@ const AutoFitEventName = ({ name }) => {
     resizeObserver.observe(containerRef.current);
     calculateSize();
 
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        calculateSize();
+      });
+    }
+
     return () => resizeObserver.disconnect();
   }, [name]);
 
@@ -184,8 +203,9 @@ const AutoFitEventName = ({ name }) => {
     >
       <span
         ref={textRef}
+        className="cert-event-name"
         style={{
-          fontFamily: '"Google Sans", "Montserrat", sans-serif',
+          fontFamily: "'Google Sans Flex', 'Google Sans', 'Google Sans Flex Variable', sans-serif",
           fontWeight: 800,
           fontSize: '2.1cqh',
           color: '#E75A24',
@@ -2052,7 +2072,7 @@ export default function StudentDashboard({ onNavigate }) {
                     >
                       <div
                         style={{
-                          fontFamily: '"Google Sans", "Arial", sans-serif',
+                          fontFamily: "'Google Sans Flex', 'Google Sans', 'Google Sans Flex Variable', sans-serif",
                           fontSize: '2cqh',
                           fontWeight: 200,
                           letterSpacing: '0.5px',
