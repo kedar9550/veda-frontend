@@ -21,6 +21,8 @@ import LoginPage from './components/Login/LoginPage';
 import ChatbotWidget from './components/Chatbot/ChatbotWidget';
 import RightStrip from './components/common/RightStrip';
 
+import VerifyCertificate from './components/Certificate/VerifyCertificate';
+
 function RegisterFormWrapper() {
   const { schoolId, eventId } = useParams();
   const navigate = useNavigate();
@@ -62,6 +64,7 @@ export default function App() {
   };
 
   const activePage = getActivePage();
+  const isVerifyPage = location.pathname.startsWith('/verify');
 
   return (
     <>
@@ -70,11 +73,11 @@ export default function App() {
       <Cursor />
 
       {/* 1. Fixed Loader curtain on top */}
-      {!loadingComplete && <Loader onComplete={() => setLoadingComplete(true)} />}
+      {!loadingComplete && !isVerifyPage && <Loader onComplete={() => setLoadingComplete(true)} />}
 
       {/* 2. Main page content rendered in background */}
-      <Header activePage={activePage} onNavigate={navigateTo} />
-      <main style={{ minHeight: '80vh' }}>
+      {!isVerifyPage && <Header activePage={activePage} onNavigate={navigateTo} />}
+      <main style={{ minHeight: isVerifyPage ? '100vh' : '80vh' }}>
         <Routes>
           <Route path="/" element={<Home loadingComplete={loadingComplete} />} />
           <Route path="/home" element={<Home loadingComplete={loadingComplete} />} />
@@ -88,17 +91,18 @@ export default function App() {
           <Route path="/events" element={<Events />} />
           <Route path="/events/:schoolId" element={<EventDetailWrapper />} />
           <Route path="/events/:schoolId/:eventId" element={<EventSingleDetailWrapper />} />
+          <Route path="/verify/certificate/:receipt/:roll" element={<VerifyCertificate />} />
           <Route path="*" element={<Contact />} />
         </Routes>
       </main>
-      <Footer onNavigate={navigateTo} />
-      <MobileNav activePage={activePage} onNavigate={navigateTo} />
+      {!isVerifyPage && <Footer onNavigate={navigateTo} />}
+      {!isVerifyPage && <MobileNav activePage={activePage} onNavigate={navigateTo} />}
 
       {/* Global Floating AI Chatbot */}
-      <ChatbotWidget />
+      {!isVerifyPage && <ChatbotWidget />}
 
       {/* Global Right Strip */}
-      <RightStrip />
+      {!isVerifyPage && <RightStrip />}
     </>
   );
 }
