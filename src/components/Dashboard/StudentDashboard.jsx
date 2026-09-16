@@ -742,7 +742,7 @@ export default function StudentDashboard({ onNavigate }) {
               <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)', fontWeight: '600', display: 'block', marginBottom: '0.25rem' }}>
                 Welcome back,
               </span>
-              <h2 style={{ margin: 0, fontWeight: '800', fontSize: '2.25rem', color: 'var(--text-light)', textTransform: 'capitalize' }}>
+              <h2 style={{ margin: 0, fontWeight: '700', fontSize: '2.25rem', color: 'var(--text-light)', textTransform: 'capitalize' }}>
                 {student.name}
               </h2>
             </div>
