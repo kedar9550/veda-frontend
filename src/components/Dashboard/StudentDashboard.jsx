@@ -106,7 +106,8 @@ const AutoFitParticipantName = ({ name, roll }) => {
         ref={textRef}
         style={{
           fontFamily: '"Google Sans", "Montserrat", sans-serif',
-          fontWeight: 800,
+          fontWeight: 900,
+          WebkitTextStroke: '0.6px #E75A24',
           fontSize: '2.8cqh',
           color: '#E75A24',
           letterSpacing: '1px',
@@ -121,6 +122,79 @@ const AutoFitParticipantName = ({ name, roll }) => {
             ({roll})
           </span>
         )}
+      </span>
+    </div>
+  );
+};
+
+// Auto-fitting event name on the dotted line
+const AutoFitEventName = ({ name }) => {
+  const containerRef = useRef(null);
+  const textRef = useRef(null);
+
+  useEffect(() => {
+    if (!containerRef.current || !textRef.current) return;
+
+    const calculateSize = () => {
+      const container = containerRef.current;
+      const text = textRef.current;
+      if (!container || !text) return;
+
+      const containerWidth = container.clientWidth;
+      let currentSize = 2.1;
+      text.style.fontSize = `${currentSize}cqh`;
+      let textWidth = text.scrollWidth;
+
+      while (textWidth > containerWidth && currentSize > 1.2) {
+        currentSize -= 0.1;
+        currentSize = Math.round(currentSize * 10) / 10;
+        text.style.fontSize = `${currentSize}cqh`;
+        textWidth = text.scrollWidth;
+      }
+
+      if (currentSize < 1.2) {
+        text.style.fontSize = '1.2cqh';
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      calculateSize();
+    });
+
+    resizeObserver.observe(containerRef.current);
+    calculateSize();
+
+    return () => resizeObserver.disconnect();
+  }, [name]);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        flex: 1,
+        position: 'relative',
+        borderBottom: '0.2cqh dotted #154487',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'baseline',
+        paddingBottom: '0.3cqh',
+        marginRight: '12px',
+        minWidth: 0
+      }}
+    >
+      <span
+        ref={textRef}
+        style={{
+          fontFamily: '"Google Sans", "Montserrat", sans-serif',
+          fontWeight: 800,
+          fontSize: '2.1cqh',
+          color: '#E75A24',
+          letterSpacing: '0.5px',
+          lineHeight: 1,
+          whiteSpace: 'nowrap'
+        }}
+      >
+        {name || 'Technical Competition'}
       </span>
     </div>
   );
@@ -1825,35 +1899,7 @@ export default function StudentDashboard({ onNavigate }) {
                         <span style={{ fontSize: '2.25cqh', color: '#154487', fontWeight: 500, whiteSpace: 'nowrap', marginRight: '12px' }}>
                           has actively participated
                         </span>
-                        <div
-                          style={{
-                            flex: 1,
-                            position: 'relative',
-                            borderBottom: '0.2cqh dotted #154487',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'baseline',
-                            paddingBottom: '0.3cqh',
-                            marginRight: '12px'
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontFamily: '"Google Sans", "Montserrat", sans-serif',
-                              fontWeight: 800,
-                              fontSize: '2.1cqh',
-                              color: '#E75A24',
-                              letterSpacing: '0.5px',
-                              lineHeight: 1,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              maxWidth: '44cqw'
-                            }}
-                          >
-                            {selectedCertificate.payment?.eventName || 'Technical Competition'}
-                          </span>
-                        </div>
+                        <AutoFitEventName name={selectedCertificate.payment?.eventName} />
                         <span style={{ fontSize: '2.25cqh', whiteSpace: 'nowrap' }}>
                           <span style={{ color: '#E75A24', fontWeight: 500 }}>VEDA-2K26</span>{' '}
                           <span style={{ color: '#154487', fontWeight: 500 }}>organized by</span>
