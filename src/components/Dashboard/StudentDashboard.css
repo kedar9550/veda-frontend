@@ -599,7 +599,7 @@
    ========================================================================== */
 
 @font-face {
-  font-family: 'Dulcelin';
+  font-family: var(--font-family);
   src: url('/fonts/Dulcelin.otf') format('opentype');
   font-display: swap;
 }

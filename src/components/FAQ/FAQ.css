@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 2rem 1rem;
   color: #ffffff;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family);
 }
 
 .faq-title {
