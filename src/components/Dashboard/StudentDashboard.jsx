@@ -1935,8 +1935,12 @@ export default function StudentDashboard({ onNavigate }) {
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                            cursor: 'pointer',
+                            transition: 'transform 0.15s ease, box-shadow 0.15s ease'
                           }}
+                          onClick={() => window.open(certVerifyUrl, '_blank')}
+                          title="Click to open verification page"
                         >
                           <QRCodeSVG
                             value={certVerifyUrl}
