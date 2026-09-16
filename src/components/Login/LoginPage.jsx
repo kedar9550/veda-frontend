@@ -25,6 +25,10 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [fetchingStudent, setFetchingStudent] = useState(false);
   const [studentLookupStatus, setStudentLookupStatus] = useState(''); // 'found', 'not_found', 'error', ''
   const [disabledFields, setDisabledFields] = useState({
@@ -363,14 +367,21 @@ export default function LoginPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <label style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)' }}>Password</label>
-              <input
-                type="password"
-                name="password"
-                value={loginForm.password}
-                onChange={handleLoginChange}
-                style={{ padding: '12px 16px', border: '1px solid var(--glass-border)', borderRadius: '10px', background: 'var(--bg-dark)', color: 'var(--text-light)', fontSize: '0.95rem', width: '100%' }}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showLoginPassword ? "text" : "password"}
+                  name="password"
+                  value={loginForm.password}
+                  onChange={handleLoginChange}
+                  style={{ padding: '12px 16px', paddingRight: '40px', border: '1px solid var(--glass-border)', borderRadius: '10px', background: 'var(--bg-dark)', color: 'var(--text-light)', fontSize: '0.95rem', width: '100%' }}
+                  required
+                />
+                <i 
+                  className={`bi ${showLoginPassword ? 'bi-eye-slash' : 'bi-eye'}`} 
+                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: 'var(--text-muted)' }}
+                ></i>
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: '16px', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', flexWrap: 'wrap' }}>
@@ -593,27 +604,41 @@ export default function LoginPage() {
 
             <div className="col-md-6 col-12 d-flex flex-column gap-2">
               <label style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)', marginBottom: 0 }}>Password</label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                style={{ padding: '12px 16px', border: '1px solid var(--glass-border)', borderRadius: '10px', background: 'var(--bg-dark)', color: 'var(--text-light)', fontSize: '0.95rem', width: '100%' }}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showRegisterPassword ? "text" : "password"}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  style={{ padding: '12px 16px', paddingRight: '40px', border: '1px solid var(--glass-border)', borderRadius: '10px', background: 'var(--bg-dark)', color: 'var(--text-light)', fontSize: '0.95rem', width: '100%' }}
+                  required
+                />
+                <i 
+                  className={`bi ${showRegisterPassword ? 'bi-eye-slash' : 'bi-eye'}`} 
+                  onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: 'var(--text-muted)' }}
+                ></i>
+              </div>
               {errors.password && <div style={{ color: '#dc3545', fontSize: '0.8rem' }}>{errors.password}</div>}
             </div>
 
             <div className="col-md-6 col-12 d-flex flex-column gap-2">
               <label style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-muted)', marginBottom: 0 }}>Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                style={{ padding: '12px 16px', border: '1px solid var(--glass-border)', borderRadius: '10px', background: 'var(--bg-dark)', color: 'var(--text-light)', fontSize: '0.95rem', width: '100%' }}
-                required
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  style={{ padding: '12px 16px', paddingRight: '40px', border: '1px solid var(--glass-border)', borderRadius: '10px', background: 'var(--bg-dark)', color: 'var(--text-light)', fontSize: '0.95rem', width: '100%' }}
+                  required
+                />
+                <i 
+                  className={`bi ${showConfirmPassword ? 'bi-eye-slash' : 'bi-eye'}`} 
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: 'var(--text-muted)' }}
+                ></i>
+              </div>
               {errors.confirmPassword && <div style={{ color: '#dc3545', fontSize: '0.8rem' }}>{errors.confirmPassword}</div>}
             </div>
 

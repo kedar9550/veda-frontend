@@ -9,12 +9,16 @@
 html {
   scroll-behavior: smooth;
   background-color: var(--bg-dark, #000000);
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 html,
 body,
 #root {
   background-color: var(--bg-dark, #000000);
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 .dark-theme,
@@ -1516,15 +1520,15 @@ body:not(.dark-theme) .theme-light-logo path.st7 {
   left: 50%;
   top: 0;
   width: 2px;
-  background: #ffffff;
-  /* Bright white line */
+  background: var(--gradient-primary);
+  /* Gradient line */
   transform: translateX(-50%);
   transform-origin: top;
   scale: 1 0;
   /* ScaleY = 0 initially, animated by GSAP */
   z-index: 2;
-  box-shadow: 0 0 15px var(--secondary), 0 0 5px rgba(255, 255, 255, 0.8);
-  /* Strong double glow effect */
+  box-shadow: 0 0 15px var(--primary), 0 0 5px rgba(255, 255, 255, 0.3);
+  /* Intense double glow */
   height: 100%;
 }
 
@@ -1584,10 +1588,9 @@ body:not(.dark-theme) .theme-light-logo path.st7 {
 
 /* Active connector line highlight */
 .timeline-item.active .timeline-connector {
-  background: #ffffff !important;
-  /* Bright white glow to match the active dot */
-  box-shadow: 0 0 15px var(--secondary), 0 0 5px rgba(255, 255, 255, 0.8) !important;
-  /* Intense double glow matching the progress line */
+  background: var(--gradient-primary) !important;
+  /* Glow matching primary */
+  box-shadow: 0 0 15px var(--primary), 0 0 5px rgba(255, 255, 255, 0.3) !important;
 }
 
 /* Center node indicator */
@@ -1601,14 +1604,14 @@ body:not(.dark-theme) .theme-light-logo path.st7 {
   left: 50%;
   top: 15px;
   transform: translateX(-50%);
-  transition: border-color 0.4s, background-color 0.4s, box-shadow 0.4s;
+  transition: border-color 0.4s, background 0.4s, box-shadow 0.4s;
   z-index: 4;
 }
 
 .timeline-dot.active {
-  border-color: var(--secondary);
-  background-color: var(--text-light);
-  box-shadow: 0 0 15px var(--secondary);
+  background: var(--gradient-primary);
+  border-color: transparent;
+  box-shadow: 0 0 15px var(--primary);
 }
 
 /* Inner Glass Panel card details */
