@@ -6,7 +6,7 @@ import Barcode from 'react-barcode';
 import GoldLogo from '../SDGs/GoldLogo';
 import adityaLogo from '../../assets/Aditya University Gold Logo.png';
 import adityaCircleLogo from '../../assets/Circle_Gold.svg';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 import './StudentDashboard.css';
 
 // Ornate Victorian Corner Flourish (Matching Reference Certificate Design)
@@ -341,7 +341,29 @@ export default function StudentDashboard({ onNavigate }) {
   const [paymentsExpanded, setPaymentsExpanded] = useState(false);
   const [eventsCardExpanded, setEventsCardExpanded] = useState(false);
 
-  const generateCertificatePdf = async () => {
+  const getCertVerifyUrl = (cert) => {
+    if (!cert) return '';
+    const rawBarcode = (
+      cert.participant?.barcode ||
+      cert.payment?.receipt ||
+      cert.payment?.teamId ||
+      `VD26-${cert.participant?.roll || 'PART'}`
+    ).toString().toUpperCase().replace(/[^A-Z0-9-]/g, '');
+    const barcodeValue = rawBarcode.length > 0 ? rawBarcode : 'VD26-CERT';
+
+    const receiptParam = encodeURIComponent(cert.payment?.receipt || cert.payment?.teamId || barcodeValue);
+    const rollParam = encodeURIComponent(cert.participant?.roll || 'STUDENT');
+
+    const baseUrl = (
+      import.meta.env.VITE_VERIFY_BASE_URL ||
+      import.meta.env.VITE_PUBLIC_URL ||
+      window.location.origin
+    ).replace(/\/$/, '');
+
+    return `${baseUrl}/verify/certificate/${receiptParam}/${rollParam}`;
+  };
+
+  const generateCertificatePdf = async (verifyUrl) => {
     const element = document.getElementById('participation-certificate-card');
     if (!element) return null;
 
@@ -378,6 +400,27 @@ export default function StudentDashboard({ onNavigate }) {
     const marginX = (pageWidth - certWidth) / 2;
 
     pdf.addImage(imgData, 'PNG', marginX, marginY, certWidth, certHeight, undefined, 'FAST');
+
+    // Add interactive PDF hyperlink annotation over the QR Code box
+    if (verifyUrl) {
+      const certBox = element.getBoundingClientRect();
+      const qrBox = element.querySelector('.cert-qr-box');
+      if (qrBox && certBox.width > 0 && certBox.height > 0) {
+        const qrRect = qrBox.getBoundingClientRect();
+        const relX = (qrRect.left - certBox.left) / certBox.width;
+        const relY = (qrRect.top - certBox.top) / certBox.height;
+        const relW = qrRect.width / certBox.width;
+        const relH = qrRect.height / certBox.height;
+
+        const pdfQrX = marginX + (relX * certWidth);
+        const pdfQrY = marginY + (relY * certHeight);
+        const pdfQrW = relW * certWidth;
+        const pdfQrH = relH * certHeight;
+
+        pdf.link(pdfQrX, pdfQrY, pdfQrW, pdfQrH, { url: verifyUrl });
+      }
+    }
+
     return pdf;
   };
 
@@ -386,7 +429,8 @@ export default function StudentDashboard({ onNavigate }) {
       setIsDownloadingCert(true);
       toast.info('Generating A4 Certificate PDF, please wait...', { duration: 3000 });
 
-      const pdf = await generateCertificatePdf();
+      const verifyUrl = getCertVerifyUrl(selectedCertificate);
+      const pdf = await generateCertificatePdf(verifyUrl);
       if (!pdf) {
         toast.error('Certificate element not found');
         return;
@@ -408,7 +452,8 @@ export default function StudentDashboard({ onNavigate }) {
       setIsPrintingCert(true);
       toast.info('Preparing certificate for printing...', { duration: 2500 });
 
-      const pdf = await generateCertificatePdf();
+      const verifyUrl = getCertVerifyUrl(selectedCertificate);
+      const pdf = await generateCertificatePdf(verifyUrl);
       if (!pdf) {
         toast.error('Certificate element not found');
         return;
@@ -1811,7 +1856,7 @@ export default function StudentDashboard({ onNavigate }) {
                 `VD26-${selectedCertificate.participant?.roll || 'PART'}`
               ).toString().toUpperCase().replace(/[^A-Z0-9-]/g, '');
               const barcodeValue = rawBarcode.length > 0 ? rawBarcode : 'VD26-CERT';
-              const certVerifyUrl = `${window.location.origin}/verify/certificate/${selectedCertificate.payment?.receipt || selectedCertificate.payment?.teamId || 'CERT'}/${selectedCertificate.participant?.roll || 'STUDENT'}`;
+              const certVerifyUrl = getCertVerifyUrl(selectedCertificate);
 
               return (
                 <div
@@ -1993,6 +2038,7 @@ export default function StudentDashboard({ onNavigate }) {
                         }}
                       >
                         <div
+                          className="cert-qr-box"
                           style={{
                             background: '#fff',
                             padding: '0.8cqh',
@@ -2008,12 +2054,14 @@ export default function StudentDashboard({ onNavigate }) {
                           onClick={() => window.open(certVerifyUrl, '_blank')}
                           title="Click to open verification page"
                         >
-                          <QRCodeSVG
+                          <QRCodeCanvas
                             value={certVerifyUrl}
-                            size={56}
+                            size={160}
                             level="H"
+                            marginSize={1}
                             fgColor="#154487"
                             bgColor="#ffffff"
+                            style={{ width: '6.5cqh', height: '6.5cqh', display: 'block' }}
                           />
                           <div
                             style={{
