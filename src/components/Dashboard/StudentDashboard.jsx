@@ -371,12 +371,14 @@ export default function StudentDashboard({ onNavigate }) {
     const html2canvas = html2canvasModule.default || html2canvasModule;
 
     const canvas = await html2canvas(element, {
-      scale: 3,
+      scale: 2, // 2 instead of 3 to avoid mobile Safari memory crashes on large offscreen elements
       useCORS: true,
       allowTaint: true,
       scrollX: 0,
       scrollY: 0,
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      windowWidth: 1403,
+      windowHeight: 992
     });
 
     const imgData = canvas.toDataURL('image/png');
@@ -384,12 +386,7 @@ export default function StudentDashboard({ onNavigate }) {
     const jsPDF = jsPDFModule.default || jsPDFModule.jsPDF || jsPDFModule;
 
     // Standard ISO 216 A4 landscape page: 297mm x 210mm
-    const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: 'a4',
-      compress: true
-    });
+    const pdf = new jsPDF('l', 'mm', 'a4');
 
     const pageWidth = 297;
     const pageHeight = 210;
@@ -400,27 +397,6 @@ export default function StudentDashboard({ onNavigate }) {
     const marginX = (pageWidth - certWidth) / 2;
 
     pdf.addImage(imgData, 'PNG', marginX, marginY, certWidth, certHeight, undefined, 'FAST');
-
-    // Add interactive PDF hyperlink annotation over the QR Code box
-    if (verifyUrl) {
-      const certBox = element.getBoundingClientRect();
-      const qrBox = element.querySelector('.cert-qr-box');
-      if (qrBox && certBox.width > 0 && certBox.height > 0) {
-        const qrRect = qrBox.getBoundingClientRect();
-        const relX = (qrRect.left - certBox.left) / certBox.width;
-        const relY = (qrRect.top - certBox.top) / certBox.height;
-        const relW = qrRect.width / certBox.width;
-        const relH = qrRect.height / certBox.height;
-
-        const pdfQrX = marginX + (relX * certWidth);
-        const pdfQrY = marginY + (relY * certHeight);
-        const pdfQrW = relW * certWidth;
-        const pdfQrH = relH * certHeight;
-
-        pdf.link(pdfQrX, pdfQrY, pdfQrW, pdfQrH, { url: verifyUrl });
-      }
-    }
-
     return pdf;
   };
 
@@ -445,6 +421,33 @@ export default function StudentDashboard({ onNavigate }) {
     } finally {
       setIsDownloadingCert(false);
     }
+  };
+
+  const handleDirectDownload = async (p, reg) => {
+    setSelectedCertificate({ participant: p, payment: reg });
+    toast.info('Preparing certificate download...', { duration: 2500 });
+
+    // Give React time to render the certificate off-screen
+    setTimeout(async () => {
+      try {
+        setIsDownloadingCert(true);
+        const pdf = await generateCertificatePdf();
+        if (!pdf) {
+          toast.error('Certificate element not found');
+          return;
+        }
+
+        const participantName = p.name?.replace(/\s+/g, '_') || 'Participant';
+        pdf.save(`Participation_Certificate_${participantName}.pdf`);
+        toast.success('Certificate downloaded successfully!');
+      } catch (error) {
+        console.error('Certificate PDF Error:', error);
+        toast.error('Failed to generate PDF.');
+      } finally {
+        setIsDownloadingCert(false);
+        setSelectedCertificate(null);
+      }
+    }, 600); // Wait for DOM and fonts
   };
 
   const handlePrintCert = async () => {
@@ -1015,7 +1018,7 @@ export default function StudentDashboard({ onNavigate }) {
                                     <th>College</th>
                                     <th>Attended</th>
                                     <th>Pass</th>
-                                    <th>Certificate</th>
+                                    <th style={{ textAlign: 'center' }}>Certificate</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -1084,17 +1087,22 @@ export default function StudentDashboard({ onNavigate }) {
                                               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No Pass</span>
                                             )}
                                           </td>
-                                          <td>
+                                          <td style={{ textAlign: 'center' }}>
                                             {isEligibleCert ? (
                                               <button
                                                 className="btn-cert-view"
                                                 onClick={(e) => {
                                                   e.stopPropagation();
-                                                  setSelectedCertificate({ participant: p, payment: reg });
+                                                  handleDirectDownload(p, reg);
                                                 }}
-                                                title="View Participation Certificate"
+                                                title="Download Participation Certificate"
+                                                disabled={isDownloadingCert}
                                               >
-                                                <i className="bi bi-eye"></i> View
+                                                {isDownloadingCert ? (
+                                                  <span className="spinner-border spinner-border-sm" style={{ width: '12px', height: '12px', marginRight: '4px' }} />
+                                                ) : (
+                                                  <i className="bi bi-download"></i>
+                                                )}
                                               </button>
                                             ) : isWinner ? (
                                               <span style={{ fontSize: '0.75rem', color: '#eab308', fontWeight: '600' }} title="Winner certificate issued separately">
@@ -1808,45 +1816,10 @@ export default function StudentDashboard({ onNavigate }) {
         </div>
       )}
 
-      {/* Participation Certificate Modal */}
+      {/* Participation Certificate (Hidden, for direct download) */}
       {selectedCertificate && (
-        <div className="cert-modal-overlay" onClick={() => setSelectedCertificate(null)}>
-          <div className="cert-modal-container" onClick={(e) => e.stopPropagation()}>
-
-            {/* Top Right Floating Action Buttons */}
-            <div className="cert-action-bar no-print">
-              <button
-                className="btn-cert-action"
-                onClick={handlePrintCert}
-                disabled={isPrintingCert || isDownloadingCert}
-                title="Print Certificate (A4)"
-              >
-                {isPrintingCert ? (
-                  <span className="spinner-border spinner-border-sm text-primary" style={{ width: '16px', height: '16px' }} />
-                ) : (
-                  <i className="bi bi-printer" style={{ color: '#154487' }}></i>
-                )}
-              </button>
-              <button
-                className="btn-cert-action"
-                onClick={handleDownloadCertPDF}
-                disabled={isPrintingCert || isDownloadingCert}
-                title="Download PDF"
-              >
-                {isDownloadingCert ? (
-                  <span className="spinner-border spinner-border-sm text-primary" style={{ width: '16px', height: '16px' }} />
-                ) : (
-                  <i className="bi bi-download" style={{ color: '#154487' }}></i>
-                )}
-              </button>
-              <button
-                className="btn-cert-action close-btn"
-                onClick={() => setSelectedCertificate(null)}
-                title="Close"
-              >
-                <i className="bi bi-x-lg"></i>
-              </button>
-            </div>
+        <div style={{ position: 'fixed', top: '-9999px', left: '-9999px', zIndex: -1000, pointerEvents: 'none', opacity: 0 }}>
+          <div>
 
             {(() => {
               const rawBarcode = (
@@ -1863,9 +1836,8 @@ export default function StudentDashboard({ onNavigate }) {
                   id="participation-certificate-card"
                   className="certificate-box"
                   style={{
-                    height: '78vh',
-                    maxHeight: '78vh',
-                    maxWidth: '95vw',
+                    width: '1403px',
+                    height: '992px',
                     aspectRatio: '3508 / 2480',
                     containerType: 'size',
                     background: '#ffffff',
