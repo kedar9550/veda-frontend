@@ -334,7 +334,7 @@ export default function StudentDashboard({ onNavigate }) {
   const [selectedPass, setSelectedPass] = useState(null);
   const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [isPrintingCert, setIsPrintingCert] = useState(false);
-  const [isDownloadingCert, setIsDownloadingCert] = useState(false);
+  const [downloadingCertId, setDownloadingCertId] = useState(null);
   const [zoomedPhoto, setZoomedPhoto] = useState(null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [expandedEvents, setExpandedEvents] = useState({});
@@ -391,18 +391,13 @@ export default function StudentDashboard({ onNavigate }) {
     const pageWidth = 297;
     const pageHeight = 210;
 
-    const marginY = 6;
-    const certHeight = pageHeight - (marginY * 2);
-    const certWidth = certHeight * (canvas.width / canvas.height);
-    const marginX = (pageWidth - certWidth) / 2;
-
-    pdf.addImage(imgData, 'PNG', marginX, marginY, certWidth, certHeight, undefined, 'FAST');
+    pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight, undefined, 'FAST');
     return pdf;
   };
 
   const handleDownloadCertPDF = async () => {
     try {
-      setIsDownloadingCert(true);
+      setDownloadingCertId('modal');
       toast.info('Generating A4 Certificate PDF, please wait...', { duration: 3000 });
 
       const verifyUrl = getCertVerifyUrl(selectedCertificate);
@@ -419,18 +414,19 @@ export default function StudentDashboard({ onNavigate }) {
       console.error('Certificate PDF Error:', error);
       toast.error('Failed to generate PDF. Check console.');
     } finally {
-      setIsDownloadingCert(false);
+      setDownloadingCertId(null);
     }
   };
 
   const handleDirectDownload = async (p, reg) => {
+    const certId = `${reg._id}-${p.roll || p.name}`;
     setSelectedCertificate({ participant: p, payment: reg });
+    setDownloadingCertId(certId);
     toast.info('Preparing certificate download...', { duration: 2500 });
 
     // Give React time to render the certificate off-screen
     setTimeout(async () => {
       try {
-        setIsDownloadingCert(true);
         const pdf = await generateCertificatePdf();
         if (!pdf) {
           toast.error('Certificate element not found');
@@ -444,7 +440,7 @@ export default function StudentDashboard({ onNavigate }) {
         console.error('Certificate PDF Error:', error);
         toast.error('Failed to generate PDF.');
       } finally {
-        setIsDownloadingCert(false);
+        setDownloadingCertId(null);
         setSelectedCertificate(null);
       }
     }, 600); // Wait for DOM and fonts
@@ -1096,9 +1092,9 @@ export default function StudentDashboard({ onNavigate }) {
                                                   handleDirectDownload(p, reg);
                                                 }}
                                                 title="Download Participation Certificate"
-                                                disabled={isDownloadingCert}
+                                                disabled={downloadingCertId === `${reg._id}-${p.roll || p.name}`}
                                               >
-                                                {isDownloadingCert ? (
+                                                {downloadingCertId === `${reg._id}-${p.roll || p.name}` ? (
                                                   <span className="spinner-border spinner-border-sm" style={{ width: '12px', height: '12px', marginRight: '4px' }} />
                                                 ) : (
                                                   <i className="bi bi-download"></i>
@@ -2028,21 +2024,21 @@ export default function StudentDashboard({ onNavigate }) {
                         >
                           <QRCodeCanvas
                             value={certVerifyUrl}
-                            size={160}
+                            size={200}
                             level="H"
                             marginSize={1}
                             fgColor="#154487"
                             bgColor="#ffffff"
-                            style={{ width: '6.5cqh', height: '6.5cqh', display: 'block' }}
+                            style={{ width: '9cqh', height: '9cqh', display: 'block' }}
                           />
                           <div
                             style={{
-                              fontSize: '1.05cqh',
+                              fontSize: '1.2cqh',
                               fontWeight: 800,
                               fontFamily: 'monospace',
                               letterSpacing: '1px',
                               color: '#154487',
-                              marginTop: '0.4cqh'
+                              marginTop: '0.5cqh'
                             }}
                           >
                             {barcodeValue}
